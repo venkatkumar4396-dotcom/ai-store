@@ -14,9 +14,13 @@
     "monitor": "node scripts/monitor.js",
     "setup": "cd backend && npm install && npx prisma generate && npx prisma db push && npm run seed && cd ../frontend && npm install"
   },
+  "dependencies": {
+    "prisma": "6.9.0",
+    "@prisma/client": "6.9.0"
+  },
   "devDependencies": {
-    "prisma": "^6.9.0",
-    "@prisma/client": "^6.9.0"
+    "prisma": "6.9.0",
+    "@prisma/client": "6.9.0"
   },
   "keywords": [
     "ai",
