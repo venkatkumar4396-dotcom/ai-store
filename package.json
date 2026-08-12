@@ -11,6 +11,7 @@
     "commit": "git add . && git commit -m \"update: platform enhancements\" && git push origin main",
     "push": "git add . && git commit -m \"update: code changes\" && git push origin main",
     "deploy": "docker-compose up -d --build",
+    "monitor": "node scripts/monitor.js",
     "setup": "cd backend && npm install && npx prisma generate && npx prisma db push && npm run seed && cd ../frontend && npm install"
   },
   "keywords": [
