@@ -1,0 +1,28 @@
+{
+  "name": "nexusforge-ai-store",
+  "version": "1.0.0",
+  "description": "NexusForge — Complete AI Agent Marketplace & Automation OS",
+  "private": true,
+  "scripts": {
+    "dev": "start-dev.bat",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "commit": "git add . && git commit -m \"update: platform enhancements\" && git push origin main",
+    "push": "git add . && git commit -m \"update: code changes\" && git push origin main",
+    "deploy": "docker-compose up -d --build",
+    "setup": "cd backend && npm install && npx prisma generate && npx prisma db push && npm run seed && cd ../frontend && npm install"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "marketplace",
+    "nextjs",
+    "express",
+    "prisma",
+    "ollama",
+    "gemini"
+  ],
+  "author": "NexusForge Team",
+  "license": "UNLICENSED"
+}
