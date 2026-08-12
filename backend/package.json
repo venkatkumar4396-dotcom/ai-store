@@ -1,0 +1,55 @@
+{
+  "name": "nexusforge-backend",
+  "version": "1.0.0",
+  "description": "NexusForge AI Agent Marketplace - Backend API",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "seed": "tsx prisma/seed.ts",
+    "db:push": "npx prisma db push",
+    "db:generate": "npx prisma generate",
+    "db:studio": "npx prisma studio",
+    "db:reset": "npx prisma db push --force-reset && tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@prisma/client": "^6.9.0",
+    "bcrypt": "^5.1.1",
+    "chokidar": "^4.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.0",
+    "nodemailer": "^9.0.3",
+    "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.19.1",
+    "qrcode-terminal": "^0.12.0",
+    "socket.io": "^4.8.1",
+    "uuid": "^14.0.1",
+    "whatsapp-web.js": "^1.26.1-alpha.3",
+    "winston": "^3.17.0",
+    "yahoo-finance2": "^3.15.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.15.0",
+    "@types/nodemailer": "^8.0.1",
+    "@types/pdfkit": "^0.17.6",
+    "@types/uuid": "^10.0.0",
+    "prisma": "^6.9.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

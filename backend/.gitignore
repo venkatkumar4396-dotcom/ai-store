@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+*.db
+*.db-journal
+data/uploads/*
+data/whatsapp-sessions/*
+!data/uploads/.gitkeep
+!data/whatsapp-sessions/.gitkeep
+logs/
+*.log

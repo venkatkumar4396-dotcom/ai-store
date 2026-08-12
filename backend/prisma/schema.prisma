@@ -1,0 +1,733 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User & Auth ────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("user") // "user" | "admin"
+  avatar       String?
+  preferences  String?  // JSON string for user preferences
+  provider     String?  @default("credentials") // "credentials" | "google" | "github"
+  providerId   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  apiKeys          ApiKey[]
+  botInstances     BotInstance[]
+  whatsappSessions WhatsAppSession[]
+  fileTrackers     FileTracker[]
+  activityLogs     ActivityLog[]
+
+  // AI OS Agent relations
+  notifications       Notification[]
+  agentMemories       AgentMemory[]
+  agentLogs           AgentActivityLog[]
+  stockWatchlist      StockWatchlist[]
+  stockAnalyses       StockAnalysis[]
+  portfolioItems      PortfolioItem[]
+  startupIdeas        StartupIdea[]
+  researchProjects    ResearchProject[]
+  careerProfiles      CareerProfile[]
+  jobMatches          JobMatch[]
+  automationWorkflows AutomationWorkflow[]
+  automationLeads     AutomationLead[]
+  invoices            Invoice[]
+
+  // New Agent relations
+  tasks              Task[]
+  goals              Goal[]
+  dailySchedules     DailySchedule[]
+  documentOperations DocumentOperation[]
+  subscription       Subscription?
+  payments           Payment[]
+
+  // Relations for Booking Bot
+  bookingSearches      BookingSearch[]
+  bookings             Booking[]
+  bookingNotifications BookingNotification[]
+
+  // Sales Agent relations
+  salesLeads           SalesLead[]
+  salesEmails          SalesEmail[]
+  salesMeetings        SalesMeeting[]
+
+  deletedAt            DateTime?
+}
+
+model ApiKey {
+  id           String    @id @default(cuid())
+  userId       String
+  provider     String    // "gemini" | "ollama" | "openai" etc.
+  encryptedKey String
+  label        String
+  isActive     Boolean   @default(true)
+  lastUsedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Bot Marketplace ────────────────────────────────────────
+
+model Bot {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String
+  category    String  // "automation" | "communication" | "development" | "productivity"
+  icon        String? // emoji or icon identifier
+  features    String? // JSON array of feature strings
+  screenshots String? // JSON array of screenshot URLs
+  isActive    Boolean @default(true)
+  usageCount  Int     @default(0)
+  price       Float   @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  instances BotInstance[]
+}
+
+model BotInstance {
+  id           String    @id @default(cuid())
+  userId       String
+  botId        String
+  status       String    @default("inactive") // "active" | "inactive" | "configuring" | "error"
+  config       String?   // JSON string for bot-specific configuration
+  lastActiveAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bot  Bot  @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, botId])
+  @@index([userId])
+  @@index([botId])
+}
+
+// ─── WhatsApp ───────────────────────────────────────────────
+
+model WhatsAppSession {
+  id             String   @id @default(cuid())
+  userId         String
+  status         String   @default("disconnected") // "connected" | "disconnected" | "qr_pending" | "initializing"
+  businessName   String?
+  industry       String?
+  services       String?  // JSON array
+  products       String?  // JSON array
+  brandTone      String?
+  targetAudience String?
+  faqData        String?  // JSON array of Q&A pairs
+  supportDetails String?
+  pricingInfo    String?
+  websiteLinks   String?  // JSON array
+  contactInfo    String?  // JSON object
+  generatedPrompt String?
+  isAiEnabled    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages   WhatsAppMessage[]
+  contacts   WhatsAppContact[]
+  templates  WhatsAppTemplate[]
+  broadcasts WhatsAppBroadcast[]
+
+  @@index([userId])
+}
+
+model WhatsAppMessage {
+  id          String   @id @default(cuid())
+  sessionId   String
+  from        String
+  to          String
+  body        String
+  direction   String   // "inbound" | "outbound"
+  messageType String   @default("text") // "text" | "image" | "document" | "audio" | "video"
+  isRead      Boolean  @default(false)
+  timestamp   DateTime @default(now())
+
+  session WhatsAppSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([from])
+  @@index([to])
+}
+
+model WhatsAppContact {
+  id            String    @id @default(cuid())
+  sessionId     String
+  phone         String
+  name          String?
+  tags          String?   // JSON array of tag strings
+  notes         String?
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  session WhatsAppSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, phone])
+  @@index([sessionId])
+}
+
+model WhatsAppTemplate {
+  id        String   @id @default(cuid())
+  sessionId String
+  name      String
+  body      String
+  category  String   @default("general") // "general" | "greeting" | "support" | "marketing"
+  variables String?  // JSON array of variable names
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  session    WhatsAppSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  broadcasts WhatsAppBroadcast[]
+
+  @@index([sessionId])
+}
+
+model WhatsAppBroadcast {
+  id          String    @id @default(cuid())
+  sessionId   String
+  name        String
+  templateId  String?
+  recipients  String    // JSON array of phone numbers
+  status      String    @default("draft") // "draft" | "scheduled" | "sending" | "completed" | "failed"
+  sentCount   Int       @default(0)
+  failedCount Int       @default(0)
+  scheduledAt DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  session  WhatsAppSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  template WhatsAppTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId])
+}
+
+// ─── File Tracker ───────────────────────────────────────────
+
+model FileTracker {
+  id             String    @id @default(cuid())
+  userId         String
+  name           String
+  description    String?
+  watchPath      String
+  status         String    @default("inactive") // "active" | "inactive" | "error"
+  fileCount      Int       @default(0)
+  lastActivityAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities FileActivity[]
+
+  @@index([userId])
+}
+
+model FileActivity {
+  id        String   @id @default(cuid())
+  trackerId String
+  fileName  String
+  fileType  String?
+  action    String   // "created" | "modified" | "deleted" | "renamed" | "uploaded"
+  fileSize  Int?
+  details   String?
+  timestamp DateTime @default(now())
+
+  tracker FileTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+
+  @@index([trackerId])
+  @@index([timestamp])
+}
+
+// ─── Activity Logging ───────────────────────────────────────
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String   // "login" | "bot_activated" | "message_sent" | "file_uploaded" etc.
+  entityType String?  // "bot" | "whatsapp" | "file" etc.
+  entityId   String?
+  metadata   String?  // JSON string with additional data
+  timestamp  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([timestamp])
+  @@index([action])
+}
+
+// ─── AI OS Centralized Core ─────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  agentId   String?  // e.g. "stock-analyst" or null
+  title     String
+  message   String
+  type      String   @default("info") // "info" | "warning" | "success"
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AgentMemory {
+  id        String   @id @default(cuid())
+  userId    String
+  agentId   String   // "stock", "startup", "research", "career", "automator"
+  key       String
+  value     String   // JSON value representation
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, agentId, key])
+  @@index([userId])
+}
+
+model AgentActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  agentId     String   // "stock", "startup", "research", "career", "automator"
+  action      String
+  description String
+  reasoning   String?  // AI reasoning explanations
+  status      String   @default("success") // "success" | "running" | "failed"
+  timestamp   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([timestamp])
+}
+
+// ─── Agent #1: Stock Intelligence ──────────────────────────
+
+model StockWatchlist {
+  id        String   @id @default(cuid())
+  userId    String
+  symbol    String
+  name      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, symbol])
+  @@index([userId])
+}
+
+model StockAnalysis {
+  id               String   @id @default(cuid())
+  userId           String
+  symbol           String
+  buyScore         Int
+  sellScore        Int
+  holdScore        Int
+  confidenceScore  Int
+  riskScore        Int
+  technicalMetrics String   // JSON string of indicators
+  newsSentiment    String?
+  aiExplanation    String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PortfolioItem {
+  id           String   @id @default(cuid())
+  userId       String
+  symbol       String
+  shares       Float
+  averagePrice Float
+  riskScore    Int
+  stopLoss     Float?
+  profitTarget Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Agent #2: Startup Advisor ──────────────────────────────
+
+model StartupIdea {
+  id                 String   @id @default(cuid())
+  userId             String
+  name               String
+  industry           String
+  description        String
+  scores             String   // JSON: market opportunity, revenue potential, risk, startup score
+  swotAnalysis       String   // JSON SWOT
+  roadmap            String   // JSON roadmap
+  revenueModel       String   // JSON revenue models
+  competitorResearch String   // JSON competitors
+  aiExplanation      String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Agent #3: Research Lab ─────────────────────────────────
+
+model ResearchProject {
+  id            String   @id @default(cuid())
+  userId        String
+  title         String
+  topic         String
+  description   String
+  summaryReport String   // JSON summary
+  citations     String   // JSON citations
+  methodology   String   // JSON methodology
+  gapReport     String   // JSON gaps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Agent #4: Career Accelerator ───────────────────────────
+
+model CareerProfile {
+  id                  String   @id @default(cuid())
+  userId              String
+  targetJob           String
+  skills              String   // JSON list of skills
+  atsScore            Int
+  readinessScore      Int
+  learningPlan        String   // JSON plan
+  optimizedResumeText String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model JobMatch {
+  id              String   @id @default(cuid())
+  userId          String
+  jobTitle        String
+  company         String
+  jobDescription  String
+  matchScore      Int
+  coverLetterText String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Agent #5: Business Automator ───────────────────────────
+
+model AutomationWorkflow {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  triggerType String
+  actionType  String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AutomationLead {
+  id                 String   @id @default(cuid())
+  userId             String
+  name               String
+  email              String
+  status             String   @default("new") // "new" | "contacted" | "qualified" | "lost"
+  notes              String?
+  interactionHistory String   // JSON interaction log
+  createdAt          DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  userId      String
+  clientName  String
+  clientEmail String
+  amount      Float
+  status      String   @default("draft") // "draft" | "sent" | "paid"
+  items       String   // JSON array of line items
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Productivity Agent ─────────────────────────────────────
+model Task {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  priority  String    @default("medium") // "low" | "medium" | "high" | "urgent"
+  status    String    @default("todo") // "todo" | "in_progress" | "completed"
+  dueDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Goal {
+  id         String    @id @default(cuid())
+  userId     String
+  title      String
+  targetDate DateTime?
+  progress   Int       @default(0) // 0 to 100
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DailySchedule {
+  id        String   @id @default(cuid())
+  userId    String
+  date      String
+  tasks     String   // JSON array or string describing the daily schedule generated by AI
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@unique([userId, date])
+}
+
+// ─── Document Agent ─────────────────────────────────────────
+model DocumentOperation {
+  id            String   @id @default(cuid())
+  userId        String
+  fileName      String
+  operationType String   // "summarize" | "analyze" | "generate_pdf"
+  summary       String?
+  keyPoints     String?  // JSON string or long text
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Payments ───────────────────────────────────────────────
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  stripeSubscriptionId String?
+  stripeCustomerId     String?
+  plan                 String    @default("free") // "free" | "pro" | "premium"
+  status               String    @default("active")
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String
+  amount          Float
+  currency        String   @default("USD")
+  status          String
+  stripeSessionId String?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model BookingSearch {
+  id            String   @id @default(cuid())
+  userId        String
+  correlationId String   @unique
+  mode          String   // 'flight' | 'bus' | 'train' | 'multi'
+  origin        String
+  destination   String
+  travelDate    DateTime
+  passengers    Int      @default(1)
+  results       String   // JSON stringified results
+  status        String   @default("completed") // 'pending' | 'completed' | 'failed'
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([correlationId])
+}
+
+model Booking {
+  id            String   @id @default(cuid())
+  userId        String
+  searchId      String
+  mode          String   // 'flight' | 'bus' | 'train'
+  carrier       String
+  origin        String
+  destination   String
+  departureTime DateTime
+  arrivalTime   DateTime
+  passengers    Int
+  totalPrice    Float
+  currency      String   @default("USD")
+  pnr           String?  @unique
+  seatInfo      String?  // JSON: selected seats/berths
+  eTicketUrl    String?
+  status        String   @default("confirmed") // 'pending' | 'confirmed' | 'cancelled'
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([pnr])
+}
+
+model BookingNotification {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String    // 'booking_confirmed' | 'price_alert' | 'search_complete' | etc.
+  channel     String    // 'in_app' | 'email' | 'sms' | 'push'
+  title       String
+  body        String
+  data        String?   // JSON payload
+  status      String    @default("pending") // 'pending' | 'sent' | 'delivered' | 'failed'
+  retryCount  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  deliveredAt DateTime?
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+model AgentHealth {
+  id        String   @id @default(cuid())
+  agentId   String   @unique // 'flight' | 'bus' | 'train' | 'orchestrator' | 'notifier'
+  status    String   @default("healthy") // 'healthy' | 'degraded' | 'down'
+  latency   Float    @default(0) // ms
+  lastPing  DateTime @default(now())
+  errorRate Float    @default(0) // percentage 0-100
+  metadata  String?  // JSON: additional health metrics
+
+  @@index([agentId])
+}
+
+// ─── AI Sales Agent ─────────────────────────────────────────
+
+model SalesLead {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  email        String
+  company      String
+  industry     String
+  role         String
+  companySize  String?
+  leadScore    Int      @default(0)  // 0-100
+  status       String   @default("new") // "new" | "contacted" | "qualified" | "meeting_set" | "won" | "lost"
+  notes        String?
+  enrichment   String?  // JSON: AI-enriched data
+  source       String   @default("ai_generated")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emails  SalesEmail[]
+  meetings SalesMeeting[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model SalesEmail {
+  id          String    @id @default(cuid())
+  userId      String
+  leadId      String?
+  subject     String
+  body        String
+  emailType   String    @default("cold_outreach") // "cold_outreach" | "follow_up" | "meeting_request" | "proposal"
+  tone        String    @default("professional") // "professional" | "casual" | "urgent" | "friendly"
+  status      String    @default("draft") // "draft" | "sent" | "scheduled"
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lead  SalesLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([leadId])
+}
+
+model SalesMeeting {
+  id          String   @id @default(cuid())
+  userId      String
+  leadId      String?
+  title       String
+  attendees   String   // JSON array of { name, email }
+  dateTime    DateTime
+  duration    Int      @default(30) // minutes
+  agenda      String?
+  status      String   @default("scheduled") // "scheduled" | "completed" | "cancelled" | "no_show"
+  meetingLink String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lead  SalesLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([dateTime])
+}

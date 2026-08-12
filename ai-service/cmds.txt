@@ -1,0 +1,4 @@
+commands to run all 
+frontend : >>cd frontend >> npm run dev
+backend : >> cd backend >> npm run dev
+brain ollama : >> .\venv\Scripts\Activate.ps1 >> python main.py

@@ -1,0 +1,36 @@
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY prisma ./prisma
+RUN sed -i 's/provider = "sqlite"/provider = "postgresql"/g' prisma/schema.prisma
+RUN npx prisma generate
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+
+# Install Chromium and system dependencies for Puppeteer / whatsapp-web.js
+RUN apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont
+
+# Configure Puppeteer to use the Alpine-installed Chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+COPY package*.json ./
+RUN npm ci --only=production
+COPY prisma ./prisma
+RUN sed -i 's/provider = "sqlite"/provider = "postgresql"/g' prisma/schema.prisma
+RUN npx prisma generate
+COPY --from=builder /app/dist ./dist
+EXPOSE 5000
+
+# Automate database push and seeding on container startup
+CMD ["sh", "-c", "npx prisma db push && npm run seed && node dist/index.js"]
