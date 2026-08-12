@@ -1,0 +1,33 @@
+services:
+  # Express Backend API
+  - type: web
+    name: nexusforge-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        value: nexora_32_character_key_prod!!
+      - key: CORS_ORIGIN
+        sync: false
+
+  # Next.js Frontend
+  - type: web
+    name: nexusforge-frontend
+    env: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: nexusforge-backend
+          property: url
