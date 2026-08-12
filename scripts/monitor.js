@@ -32,7 +32,8 @@ function checkHealth() {
     });
   }).on('error', (err) => {
     const timestamp = new Date().toLocaleTimeString();
-    console.log(`[${timestamp}] \x1b[31mOFFLINE / ERROR\x1b[0m | ${err.message}`);
+    console.log(`[${timestamp}] \x1b[31mOFFLINE / WAITING\x1b[0m | ${err.message}`);
+    console.log(`                \x1b[90mTip: Run 'npm run dev' to start local server, or set BACKEND_URL="https://your-app.onrender.com/health"\x1b[0m`);
   });
 }
 

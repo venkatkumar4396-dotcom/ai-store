@@ -4,7 +4,7 @@ services:
     name: nexusforge-backend
     env: node
     rootDir: backend
-    buildCommand: npm install && npx prisma generate && npm run build
+    buildCommand: npm install && npx prisma generate --schema=prisma/schema.prisma && npm run build
     startCommand: node dist/index.js
     envVars:
       - key: PORT
