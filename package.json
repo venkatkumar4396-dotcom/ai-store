@@ -7,7 +7,7 @@
     "dev": "start-dev.bat",
     "build:backend": "npm --prefix backend run build",
     "build:frontend": "npm --prefix frontend run build",
-    "build": "cd backend && npm install --production=false && npx prisma@6.9.0 generate && npm run build",
+    "build": "cd backend && npm install --production=false && npm run build",
     "commit": "git add . && git commit -m \"update: platform enhancements\" && git push origin main",
     "push": "git add . && git commit -m \"update: code changes\" && git push origin main",
     "deploy": "docker-compose up -d --build",
