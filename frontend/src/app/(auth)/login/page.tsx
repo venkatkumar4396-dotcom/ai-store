@@ -402,42 +402,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleOAuthLogin = async (provider: "google" | "github") => {
-    setIsLoading(true);
-    setError("");
-    try {
-      const mockOAuthPayload = {
-        google: {
-          providerId: "google-1093284092184",
-          email: "alex.google@nexora.ai",
-          name: "Alex Google User",
-          avatar: "https://ui-avatars.com/api/?name=Alex+Google+User&background=4285F4&color=fff",
-        },
-        github: {
-          providerId: "github-84029384",
-          email: "alex.github@nexora.ai",
-          name: "Alex GitHub User",
-          avatar: "https://ui-avatars.com/api/?name=Alex+GitHub+User&background=24292e&color=fff",
-        }
-      };
-
-      const payload = mockOAuthPayload[provider];
-      const { data } = await api.post(`/auth/${provider}`, payload);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("nexora_logged_in", "true");
-        if (data?.token) {
-          localStorage.setItem("nexora_auth_token", data.token);
-        }
-      }
-      router.push("/dashboard");
-    } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.error || `Failed to sign in with ${provider}.`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const resetForgotState = () => {
     if (forgotEmail.trim()) {
       setEmail(forgotEmail.trim());
@@ -946,8 +910,6 @@ export default function LoginPage() {
           )}
         </Card>
 
-        {/* Bottom branding */}
-        <motion.p
         {/* Bottom branding */}
         <motion.p
           initial={{ opacity: 0 }}

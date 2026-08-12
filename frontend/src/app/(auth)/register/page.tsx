@@ -341,41 +341,6 @@ export default function RegisterPage() {
     }, 50);
   };
 
-  const handleOAuthLogin = async (provider: "google" | "github") => {
-    setIsLoading(true);
-    setError("");
-    try {
-      const mockOAuthPayload = {
-        google: {
-          providerId: "google-1093284092184",
-          email: "alex.google@nexora.ai",
-          name: "Alex Google User",
-          avatar: "https://ui-avatars.com/api/?name=Alex+Google+User&background=4285F4&color=fff",
-        },
-        github: {
-          providerId: "github-84029384",
-          email: "alex.github@nexora.ai",
-          name: "Alex GitHub User",
-          avatar: "https://ui-avatars.com/api/?name=Alex+GitHub+User&background=24292e&color=fff",
-        },
-      };
-      const { data } = await api.post(`/auth/${provider}`, mockOAuthPayload[provider]);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("nexora_logged_in", "true");
-        localStorage.setItem("nexora_user_persona", selectedPersona);
-        if (data?.token) {
-          localStorage.setItem("nexora_auth_token", data.token);
-        }
-      }
-      setStep(3);
-      runProvisioningAnimation();
-    } catch (err: unknown) {
-      const apiErr = err as { response?: { data?: { error?: string } } };
-      setError(apiErr.response?.data?.error || `Failed to sign in with ${provider}.`);
-      setIsLoading(false);
-    }
-  };
-
   const currentTab = SHOWCASE_TABS.find((t) => t.id === activeTab) || SHOWCASE_TABS[0];
   const currentTestimonial = TESTIMONIALS[testimonialIdx];
 
