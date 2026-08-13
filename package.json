@@ -5,9 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "start-dev.bat",
+    "start": "node dist/index.js",
     "build:backend": "npm --prefix backend run build",
     "build:frontend": "npm --prefix frontend run build",
-    "build": "npx --package=prisma@6.9.0 prisma generate && cd backend && npm install --production=false && npm run build",
+    "build": "npx --package=prisma@6.9.0 prisma generate && cd backend && npm install --production=false && npm run build && cd .. && node -e \"fs.cpSync('backend/dist', 'dist', {recursive: true})\"",
     "commit": "git add . && git commit -m \"update: platform enhancements\" && git push origin main",
     "push": "git add . && git commit -m \"update: code changes\" && git push origin main",
     "deploy": "docker-compose up -d --build",
