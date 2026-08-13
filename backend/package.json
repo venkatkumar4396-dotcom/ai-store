@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
-    "@prisma/client": "^6.9.0",
+    "@prisma/client": "6.9.0",
     "bcrypt": "^5.1.1",
     "chokidar": "^4.0.3",
     "cors": "^2.8.5",
@@ -46,9 +46,13 @@
     "@types/nodemailer": "^8.0.1",
     "@types/pdfkit": "^0.17.6",
     "@types/uuid": "^10.0.0",
-    "prisma": "^6.9.0",
+    "prisma": "6.9.0",
     "tsx": "^4.19.0",
     "typescript": "^5.8.0"
+  },
+  "overrides": {
+    "prisma": "6.9.0",
+    "@prisma/client": "6.9.0"
   },
   "engines": {
     "node": ">=18.0.0"
