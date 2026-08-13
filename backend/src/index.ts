@@ -81,6 +81,7 @@ app.use(cors({
     const isAllowed = 
       env.NODE_ENV === 'development' ||
       origin === env.CORS_ORIGIN ||
+      origin.includes('onrender.com') ||
       origin.includes('localhost') ||
       origin.includes('127.0.0.1') ||
       origin.includes('192.168.') ||
