@@ -59,18 +59,19 @@ whatsappService.restoreActiveSessions();
 import { ensureAdminSeeded } from './services/auth.service';
 ensureAdminSeeded();
 
+import { MetaLlamaProvider } from './services/ai/meta';
 import { FallbackProvider } from './services/ai/fallback';
 import { PollinationsProvider } from './services/ai/pollinations';
 
-// Register AI Providers
+// Register AI Providers (Priority: 1. Kimi -> 2. Meta Llama -> 3. Gemini -> 4. Pollinations -> 5. Ollama -> 6. Fallback)
 try {
-  const hasGemini = !!env.GEMINI_API_KEY;
-  aiRouter.registerProvider(new GeminiProvider(), hasGemini);  // Google Gemini (Primary when API key is provided)
-  aiRouter.registerProvider(new KimiProvider(), !hasGemini);   // Moonshot Kimi AI
-  aiRouter.registerProvider(new PollinationsProvider());      // Pollinations AI (Zero-config free online LLM)
-  aiRouter.registerProvider(new OllamaProvider());            // Ollama local fallback
-  aiRouter.registerProvider(new FallbackProvider());          // Rules-engine safety net
-  logger.info('AI Providers (Gemini, Kimi, Pollinations, Ollama, Fallback) successfully registered in Router.');
+  aiRouter.registerProvider(new KimiProvider(), true);       // 1. Kimi (Moonshot AI - Primary)
+  aiRouter.registerProvider(new MetaLlamaProvider(), false); // 2. Meta / Llama API (Secondary)
+  aiRouter.registerProvider(new GeminiProvider(), false);    // 3. Google Gemini (Tertiary)
+  aiRouter.registerProvider(new PollinationsProvider());     // 4. Pollinations AI (Zero-config free online LLM)
+  aiRouter.registerProvider(new OllamaProvider());           // 5. Ollama local fallback
+  aiRouter.registerProvider(new FallbackProvider());         // 6. Rules-engine safety net
+  logger.info('AI Provider Chain configured: Kimi (Primary) → Meta Llama (Secondary) → Gemini (Tertiary) → Pollinations → Ollama → Fallback.');
 } catch (error: any) {
   logger.error(`Failed to register AI Providers: ${error.message}`);
 }

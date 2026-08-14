@@ -15,6 +15,9 @@ interface EnvConfig {
   KIMI_API_KEY: string;
   KIMI_BASE_URL: string;
   KIMI_MODEL: string;
+  META_API_KEY: string;
+  META_BASE_URL: string;
+  META_MODEL: string;
   OLLAMA_BASE_URL: string;
   OLLAMA_MODEL: string;
   WHATSAPP_SESSION_PATH: string;
@@ -54,6 +57,9 @@ const env: EnvConfig = {
   KIMI_API_KEY: getEnvString('KIMI_API_KEY', ''),
   KIMI_BASE_URL: getEnvString('KIMI_BASE_URL', 'https://api.moonshot.ai/v1'),
   KIMI_MODEL: getEnvString('KIMI_MODEL', 'moonshot-v1-128k'),
+  META_API_KEY: getEnvString('META_API_KEY', 'LLM_1958630808184263_hfZ4QHw6laX-PjUxOg5Io0y8mKs'),
+  META_BASE_URL: getEnvString('META_BASE_URL', 'https://api.llama-api.com'),
+  META_MODEL: getEnvString('META_MODEL', 'llama3.3-70b'),
   OLLAMA_BASE_URL: getEnvString('OLLAMA_BASE_URL', 'http://localhost:11434'),
   OLLAMA_MODEL: getEnvString('OLLAMA_MODEL', 'llama3'),
   WHATSAPP_SESSION_PATH: getEnvString('WHATSAPP_SESSION_PATH', './data/whatsapp-sessions'),
