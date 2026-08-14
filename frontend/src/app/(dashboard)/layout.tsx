@@ -31,11 +31,13 @@ export default function DashboardLayout({
           const currentPort = match[1];
           const backendHostname = hostname.replace(`-${currentPort}`, "-5000");
           healthUrl = `https://${backendHostname}/health`;
+        } else if (hostname.includes("onrender.com")) {
+          healthUrl = "https://ai-store-87n2.onrender.com/health";
         } else {
           healthUrl = `${window.location.protocol}//${window.location.hostname}:5000/health`;
         }
       } else {
-        healthUrl = "http://localhost:5000/health";
+        healthUrl = "https://ai-store-87n2.onrender.com/health";
       }
       const res = await fetch(healthUrl, { method: "GET" });
       if (res.ok) {

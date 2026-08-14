@@ -30,10 +30,14 @@ const getSocketURL = () => {
       return `https://${backendHost}`;
     }
 
+    if (hostname.includes("onrender.com")) {
+      return "https://ai-store-87n2.onrender.com";
+    }
+
     // ── Plain local fallback ────────────────────────────────────────
     return `${protocol}//${hostname}:5000`;
   }
-  return "http://localhost:5000";
+  return "https://ai-store-87n2.onrender.com";
 };
 
 export function getSocket(): Socket {
