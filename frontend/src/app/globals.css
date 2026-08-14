@@ -158,36 +158,34 @@
     0 4px 12px rgba(99, 102, 241, 0.05) !important;
 }
 
-/* ═══════════ LIGHT MODE TEXT CONTRAST OVERRIDES ═══════════ */
-.light .text-white,
-.light h1.text-white,
-.light h2.text-white,
-.light h3.text-white,
-.light h4.text-white,
-.light p.text-white,
-.light span.text-white,
-.light div.text-white {
-  color: #0f172a !important;
+/* ═══════════ AUTH PAGES & DARK CARDS — GUARANTEED BRIGHT CRISP TEXT ═══════════ */
+.auth-page,
+.auth-root,
+[data-theme="dark"],
+.bg-\[\#050510\],
+.bg-\[\#05050f\] {
+  color: #f8fafc !important;
 }
 
-.light .text-zinc-100 {
-  color: #0f172a !important;
+.auth-page h1,
+.auth-page h2,
+.auth-page h3,
+.auth-page .text-white,
+.bg-\[\#050510\] .text-white,
+.bg-\[\#05050f\] .text-white {
+  color: #ffffff !important;
 }
 
-.light .text-zinc-200 {
-  color: #1e293b !important;
+.auth-page p,
+.auth-page span,
+.bg-\[\#050510\] p,
+.bg-\[\#050510\] span:not([class*="text-indigo"]):not([class*="text-emerald"]):not([class*="text-amber"]):not([class*="text-rose"]):not([class*="text-cyan"]) {
+  color: #cbd5e1;
 }
 
-.light .text-zinc-300 {
-  color: #334155 !important;
-}
-
-.light .text-zinc-400 {
-  color: #475569 !important;
-}
-
-.light .text-zinc-500 {
-  color: #64748b !important;
+.auth-page label,
+.bg-\[\#050510\] label {
+  color: #94a3b8 !important;
 }
 
 /* Light mode indicator badge contrast enhancements */

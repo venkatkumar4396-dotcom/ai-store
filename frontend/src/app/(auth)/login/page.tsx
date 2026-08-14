@@ -558,12 +558,12 @@ export default function LoginPage() {
               >
                 {/* Header */}
                 <div className="space-y-1.5">
-                  <h2 className="text-3xl font-black text-white tracking-tight">Welcome back</h2>
-                  <p className="text-sm text-zinc-400">Sign in to your Nexora workspace</p>
+                  <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-sm">Welcome back</h2>
+                  <p className="text-sm font-medium text-zinc-200">Sign in to your Nexora workspace</p>
                 </div>
 
                 {/* User type selector */}
-                <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+                <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-zinc-900/80 border border-white/10 shadow-inner">
                   {USER_TYPES.map((type) => {
                     const Icon = type.icon;
                     const isActive = userType === type.id;
@@ -573,16 +573,16 @@ export default function LoginPage() {
                         onClick={() => handleQuickFill(type.id)}
                         className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-center transition-all duration-200 border ${
                           isActive
-                            ? `${type.activeBg} shadow-lg`
-                            : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]"
+                            ? `${type.activeBg} shadow-lg ring-1 ring-white/20`
+                            : "border-transparent text-zinc-300 hover:text-white hover:bg-white/[0.06]"
                         }`}
                       >
-                        <div className={`p-1.5 rounded-lg ${isActive ? `bg-gradient-to-br ${type.gradient} bg-opacity-20` : "bg-white/[0.04]"}`}>
-                          <Icon className={`h-3.5 w-3.5 ${isActive ? type.activeText : "text-zinc-500"}`} />
+                        <div className={`p-1.5 rounded-lg ${isActive ? `bg-gradient-to-br ${type.gradient} bg-opacity-30` : "bg-white/[0.08]"}`}>
+                          <Icon className={`h-4 w-4 ${isActive ? type.activeText : "text-zinc-300"}`} />
                         </div>
                         <div>
-                          <div className={`text-[11px] font-bold leading-none ${isActive ? "text-white" : "text-zinc-400"}`}>{type.title}</div>
-                          <div className="text-[9px] text-zinc-600 mt-0.5">{type.subtitle}</div>
+                          <div className={`text-[11px] font-bold leading-none ${isActive ? "text-white" : "text-zinc-200"}`}>{type.title}</div>
+                          <div className="text-[10px] text-zinc-400 mt-1 font-medium">{type.subtitle}</div>
                         </div>
                       </button>
                     );
@@ -596,9 +596,9 @@ export default function LoginPage() {
                       initial={{ opacity: 0, y: -8, height: 0 }}
                       animate={{ opacity: 1, y: 0, height: "auto" }}
                       exit={{ opacity: 0, y: -8, height: 0 }}
-                      className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm"
+                      className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-sm font-medium shadow-md"
                     >
-                      <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                      <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-rose-400" />
                       <span>{error}</span>
                     </motion.div>
                   )}
@@ -608,18 +608,18 @@ export default function LoginPage() {
                 <form onSubmit={handleLogin} className="space-y-4">
                   {/* Email */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email</Label>
+                    <Label className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Email or Username</Label>
                     <div className="relative group">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
                       <Input
                         id="login-email"
-                        type="email"
-                        placeholder="you@example.com"
+                        type="text"
+                        placeholder="kumar or you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 h-12 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 focus:bg-indigo-500/[0.04] rounded-xl transition-all text-sm"
+                        className="pl-10 h-12 bg-zinc-900/90 border-white/20 text-white placeholder:text-zinc-500 focus:border-indigo-400 focus:bg-zinc-900 rounded-xl transition-all text-sm font-medium"
                         required
-                        autoComplete="email"
+                        autoComplete="username"
                       />
                     </div>
                   </div>
@@ -627,28 +627,28 @@ export default function LoginPage() {
                   {/* Password */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Password</Label>
+                      <Label className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Password</Label>
                       <button
                         type="button"
                         onClick={() => { setForgotMode(true); setForgotEmail(email); }}
-                        className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
+                        className="text-xs text-indigo-300 hover:text-indigo-200 transition-colors font-semibold"
                       >
                         Forgot password?
                       </button>
                     </div>
                     <div className="relative group">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
                       <Input
                         id="login-password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 pr-10 h-12 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 focus:bg-indigo-500/[0.04] rounded-xl transition-all text-sm"
+                        className="pl-10 pr-10 h-12 bg-zinc-900/90 border-white/20 text-white placeholder:text-zinc-500 focus:border-indigo-400 focus:bg-zinc-900 rounded-xl transition-all text-sm font-medium"
                         required
                         autoComplete="current-password"
                       />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors">
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors">
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
@@ -659,7 +659,7 @@ export default function LoginPage() {
                     id="login-submit"
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 transition-all duration-300 text-sm relative overflow-hidden group"
+                    className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all duration-300 text-sm relative overflow-hidden group"
                   >
                     <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {isLoading ? (
@@ -672,9 +672,9 @@ export default function LoginPage() {
 
                 {/* Divider */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-white/[0.07]" />
-                  <span className="text-xs text-zinc-600 font-medium">or continue with</span>
-                  <div className="flex-1 h-px bg-white/[0.07]" />
+                  <div className="flex-1 h-px bg-white/20" />
+                  <span className="text-xs text-zinc-300 font-semibold">or continue with</span>
+                  <div className="flex-1 h-px bg-white/20" />
                 </div>
 
                 {/* OAuth */}

@@ -78,15 +78,10 @@ export default function OverviewDashboardPage() {
     fetchUser();
   }, []);
 
-  // Filter quick actions to only show deployed agents
-  const visibleQuickActions = QUICK_ACTIONS.filter((action) => {
-    const requiredBotId = ROUTE_TO_BOT_ID[action.href];
-    if (!requiredBotId) return true;
-    if (isBotsLoading) return false;
-    return isBotDeployed(requiredBotId);
-  });
+  // Quick actions suite always available for mobile & desktop fast launch
+  const visibleQuickActions = QUICK_ACTIONS;
 
-  const hasNoDeployedBots = !isBotsLoading && deployedBotIds.size === 0;
+  const hasNoDeployedBots = false;
 
   const fetchDashboardData = React.useCallback(async (showToast = false) => {
     if (showToast) setIsRefreshing(true);
