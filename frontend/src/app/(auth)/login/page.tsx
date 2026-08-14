@@ -4,17 +4,18 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Loader2, ArrowRight, Lock, ShieldCheck, KeyRound, CheckCircle2, AlertCircle, Zap, User, Briefcase, Terminal, Check, X } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Sparkles, Loader2, ArrowRight, Lock, ShieldCheck, KeyRound, CheckCircle2,
+  AlertCircle, Zap, User, Briefcase, Terminal, Check, X, Eye, EyeOff, Mail,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import api from "@/lib/api";
 
-// ─── Password Strength Checker ──────────────────────────────
-
+// ─── Password Strength ───────────────────────────────────────────
 interface PasswordStrength {
-  score: number; // 0-4
+  score: number;
   label: string;
   color: string;
   checks: { label: string; met: boolean }[];
@@ -29,24 +30,20 @@ function getPasswordStrength(password: string): PasswordStrength {
     { label: "Special character", met: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) },
   ];
   const score = checks.filter((c) => c.met).length;
-
   const levels: Record<number, { label: string; color: string }> = {
-    0: { label: "Very weak", color: "bg-red-500" },
-    1: { label: "Weak", color: "bg-red-500" },
-    2: { label: "Fair", color: "bg-orange-500" },
-    3: { label: "Good", color: "bg-yellow-500" },
+    0: { label: "Very weak", color: "bg-rose-500" },
+    1: { label: "Weak", color: "bg-rose-400" },
+    2: { label: "Fair", color: "bg-amber-500" },
+    3: { label: "Good", color: "bg-yellow-400" },
     4: { label: "Strong", color: "bg-emerald-500" },
     5: { label: "Very strong", color: "bg-emerald-400" },
   };
-
   return { score, ...levels[score], checks };
 }
 
-// ─── OTP Input Component ────────────────────────────────────
-
+// ─── OTP Input ────────────────────────────────────────────────────
 function OtpInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
   const inputsRef = React.useRef<(HTMLInputElement | null)[]>([]);
-
   const handleChange = (index: number, digit: string) => {
     if (!/^\d?$/.test(digit)) return;
     const arr = value.split("");
@@ -54,29 +51,15 @@ function OtpInput({ value, onChange }: { value: string; onChange: (val: string) 
     arr[index] = digit;
     const newVal = arr.join("").slice(0, 6);
     onChange(newVal);
-    if (digit && index < 5) {
-      inputsRef.current[index + 1]?.focus();
-    }
+    if (digit && index < 5) inputsRef.current[index + 1]?.focus();
   };
-
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && !value[index] && index > 0) {
       inputsRef.current[index - 1]?.focus();
     }
   };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    onChange(pasted);
-    if (pasted.length > 0) {
-      const focusIndex = Math.min(pasted.length, 5);
-      inputsRef.current[focusIndex]?.focus();
-    }
-  };
-
   return (
-    <div className="flex gap-1.5 sm:gap-2.5 justify-center max-w-full overflow-hidden">
+    <div className="flex gap-2 justify-center">
       {Array.from({ length: 6 }).map((_, i) => (
         <input
           key={i}
@@ -87,165 +70,128 @@ function OtpInput({ value, onChange }: { value: string; onChange: (val: string) 
           value={value[i] || ""}
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          onPaste={i === 0 ? handlePaste : undefined}
-          className="w-9 sm:w-12 h-12 sm:h-14 text-center text-lg sm:text-xl font-mono font-bold rounded-xl border border-white/10 bg-white/[0.03] text-white focus:outline-none otp-glow transition-all duration-200"
-          autoComplete="one-time-code"
+          className="w-11 h-12 text-center text-lg font-bold rounded-xl border border-white/10 bg-white/[0.04] text-white focus:outline-none focus:border-indigo-500/70 focus:bg-indigo-500/10 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.2)] transition-all duration-200 caret-indigo-400"
         />
       ))}
     </div>
   );
 }
 
-// ─── Floating Sparkle Particles ─────────────────────────────
-
-function FloatingParticles() {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {/* Animated gradient orbs */}
-      <div className="login-orb-1 absolute -top-20 -left-20 w-[350px] h-[350px] rounded-full bg-indigo-600/15 glow-pulse" />
-      <div className="login-orb-2 absolute -bottom-32 -right-20 w-[400px] h-[400px] rounded-full bg-violet-600/12 glow-pulse" style={{ animationDelay: "2s" }} />
-      <div className="login-orb-3 absolute top-1/3 right-0 w-[250px] h-[250px] rounded-full bg-cyan-500/8 glow-pulse" style={{ animationDelay: "4s" }} />
-      {/* Tiny floating dots */}
-      {[...Array(6)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 rounded-full bg-indigo-400/40"
-          style={{
-            top: `${15 + i * 14}%`,
-            left: `${10 + (i * 17) % 80}%`,
-          }}
-          animate={{
-            y: [0, -20, 0],
-            opacity: [0.2, 0.6, 0.2],
-          }}
-          transition={{
-            duration: 3 + i * 0.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: i * 0.4,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ─── User Type Definitions ──────────────────────────────────
-
+// ─── User Type Definitions ────────────────────────────────────────
 type UserTypeId = "user" | "business" | "developer";
 
-interface UserTypeConfig {
-  id: UserTypeId;
-  title: string;
-  subtitle: string;
-  badge: string;
-  description: string;
-  iconName: string;
-  gradient: string;
-  glowColor: string;
-  badgeClass: string;
-  borderActive: string;
-  demoEmail: string;
-}
-
-const USER_TYPES: UserTypeConfig[] = [
+const USER_TYPES = [
   {
-    id: "user",
+    id: "user" as UserTypeId,
     title: "Individual",
-    subtitle: "Personal AI OS",
-    badge: "Personal AI OS",
-    description: "Access Travel, Stock Intelligence, Career & Document AI agents.",
-    iconName: "User",
-    gradient: "from-indigo-600 via-indigo-500 to-violet-600",
-    glowColor: "shadow-indigo-600/20",
-    badgeClass: "bg-indigo-500/10 border-indigo-500/20 text-indigo-300",
-    borderActive: "border-indigo-500 bg-indigo-500/10 text-white shadow-indigo-500/15 shadow-md",
+    subtitle: "Personal AI",
+    icon: User,
+    gradient: "from-indigo-600 to-violet-600",
+    activeBg: "bg-indigo-500/10 border-indigo-500/40",
+    activeText: "text-indigo-300",
+    dotColor: "bg-indigo-500",
     demoEmail: "user@nexora.ai",
+    description: "Travel, stocks, career & document agents",
   },
   {
-    id: "business",
-    title: "Business & Agency",
-    subtitle: "WhatsApp & Sales AI",
-    badge: "WhatsApp & CRM",
-    description: "Manage WhatsApp auto-reply bot, sales leads & customer support workflows.",
-    iconName: "Briefcase",
-    gradient: "from-emerald-600 via-teal-500 to-cyan-600",
-    glowColor: "shadow-emerald-600/20",
-    badgeClass: "bg-emerald-500/10 border-emerald-500/20 text-emerald-300",
-    borderActive: "border-emerald-500 bg-emerald-500/10 text-white shadow-emerald-500/15 shadow-md",
+    id: "business" as UserTypeId,
+    title: "Business",
+    subtitle: "WhatsApp & CRM",
+    icon: Briefcase,
+    gradient: "from-emerald-600 to-teal-600",
+    activeBg: "bg-emerald-500/10 border-emerald-500/40",
+    activeText: "text-emerald-300",
+    dotColor: "bg-emerald-500",
     demoEmail: "business@nexora.ai",
+    description: "WhatsApp bots, sales & customer support",
   },
   {
-    id: "developer",
-    title: "Developer & Admin",
-    subtitle: "API & Model Control",
-    badge: "API & Admin",
-    description: "Manage API keys, LLM prompts, model playground & admin configurations.",
-    iconName: "Terminal",
-    gradient: "from-amber-600 via-orange-500 to-rose-600",
-    glowColor: "shadow-amber-600/20",
-    badgeClass: "bg-amber-500/10 border-amber-500/20 text-amber-300",
-    borderActive: "border-amber-500 bg-amber-500/10 text-white shadow-amber-500/15 shadow-md",
+    id: "developer" as UserTypeId,
+    title: "Developer",
+    subtitle: "API & Admin",
+    icon: Terminal,
+    gradient: "from-amber-600 to-orange-600",
+    activeBg: "bg-amber-500/10 border-amber-500/40",
+    activeText: "text-amber-300",
+    dotColor: "bg-amber-500",
     demoEmail: "admin@nexora.ai",
+    description: "LLM control, API keys & admin config",
   },
 ];
 
-// ─── Main Login Page ────────────────────────────────────────
+// ─── Floating animated background orbs ────────────────────────────
+function AmbientBg() {
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden>
+      <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-indigo-700/20 blur-[120px] animate-pulse" style={{ animationDuration: "6s" }} />
+      <div className="absolute top-1/2 -right-48 w-[550px] h-[550px] rounded-full bg-violet-700/15 blur-[130px]" style={{ animation: "float-slow 12s ease-in-out infinite" }} />
+      <div className="absolute -bottom-32 left-1/3 w-[450px] h-[450px] rounded-full bg-cyan-700/10 blur-[110px]" style={{ animation: "float-reverse 10s ease-in-out infinite" }} />
+      {/* Subtle dot grid */}
+      <div
+        className="absolute inset-0 opacity-[0.018]"
+        style={{
+          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)`,
+          backgroundSize: "32px 32px",
+        }}
+      />
+    </div>
+  );
+}
 
+// ─── Stats bar ─────────────────────────────────────────────────────
+const STATS = [
+  { label: "AI Agents", value: "11+" },
+  { label: "Uptime", value: "99.9%" },
+  { label: "Avg Response", value: "< 1.5s" },
+];
+
+// ─── Main Login Page ────────────────────────────────────────────────
 export default function LoginPage() {
   const router = useRouter();
 
-  // Login State
   const [userType, setUserType] = React.useState<UserTypeId>("user");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 
-  // Forgot Password OTP State
+  // Forgot password flow
   const [forgotMode, setForgotMode] = React.useState(false);
   const [forgotEmail, setForgotEmail] = React.useState("");
   const [otp, setOtp] = React.useState("");
   const [resetPermissionToken, setResetPermissionToken] = React.useState("");
   const [newPassword, setNewPassword] = React.useState("");
+  const [showNewPassword, setShowNewPassword] = React.useState(false);
   const [step, setStep] = React.useState<1 | 2 | 3 | 4>(1);
-  // 1 = enter email, 2 = enter OTP, 3 = set new password, 4 = success
   const [forgotError, setForgotError] = React.useState("");
   const [forgotSuccess, setForgotSuccess] = React.useState("");
 
-  const activeUserType = React.useMemo(
-    () => USER_TYPES.find((t) => t.id === userType) || USER_TYPES[0],
-    [userType]
-  );
+  // Google OAuth
+  const [showGoogleModal, setShowGoogleModal] = React.useState(false);
+  const [customGoogleEmail, setCustomGoogleEmail] = React.useState("");
 
+  const activeType = React.useMemo(() => USER_TYPES.find((t) => t.id === userType) || USER_TYPES[0], [userType]);
   const passwordStrength = React.useMemo(() => getPasswordStrength(newPassword), [newPassword]);
 
+  // ─── Handlers ───────────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     const cleanEmail = email.trim().toLowerCase();
-
-    if (!cleanEmail || !password) {
-      setError("Please fill in all fields.");
-      return;
-    }
-
+    if (!cleanEmail || !password) { setError("Please fill in all fields."); return; }
     setIsLoading(true);
     try {
       const { data } = await api.post("/auth/login", { email: cleanEmail, password, userType });
       if (typeof window !== "undefined") {
         localStorage.setItem("nexora_logged_in", "true");
         localStorage.setItem("nexora_user_type", userType);
-        if (data?.token) {
-          localStorage.setItem("nexora_auth_token", data.token);
-        }
+        if (data?.token) localStorage.setItem("nexora_auth_token", data.token);
       }
       router.push("/dashboard");
     } catch (err: any) {
-      console.error(err);
       if (err.message === "Network Error" || !err.response) {
-        setError("Network Error: Cannot connect to Nexora API server. Make sure it is running on port 5000.");
+        setError("Cannot reach Nexora API server. Please try again shortly.");
       } else {
         setError(err.response?.data?.error || "Invalid email or password.");
       }
@@ -254,765 +200,567 @@ export default function LoginPage() {
     }
   };
 
-  // ─── Google & GitHub OAuth Handler ─────────────────────────────
-  const [showGoogleModal, setShowGoogleModal] = React.useState(false);
-  const [customGoogleEmail, setCustomGoogleEmail] = React.useState("");
-
   const handleOAuthLogin = (provider: "google" | "github") => {
     setError("");
-    if (provider === "google") {
-      setShowGoogleModal(true);
-    } else {
-      // GitHub OAuth flow fallback
-      handleGoogleAuthSubmit("github.user@github.com", "GitHub Developer", "github");
-    }
+    if (provider === "google") { setShowGoogleModal(true); }
+    else { handleGoogleAuthSubmit("github.user@github.com", "GitHub Developer", "github"); }
   };
 
-  const handleGoogleAuthSubmit = async (
-    targetEmail: string,
-    targetName?: string,
-    providerType: "google" | "github" = "google"
-  ) => {
-    if (!targetEmail || !targetEmail.trim()) return;
-    setIsLoading(true);
-    setError("");
-    setShowGoogleModal(false);
-
+  const handleGoogleAuthSubmit = async (targetEmail: string, targetName?: string, providerType: "google" | "github" = "google") => {
+    if (!targetEmail?.trim()) return;
+    setIsLoading(true); setError(""); setShowGoogleModal(false);
     const cleanEmail = targetEmail.trim().toLowerCase();
     const displayName = targetName || cleanEmail.split("@")[0].replace(/\./g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
     const providerId = `${providerType}_${cleanEmail}`;
     const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanEmail}`;
-
     try {
       const endpoint = providerType === "google" ? "/auth/google" : "/auth/github";
-      const { data } = await api.post(endpoint, {
-        providerId,
-        email: cleanEmail,
-        name: displayName,
-        avatar,
-      });
-
+      const { data } = await api.post(endpoint, { providerId, email: cleanEmail, name: displayName, avatar });
       if (typeof window !== "undefined") {
         localStorage.setItem("nexora_logged_in", "true");
         localStorage.setItem("nexora_user_type", userType);
-        if (data?.token) {
-          localStorage.setItem("nexora_auth_token", data.token);
-        }
+        if (data?.token) localStorage.setItem("nexora_auth_token", data.token);
       }
       router.push("/dashboard");
     } catch (err: any) {
-      console.error("OAuth error:", err);
-      setError(err.response?.data?.error || "Google authentication failed. Please try again.");
+      setError(err.response?.data?.error || "Authentication failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleQuickFillDemo = (typeId: UserTypeId) => {
+  const handleQuickFill = (typeId: UserTypeId) => {
     setUserType(typeId);
-    const selected = USER_TYPES.find((t) => t.id === typeId);
-    if (selected) {
-      setEmail(selected.demoEmail);
-      setPassword("Password123!");
-    }
+    const t = USER_TYPES.find((x) => x.id === typeId);
+    if (t) { setEmail(t.demoEmail); setPassword("Password123!"); }
   };
 
-  // Step 1: Request OTP
   const handleForgotSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setForgotError("");
-    setForgotSuccess("");
+    setForgotError(""); setForgotSuccess("");
     const cleanEmail = forgotEmail.trim();
-    if (!cleanEmail) {
-      setForgotError("Email address is required.");
-      return;
-    }
+    if (!cleanEmail) { setForgotError("Email address is required."); return; }
     setIsLoading(true);
     try {
       const res = await api.post("/auth/forgot-password", { email: cleanEmail });
-      setForgotSuccess(res.data.devNote ? `${res.data.message} ${res.data.devNote}` : res.data.message);
-      if (res.data.debugOtp) {
-        setOtp(res.data.debugOtp);
-      }
+      setForgotSuccess(res.data.message);
+      if (res.data.debugOtp) setOtp(res.data.debugOtp);
       setStep(2);
     } catch (err: any) {
       setForgotError(err.response?.data?.error || "Failed to send OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    } finally { setIsLoading(false); }
   };
 
-  // Step 2: Verify OTP
   const handleOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    setForgotError("");
-    setForgotSuccess("");
-    const cleanEmail = forgotEmail.trim();
-    if (otp.length !== 6) {
-      setForgotError("Please enter the complete 6-digit OTP.");
-      return;
-    }
+    setForgotError(""); setForgotSuccess("");
+    if (otp.length !== 6) { setForgotError("Please enter the complete 6-digit OTP."); return; }
     setIsLoading(true);
     try {
-      const res = await api.post("/auth/verify-otp", { email: cleanEmail, otp });
+      const res = await api.post("/auth/verify-otp", { email: forgotEmail.trim(), otp });
       setResetPermissionToken(res.data.resetPermissionToken);
       setForgotSuccess("OTP verified! Set your new password below.");
       setStep(3);
     } catch (err: any) {
       setForgotError(err.response?.data?.error || "Invalid OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    } finally { setIsLoading(false); }
   };
 
-  // Step 3: Reset Password
   const handleResetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setForgotError("");
-    setForgotSuccess("");
-    const cleanEmail = forgotEmail.trim();
-    if (!newPassword) {
-      setForgotError("New password is required.");
-      return;
-    }
+    setForgotError(""); setForgotSuccess("");
+    if (!newPassword) { setForgotError("New password is required."); return; }
     if (passwordStrength.score < 5) {
-      const missingChecks = passwordStrength.checks
-        .filter((c) => !c.met)
-        .map((c) => c.label)
-        .join(", ");
-      setForgotError(`Password must meet all requirements. Missing: ${missingChecks}`);
+      setForgotError(`Password must meet all requirements. Missing: ${passwordStrength.checks.filter(c => !c.met).map(c => c.label).join(", ")}`);
       return;
     }
     setIsLoading(true);
     try {
-      await api.post("/auth/reset-password", {
-        email: cleanEmail,
-        resetPermissionToken,
-        password: newPassword,
-      });
-      setForgotSuccess("Password reset successfully! You can now sign in.");
-      if (cleanEmail) {
-        setEmail(cleanEmail);
-      }
+      await api.post("/auth/reset-password", { email: forgotEmail.trim(), resetPermissionToken, password: newPassword });
+      setForgotSuccess("Password reset successfully!");
+      if (forgotEmail.trim()) setEmail(forgotEmail.trim());
       setStep(4);
     } catch (err: any) {
       setForgotError(err.response?.data?.error || "Reset failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    } finally { setIsLoading(false); }
   };
 
   const resetForgotState = () => {
-    if (forgotEmail.trim()) {
-      setEmail(forgotEmail.trim());
-    }
-    setForgotMode(false);
-    setStep(1);
-    setForgotEmail("");
-    setOtp("");
-    setResetPermissionToken("");
-    setNewPassword("");
-    setForgotError("");
-    setForgotSuccess("");
+    if (forgotEmail.trim()) setEmail(forgotEmail.trim());
+    setForgotMode(false); setStep(1); setForgotEmail(""); setOtp("");
+    setResetPermissionToken(""); setNewPassword(""); setForgotError(""); setForgotSuccess("");
   };
 
-  const stepIcons = [
-    { icon: KeyRound, label: "Email" },
-    { icon: ShieldCheck, label: "OTP" },
-    { icon: Lock, label: "Password" },
-    { icon: CheckCircle2, label: "Done" },
-  ];
-
-  // Stagger animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const } },
-  };
-
+  // ─── Render ──────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen w-full bg-[#05050f] text-foreground flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Premium background — uniform deep dark */}
-      <FloatingParticles />
+    <div className="min-h-screen w-full bg-[#050510] text-white flex relative overflow-hidden selection:bg-indigo-500/30">
+      <AmbientBg />
 
-      {/* Subtle grid overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.012] pointer-events-none"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px',
-        }}
-      />
+      {/* ── LEFT — Branding Panel (desktop) ── */}
+      <div className="hidden lg:flex flex-col justify-between w-[420px] xl:w-[480px] shrink-0 relative z-10 p-10 border-r border-white/[0.06]">
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="absolute inset-0 bg-indigo-500/50 rounded-2xl blur-xl scale-150" />
+            <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-xl shadow-indigo-600/30 border border-white/20">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+          </div>
+          <div>
+            <span className="font-extrabold text-xl text-white tracking-tight">Nexora</span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-widest">All systems operational</span>
+            </div>
+          </div>
+        </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-md relative z-10"
-      >
-        <Card className="glass-glow-card rounded-2xl overflow-hidden">
-          {!forgotMode ? (
-            // ─── LOGIN CARD CONTENT ───
-            <>
-              <CardHeader className="text-center space-y-3 pt-8 pb-2">
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="space-y-3"
-                >
-                  {/* Logo */}
-                  <motion.div variants={itemVariants} className="flex justify-center">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-indigo-500/20 rounded-2xl blur-xl scale-150" />
-                      <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-600/25">
-                        <Sparkles className="h-7 w-7 text-white" />
-                      </div>
-                    </div>
-                  </motion.div>
+        {/* Hero copy */}
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+              <Zap className="h-3 w-3" />
+              Your AI-Powered Workspace
+            </div>
+            <h1 className="text-4xl xl:text-5xl font-black leading-tight">
+              <span className="text-white">Intelligence,</span>
+              <br />
+              <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
+                Automated.
+              </span>
+            </h1>
+            <p className="text-zinc-400 text-base leading-relaxed">
+              11 autonomous AI agents that handle travel, stocks, career growth, research, and business automation — so you don't have to.
+            </p>
+          </div>
 
-                  {/* Title */}
-                  <motion.div variants={itemVariants}>
-                    <CardTitle className="text-3xl font-bold tracking-tight gradient-text pb-1">
-                      Welcome back
-                    </CardTitle>
-                  </motion.div>
+          {/* Feature list */}
+          <div className="space-y-3">
+            {[
+              { icon: "🚀", text: "Deploy AI agents in seconds" },
+              { icon: "📊", text: "Live stock intelligence & signals" },
+              { icon: "✈️", text: "Multi-modal travel & booking AI" },
+              { icon: "💬", text: "WhatsApp bot automation suite" },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + i * 0.08 }}
+                className="flex items-center gap-3"
+              >
+                <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-sm shrink-0">
+                  {item.icon}
+                </div>
+                <span className="text-zinc-300 text-sm">{item.text}</span>
+              </motion.div>
+            ))}
+          </div>
 
-                  <motion.div variants={itemVariants}>
-                    <CardDescription className="text-zinc-400 text-sm leading-relaxed">
-                      Sign in to access your AI agent control center
-                    </CardDescription>
-                  </motion.div>
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-3 pt-2">
+            {STATS.map((stat) => (
+              <div key={stat.label} className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center">
+                <div className="text-xl font-black text-white">{stat.value}</div>
+                <div className="text-[10px] text-zinc-500 mt-0.5 font-medium">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-                  {/* Powered by badge & Active User Type indicator */}
-                  <motion.div variants={itemVariants} className="flex justify-center items-center gap-2">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/[0.08] border border-indigo-500/15 text-[10px] font-medium text-indigo-300/80">
-                      <Zap className="h-3 w-3" />
-                      <span>Powered by Nexora Intelligence Engine</span>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              </CardHeader>
+        {/* Footer trust marks */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-zinc-500 text-xs">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+            <span>Enterprise-grade security · JWT · AES-256</span>
+          </div>
+          <div className="flex -space-x-2">
+            {["A","B","C","D"].map((l) => (
+              <div key={l} className="w-7 h-7 rounded-full border-2 border-zinc-900 bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-[9px] font-bold text-white">
+                {l}
+              </div>
+            ))}
+            <div className="w-7 h-7 rounded-full border-2 border-zinc-900 bg-zinc-800 flex items-center justify-center text-[9px] font-semibold text-zinc-300 ml-1">
+              +2k
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <form onSubmit={handleLogin}>
-                <CardContent className="space-y-4 px-7 pt-2">
-                  <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="space-y-4"
+      {/* ── RIGHT — Form Panel ── */}
+      <div className="flex-1 flex flex-col items-center justify-center p-5 sm:p-8 relative z-10 overflow-y-auto">
+        {/* Mobile logo */}
+        <div className="flex lg:hidden items-center gap-2.5 mb-8">
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+            <Sparkles className="h-5 w-5 text-white" />
+          </div>
+          <span className="font-extrabold text-xl text-white">Nexora</span>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-[420px]"
+        >
+          <AnimatePresence mode="wait">
+            {forgotMode ? (
+              /* ──── FORGOT PASSWORD FLOW ──── */
+              <motion.div
+                key="forgot"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-5"
+              >
+                {/* Header */}
+                <div className="space-y-1.5">
+                  <button
+                    onClick={resetForgotState}
+                    className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5 mb-3"
                   >
-                    {/* User Type Selection Tabs */}
-                    <motion.div variants={itemVariants} className="space-y-2">
-                      <div className="flex justify-between items-center px-0.5">
-                        <Label className="text-zinc-300 text-xs font-semibold tracking-wide uppercase">
-                          Account User Type
-                        </Label>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium transition-all ${activeUserType.badgeClass}`}>
-                          {activeUserType.badge}
-                        </span>
-                      </div>
+                    ← Back to sign in
+                  </button>
+                  <h2 className="text-2xl font-bold text-white">Reset password</h2>
+                  <p className="text-sm text-zinc-400">
+                    {step === 1 && "Enter your email to receive a one-time password."}
+                    {step === 2 && "We sent a 6-digit code to your email."}
+                    {step === 3 && "Create a strong new password."}
+                    {step === 4 && "You're all set! Sign in with your new password."}
+                  </p>
+                </div>
 
-                      <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md">
-                        {USER_TYPES.map((t) => {
-                          const isSelected = userType === t.id;
-                          const IconComponent = t.id === "user" ? User : t.id === "business" ? Briefcase : Terminal;
-                          return (
-                            <button
-                              key={t.id}
-                              type="button"
-                              onClick={() => setUserType(t.id)}
-                              className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all duration-200 cursor-pointer ${
-                                isSelected
-                                  ? t.borderActive
-                                  : "border-transparent bg-white/[0.02] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.05]"
-                              }`}
-                            >
-                              <IconComponent className={`h-4 w-4 mb-1 ${isSelected ? "text-white" : "text-zinc-400"}`} />
-                              <span className="text-[11px] font-semibold leading-tight">{t.title.split(" ")[0]}</span>
-                              <span className="text-[9px] text-zinc-400 truncate max-w-full">{t.subtitle}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
+                {/* Step progress */}
+                <div className="flex items-center gap-1.5">
+                  {[1, 2, 3, 4].map((s) => (
+                    <div key={s} className={`h-1 flex-1 rounded-full transition-all duration-500 ${step >= s ? "bg-indigo-500" : "bg-white/10"}`} />
+                  ))}
+                </div>
 
-                      <div className="flex items-center justify-between px-1 pt-0.5">
-                        <p className="text-[11px] text-zinc-400 leading-snug">
-                          {activeUserType.description}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => handleQuickFillDemo(userType)}
-                          className="text-[10px] text-indigo-400 hover:text-indigo-300 font-medium underline shrink-0 ml-2 bg-transparent border-0 cursor-pointer transition-colors"
-                        >
-                          Auto-fill demo
-                        </button>
-                      </div>
-                    </motion.div>
-
-                    {error && (
-                      <motion.div variants={itemVariants}>
-                        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-400 flex items-start gap-2">
-                          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                          <span>{error}</span>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    <motion.div variants={itemVariants} className="space-y-1.5">
-                      <Label htmlFor="email" className="text-zinc-300 text-xs font-semibold tracking-wide uppercase">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder={activeUserType.demoEmail}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="bg-white/[0.03] border-white/10 text-white placeholder-zinc-600 h-11 rounded-xl input-focus-glow transition-all duration-200"
-                      />
-                    </motion.div>
-                    <motion.div variants={itemVariants} className="space-y-1.5">
-                      <div className="flex justify-between items-center">
-                        <Label htmlFor="password" className="text-zinc-300 text-xs font-semibold tracking-wide uppercase">Password</Label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setForgotMode(true);
-                            setStep(1);
-                            setForgotError("");
-                            setForgotSuccess("");
-                          }}
-                          className="text-[11px] text-indigo-400 hover:text-indigo-300 hover:underline bg-transparent border-0 cursor-pointer transition-colors"
-                        >
-                          Forgot password?
-                        </button>
-                      </div>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="bg-white/[0.03] border-white/10 text-white placeholder-zinc-600 h-11 rounded-xl input-focus-glow transition-all duration-200"
-                      />
-                    </motion.div>
-                  </motion.div>
-                </CardContent>
-
-                <CardFooter className="flex flex-col gap-4 px-7 pb-8 pt-2">
+                {/* Error / Success */}
+                {(forgotError || forgotSuccess) && (
                   <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="w-full space-y-4"
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex items-start gap-3 p-3.5 rounded-xl border text-sm ${forgotError ? "bg-rose-500/10 border-rose-500/20 text-rose-300" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"}`}
                   >
-                    <motion.div variants={itemVariants}>
-                      <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className={`w-full h-11 bg-gradient-to-r ${activeUserType.gradient} text-white shadow-xl ${activeUserType.glowColor} font-semibold cursor-pointer rounded-xl btn-premium text-sm tracking-wide transition-all duration-300`}
-                      >
-                        {isLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-white mr-2" />
-                        ) : (
-                          <>
-                            Sign In as {activeUserType.title} <ArrowRight className="h-4 w-4 ml-2" />
-                          </>
-                        )}
-                      </Button>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="relative w-full flex items-center justify-center my-1">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-white/[0.06]" />
-                      </div>
-                      <span className="relative px-4 text-[10px] text-zinc-600 uppercase tracking-widest bg-[#0a0a1a]">
-                        Or continue with
-                      </span>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 w-full">
-                      <div className="relative group">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => handleOAuthLogin("google")}
-                          disabled={isLoading}
-                          className="w-full bg-white/[0.02] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:border-white/15 font-semibold text-xs py-2.5 cursor-pointer rounded-xl transition-all duration-200"
-                        >
-                          <svg className="h-4 w-4 mr-2 shrink-0" viewBox="0 0 24 24">
-                            <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.48 15.01.5 12 .5 7.37.5 3.42 3.16 1.5 7.03l3.87 3c.92-2.75 3.51-4.99 6.63-4.99z" />
-                            <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.43h6.43c-.28 1.47-1.11 2.71-2.36 3.55l3.66 2.84c2.14-1.97 3.39-4.88 3.39-8.48z" />
-                            <path fill="#FBBC05" d="M5.37 14.51c-.24-.72-.37-1.49-.37-2.29s.13-1.57.37-2.29L1.5 6.93C.54 8.87 0 11.06 0 13.38s.54 4.51 1.5 6.45l3.87-3.32z" />
-                            <path fill="#34A853" d="M12 23.5c3.24 0 5.97-1.08 7.96-2.91l-3.66-2.84c-1.01.68-2.31 1.09-3.96 1.09-3.12 0-5.71-2.24-6.63-4.99L1.5 17.17c1.92 3.87 5.87 6.33 10.5 6.33z" />
-                          </svg>
-                          Google
-                        </Button>
-                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] bg-zinc-800 text-zinc-300 rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                          Demo mode
-                        </span>
-                      </div>
-                      <div className="relative group">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => handleOAuthLogin("github")}
-                          disabled={isLoading}
-                          className="w-full bg-white/[0.02] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:border-white/15 font-semibold text-xs py-2.5 cursor-pointer rounded-xl transition-all duration-200"
-                        >
-                          <svg className="h-4 w-4 mr-2 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                            <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z" />
-                          </svg>
-                          GitHub
-                        </Button>
-                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] bg-zinc-800 text-zinc-300 rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                          Demo mode
-                        </span>
-                      </div>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="text-xs text-center text-zinc-500 mt-2">
-                      Don&apos;t have an account?{" "}
-                      <Link href="/register" className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors font-medium">
-                        Create one free
-                      </Link>
-                    </motion.div>
-                  </motion.div>
-                </CardFooter>
-              </form>
-            </>
-          ) : (
-            // ─── FORGOT PASSWORD OTP WIZARD ───
-            <>
-              <CardHeader className="text-center space-y-3 pt-8 pb-2">
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="space-y-3"
-                >
-                  <motion.div variants={itemVariants} className="flex justify-center">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-violet-500/20 rounded-2xl blur-xl scale-150" />
-                      <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 via-indigo-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-violet-600/25">
-                        <Lock className="h-6 w-6 text-white" />
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <CardTitle className="text-2xl font-bold tracking-tight gradient-text pb-1">
-                      {step === 1 ? "Recover Password" : step === 2 ? "Enter OTP" : step === 3 ? "New Password" : "All Set!"}
-                    </CardTitle>
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <CardDescription className="text-zinc-400 text-sm leading-relaxed">
-                      {step === 1
-                        ? "Enter your email and we\u2019ll send you a 6-digit verification code."
-                        : step === 2
-                          ? "Enter the 6-digit OTP sent to your email."
-                          : step === 3
-                            ? "Choose a strong new password for your account."
-                            : "Your password has been successfully updated."}
-                    </CardDescription>
-                  </motion.div>
-
-                  {/* Step progress indicator */}
-                  <motion.div variants={itemVariants} className="flex items-center justify-center gap-1.5 pt-2">
-                    {stepIcons.map((s, i) => {
-                      const Icon = s.icon;
-                      const isActive = step === i + 1;
-                      const isDone = step > i + 1;
-                      return (
-                        <React.Fragment key={i}>
-                          {i > 0 && (
-                            <div className={`w-8 h-[2px] rounded-full ${isDone ? "bg-indigo-500" : "bg-zinc-800"} transition-colors duration-300`} />
-                          )}
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs transition-all duration-300 ${isDone
-                                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
-                                : isActive
-                                  ? "bg-indigo-600/20 border border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10"
-                                  : "bg-zinc-900 text-zinc-600 border border-zinc-800"
-                              }`}
-                            title={s.label}
-                          >
-                            <Icon className="h-3.5 w-3.5" />
-                          </div>
-                        </React.Fragment>
-                      );
-                    })}
-                  </motion.div>
-                </motion.div>
-              </CardHeader>
-
-              <CardContent className="space-y-4 px-7">
-                {forgotError && (
-                  <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-400 flex items-start gap-2">
-                      <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span>{forgotError}</span>
-                    </div>
-                  </motion.div>
-                )}
-                {forgotSuccess && (
-                  <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span>{forgotSuccess}</span>
-                    </div>
+                    {forgotError ? <X className="h-4 w-4 mt-0.5 shrink-0" /> : <Check className="h-4 w-4 mt-0.5 shrink-0" />}
+                    <span>{forgotError || forgotSuccess}</span>
                   </motion.div>
                 )}
 
-                {/* Step 1: Enter email */}
+                {/* Step 1 — email */}
                 {step === 1 && (
                   <form onSubmit={handleForgotSubmit} className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="forgot-email" className="text-zinc-300 text-xs font-semibold tracking-wide uppercase">Email Address</Label>
-                      <Input
-                        id="forgot-email"
-                        type="email"
-                        placeholder="your-email@nexora.ai"
-                        value={forgotEmail}
-                        onChange={(e) => setForgotEmail(e.target.value)}
-                        className="bg-white/[0.03] border-white/10 text-white placeholder-zinc-600 h-11 rounded-xl input-focus-glow transition-all duration-200"
-                      />
+                      <Label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Email Address</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 pointer-events-none" />
+                        <Input
+                          type="email"
+                          placeholder="you@example.com"
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          className="pl-10 h-11 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 focus:bg-indigo-500/5 rounded-xl transition-all"
+                          required
+                        />
+                      </div>
                     </div>
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full h-11 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-xl shadow-indigo-600/20 font-semibold cursor-pointer rounded-xl btn-premium"
-                    >
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-white mr-2" /> : "Send OTP"}
+                    <Button type="submit" disabled={isLoading} className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all">
+                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Send OTP <ArrowRight className="h-4 w-4 ml-1" /></>}
                     </Button>
                   </form>
                 )}
 
-                {/* Step 2: Enter OTP */}
+                {/* Step 2 — OTP */}
                 {step === 2 && (
                   <form onSubmit={handleOtpVerify} className="space-y-5">
-                    <div className="space-y-3">
-                      <Label className="text-center block text-zinc-300 text-xs font-semibold tracking-wide uppercase">Enter 6-digit code</Label>
-                      <OtpInput value={otp} onChange={setOtp} />
-                      <p className="text-[11px] text-zinc-500 text-center">
-                        Sent to <span className="text-zinc-300 font-medium">{forgotEmail}</span>
-                      </p>
-                    </div>
-                    <Button
-                      type="submit"
-                      disabled={isLoading || otp.length !== 6}
-                      className="w-full h-11 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-xl shadow-indigo-600/20 font-semibold cursor-pointer rounded-xl btn-premium disabled:opacity-50"
-                    >
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-white mr-2" /> : "Verify OTP"}
+                    <OtpInput value={otp} onChange={setOtp} />
+                    <Button type="submit" disabled={isLoading || otp.length !== 6} className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl">
+                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Verify OTP <ShieldCheck className="h-4 w-4 ml-1" /></>}
                     </Button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOtp("");
-                        setForgotError("");
-                        setForgotSuccess("");
-                        setStep(1);
-                      }}
-                      className="text-xs text-zinc-500 hover:text-indigo-400 hover:underline bg-transparent border-0 cursor-pointer mx-auto block transition-colors"
-                    >
-                      Resend code
-                    </button>
                   </form>
                 )}
 
-                {/* Step 3: Set new password */}
+                {/* Step 3 — new password */}
                 {step === 3 && (
                   <form onSubmit={handleResetSubmit} className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="new-password" className="text-zinc-300 text-xs font-semibold tracking-wide uppercase">New Password</Label>
-                      <Input
-                        id="new-password"
-                        type="password"
-                        placeholder="Strong new password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        className="bg-white/[0.03] border-white/10 text-white placeholder-zinc-600 h-11 rounded-xl input-focus-glow transition-all duration-200"
-                      />
+                      <Label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">New Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                        <Input
+                          type={showNewPassword ? "text" : "password"}
+                          placeholder="Create a strong password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="pl-10 pr-10 h-11 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 rounded-xl transition-all"
+                        />
+                        <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300">
+                          {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                      {newPassword && (
+                        <div className="space-y-1.5 mt-2">
+                          <div className="flex gap-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i < passwordStrength.score ? passwordStrength.color : "bg-white/10"}`} />
+                            ))}
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {passwordStrength.checks.map((c, i) => (
+                              <span key={i} className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 ${c.met ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-white/[0.03] border-white/10 text-zinc-600"}`}>
+                                {c.met ? <Check className="h-2.5 w-2.5" /> : <X className="h-2.5 w-2.5" />}
+                                {c.label}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-
-                    {/* Password Strength Indicator */}
-                    {newPassword.length > 0 && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-2.5">
-                        <div className="flex gap-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < passwordStrength.score ? passwordStrength.color : "bg-zinc-800"
-                                }`}
-                            />
-                          ))}
-                        </div>
-                        <p className="text-[11px] text-zinc-400">
-                          Strength: <span className={`font-semibold ${passwordStrength.score >= 4 ? "text-emerald-400" : passwordStrength.score >= 3 ? "text-yellow-400" : "text-rose-400"
-                            }`}>{passwordStrength.label}</span>
-                        </p>
-                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                          {passwordStrength.checks.map((check) => (
-                            <div key={check.label} className="flex items-center gap-1.5 text-[11px]">
-                              <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] transition-all duration-200 ${check.met ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-900 text-zinc-600"
-                                }`}>
-                                {check.met ? "✓" : "·"}
-                              </div>
-                              <span className={`transition-colors ${check.met ? "text-zinc-300" : "text-zinc-600"}`}>{check.label}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-
-                    <Button
-                      type="submit"
-                      disabled={isLoading || !newPassword}
-                      className="w-full h-11 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-xl shadow-indigo-600/20 font-semibold cursor-pointer rounded-xl btn-premium disabled:opacity-50"
-                    >
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-white mr-2" /> : "Save New Password"}
+                    <Button type="submit" disabled={isLoading} className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl">
+                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Reset Password <Lock className="h-4 w-4 ml-1" /></>}
                     </Button>
                   </form>
                 )}
 
-                {/* Step 4: Success */}
+                {/* Step 4 — success */}
                 {step === 4 && (
-                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                    <Button
-                      onClick={resetForgotState}
-                      className="w-full h-11 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-semibold cursor-pointer rounded-xl btn-premium shadow-xl shadow-emerald-600/20"
-                    >
-                      Go to Sign In
+                  <div className="text-center space-y-4 py-4">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
+                      <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+                    </div>
+                    <p className="text-zinc-300 text-sm">Password updated successfully.</p>
+                    <Button onClick={resetForgotState} className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl">
+                      Sign In Now
                     </Button>
-                  </motion.div>
+                  </div>
                 )}
-              </CardContent>
+              </motion.div>
+            ) : (
+              /* ──── MAIN LOGIN FORM ──── */
+              <motion.div
+                key="login"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                {/* Header */}
+                <div className="space-y-1.5">
+                  <h2 className="text-3xl font-black text-white tracking-tight">Welcome back</h2>
+                  <p className="text-sm text-zinc-400">Sign in to your Nexora workspace</p>
+                </div>
 
-              <CardFooter className="flex flex-col gap-2 px-7 pb-8 pt-0">
-                {step !== 4 && (
-                  <button
-                    type="button"
-                    onClick={resetForgotState}
-                    className="text-xs text-zinc-500 hover:text-indigo-400 hover:underline bg-transparent border-0 cursor-pointer mx-auto mt-2 transition-colors"
+                {/* User type selector */}
+                <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+                  {USER_TYPES.map((type) => {
+                    const Icon = type.icon;
+                    const isActive = userType === type.id;
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => handleQuickFill(type.id)}
+                        className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-center transition-all duration-200 border ${
+                          isActive
+                            ? `${type.activeBg} shadow-lg`
+                            : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]"
+                        }`}
+                      >
+                        <div className={`p-1.5 rounded-lg ${isActive ? `bg-gradient-to-br ${type.gradient} bg-opacity-20` : "bg-white/[0.04]"}`}>
+                          <Icon className={`h-3.5 w-3.5 ${isActive ? type.activeText : "text-zinc-500"}`} />
+                        </div>
+                        <div>
+                          <div className={`text-[11px] font-bold leading-none ${isActive ? "text-white" : "text-zinc-400"}`}>{type.title}</div>
+                          <div className="text-[9px] text-zinc-600 mt-0.5">{type.subtitle}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Error */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, height: 0 }}
+                      animate={{ opacity: 1, y: 0, height: "auto" }}
+                      exit={{ opacity: 0, y: -8, height: 0 }}
+                      className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm"
+                    >
+                      <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                      <span>{error}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Form */}
+                <form onSubmit={handleLogin} className="space-y-4">
+                  {/* Email */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email</Label>
+                    <div className="relative group">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
+                      <Input
+                        id="login-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 h-12 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 focus:bg-indigo-500/[0.04] rounded-xl transition-all text-sm"
+                        required
+                        autoComplete="email"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Password</Label>
+                      <button
+                        type="button"
+                        onClick={() => { setForgotMode(true); setForgotEmail(email); }}
+                        className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                    <div className="relative group">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
+                      <Input
+                        id="login-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10 pr-10 h-12 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 focus:bg-indigo-500/[0.04] rounded-xl transition-all text-sm"
+                        required
+                        autoComplete="current-password"
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors">
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Submit */}
+                  <Button
+                    id="login-submit"
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 transition-all duration-300 text-sm relative overflow-hidden group"
                   >
-                    ← Back to login
+                    <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {isLoading ? (
+                      <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Signing in...</span>
+                    ) : (
+                      <span className="flex items-center gap-2">Sign In <ArrowRight className="h-4 w-4" /></span>
+                    )}
+                  </Button>
+                </form>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-white/[0.07]" />
+                  <span className="text-xs text-zinc-600 font-medium">or continue with</span>
+                  <div className="flex-1 h-px bg-white/[0.07]" />
+                </div>
+
+                {/* OAuth */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => handleOAuthLogin("google")}
+                    disabled={isLoading}
+                    className="flex items-center justify-center gap-2.5 h-11 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-zinc-300 text-sm font-semibold transition-all duration-200 hover:border-white/20"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Google
                   </button>
-                )}
-              </CardFooter>
-            </>
-          )}
-        </Card>
+                  <button
+                    onClick={() => handleOAuthLogin("github")}
+                    disabled={isLoading}
+                    className="flex items-center justify-center gap-2.5 h-11 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-zinc-300 text-sm font-semibold transition-all duration-200 hover:border-white/20"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                    </svg>
+                    GitHub
+                  </button>
+                </div>
 
-        {/* Bottom branding */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="text-center text-[11px] text-zinc-600 mt-6 tracking-wide"
-        >
-          Nexora · Intelligence, Automated
-        </motion.p>
-      </motion.div>
+                {/* Sign up link */}
+                <p className="text-center text-sm text-zinc-500">
+                  New to Nexora?{" "}
+                  <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+                    Create a free account →
+                  </Link>
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
 
-      {/* ─── GOOGLE MAIL OAUTH AUTHENTICATION MODAL ─── */}
+      {/* ── Google OAuth Modal ── */}
       <AnimatePresence>
         {showGoogleModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.94, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 p-6 shadow-2xl"
+              exit={{ opacity: 0, scale: 0.94, y: 12 }}
+              className="w-full max-w-sm rounded-3xl border border-white/10 bg-zinc-950 p-6 shadow-2xl space-y-5"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                    <svg className="h-5 w-5" viewBox="0 0 24 24">
-                      <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.48 15.01.5 12 .5 7.37.5 3.42 3.16 1.5 7.03l3.87 3c.92-2.75 3.51-4.99 6.63-4.99z" />
-                      <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.43h6.43c-.28 1.47-1.11 2.71-2.36 3.55l3.66 2.84c2.14-1.97 3.39-4.88 3.39-8.48z" />
-                      <path fill="#FBBC05" d="M5.37 14.51c-.24-.72-.37-1.49-.37-2.29s.13-1.57.37-2.29L1.5 6.93C.54 8.87 0 11.06 0 13.38s.54 4.51 1.5 6.45l3.87-3.32z" />
-                      <path fill="#34A853" d="M12 23.5c3.24 0 5.97-1.08 7.96-2.91l-3.66-2.84c-1.01.68-2.31 1.09-3.96 1.09-3.12 0-5.71-2.24-6.63-4.99L1.5 17.17c1.92 3.87 5.87 6.33 10.5 6.33z" />
+                  <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base">Sign in with Google Mail</h3>
-                    <p className="text-xs text-zinc-400">Choose a Google Account or enter your Google Mail</p>
+                    <div className="text-sm font-bold text-white">Sign in with Google</div>
+                    <div className="text-xs text-zinc-500">Enter your Gmail address</div>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowGoogleModal(false)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
-                >
+                <button onClick={() => setShowGoogleModal(false)} className="text-zinc-600 hover:text-white transition-colors">
                   <X className="h-4 w-4" />
                 </button>
               </div>
-
-              {/* Quick Select Preset Google Accounts */}
-              <div className="space-y-2 mb-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">Select Account</p>
-                {[
-                  { name: "Venkat Kumar", email: "venkatkumar4396@gmail.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=venkatkumar" },
-                  { name: "Alex Developer", email: "alex.dev@gmail.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alexdev" },
-                  { name: "Sarah Tech Lead", email: "sarah.tech@gmail.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sarahtech" },
-                ].map((acc) => (
-                  <button
-                    key={acc.email}
-                    type="button"
-                    onClick={() => handleGoogleAuthSubmit(acc.email, acc.name, "google")}
-                    className="w-full flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/15 transition-all text-left group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {/* Avatar */}
-                      <img src={acc.avatar} alt={acc.name} className="w-8 h-8 rounded-full bg-white/10 shrink-0" />
-                      <div className="min-w-0">
-                        <div className="text-xs font-semibold text-white group-hover:text-indigo-300 transition-colors truncate">{acc.name}</div>
-                        <div className="text-[11px] text-zinc-400 truncate">{acc.email}</div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md font-medium shrink-0">
-                      1-Tap Auth
-                    </span>
-                  </button>
-                ))}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Gmail Address</Label>
+                <Input
+                  type="email"
+                  placeholder="yourname@gmail.com"
+                  value={customGoogleEmail}
+                  onChange={(e) => setCustomGoogleEmail(e.target.value)}
+                  className="h-11 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 rounded-xl focus:border-indigo-500/60"
+                  autoFocus
+                  onKeyDown={(e) => { if (e.key === "Enter") handleGoogleAuthSubmit(customGoogleEmail); }}
+                />
               </div>
-
-              {/* Custom Google Email Entry */}
-              <div className="border-t border-white/10 pt-4 space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Or use another Google Mail</p>
-                <div className="flex gap-2">
-                  <Input
-                    type="email"
-                    placeholder="you.name@gmail.com"
-                    value={customGoogleEmail}
-                    onChange={(e) => setCustomGoogleEmail(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder-zinc-500 text-xs h-10"
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => handleGoogleAuthSubmit(customGoogleEmail, undefined, "google")}
-                    disabled={!customGoogleEmail.trim()}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 h-10 shrink-0 font-medium"
-                  >
-                    Authenticate
-                  </Button>
-                </div>
-              </div>
-
-              {/* Footer Security Badge */}
-              <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-zinc-500">
-                <span className="flex items-center gap-1 text-emerald-400">
-                  <ShieldCheck className="h-3 w-3" /> Encrypted SSL OAuth 2.0
-                </span>
-                <span>Powered by Nexora Auth</span>
+              <div className="flex gap-2.5">
+                <Button variant="outline" onClick={() => setShowGoogleModal(false)} className="flex-1 h-10 border-white/10 text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl text-sm">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleGoogleAuthSubmit(customGoogleEmail)}
+                  disabled={!customGoogleEmail.trim() || isLoading}
+                  className="flex-1 h-10 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-sm"
+                >
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
+                </Button>
               </div>
             </motion.div>
           </div>
