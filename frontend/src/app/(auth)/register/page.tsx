@@ -294,7 +294,7 @@ export default function RegisterPage() {
       const cleanEmail = email.trim().toLowerCase();
 
       const { data } = await api.post("/auth/register", { name: cleanName, email: cleanEmail, password });
-      
+
       if (typeof window !== "undefined") {
         localStorage.setItem("nexora_logged_in", "true");
         localStorage.setItem("nexora_user_persona", selectedPersona);
@@ -403,11 +403,10 @@ export default function RegisterPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all ${
-                    activeTab === tab.id
+                  className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all ${activeTab === tab.id
                       ? "bg-indigo-600/30 text-white border border-indigo-500/40 shadow-lg shadow-indigo-600/20"
                       : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
-                  }`}
+                    }`}
                 >
                   {tab.title}
                 </button>
@@ -499,7 +498,7 @@ export default function RegisterPage() {
           className="w-full max-w-xl"
         >
           <div className="glass-glow-card rounded-3xl overflow-hidden p-6 md:p-8 space-y-6 border border-white/10 bg-zinc-950/70 backdrop-blur-xl shadow-2xl relative">
-            
+
             {/* Step Wizard Progress Bar */}
             {step !== 3 && (
               <div className="space-y-2">
@@ -595,11 +594,10 @@ export default function RegisterPage() {
                           type="button"
                           key={persona.id}
                           onClick={() => setSelectedPersona(persona.id)}
-                          className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden flex items-start gap-3 ${
-                            isSelected
+                          className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden flex items-start gap-3 ${isSelected
                               ? `bg-indigo-600/15 border-indigo-500/60 shadow-lg shadow-indigo-600/15 ring-1 ring-indigo-500/50`
                               : "bg-white/[0.02] border-white/[0.07] hover:bg-white/[0.05] hover:border-white/20"
-                          }`}
+                            }`}
                         >
                           <div className={`p-2 rounded-xl bg-white/[0.05] border border-white/10 shrink-0 ${isSelected ? "text-indigo-400 bg-indigo-500/20" : "text-zinc-400"}`}>
                             <Icon className="h-4 w-4" />
@@ -727,9 +725,8 @@ export default function RegisterPage() {
                         {Array.from({ length: 5 }).map((_, i) => (
                           <div
                             key={i}
-                            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                              i < strength.score ? strength.color : "bg-zinc-800"
-                            }`}
+                            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < strength.score ? strength.color : "bg-zinc-800"
+                              }`}
                           />
                         ))}
                       </div>
@@ -771,11 +768,10 @@ export default function RegisterPage() {
                           type="button"
                           key={agent.id}
                           onClick={() => toggleAgentFocus(agent.id)}
-                          className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between ${
-                            isChecked
+                          className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between ${isChecked
                               ? "bg-indigo-600/15 border-indigo-500/40 text-white shadow-sm"
                               : "bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-2.5">
                             <div className={`p-1.5 rounded-lg ${isChecked ? "bg-indigo-500/20 text-indigo-400" : "bg-white/[0.05] text-zinc-500"}`}>
@@ -884,7 +880,7 @@ export default function RegisterPage() {
       {/* Brand Badge */}
       <div className="fixed bottom-4 right-4 z-50">
         <span className="text-[11px] font-semibold text-zinc-400 bg-zinc-950/80 backdrop-blur-md border border-white/10 rounded-full px-3 py-1.5 shadow-xl">
-          Kumar Productions
+
         </span>
       </div>
 
