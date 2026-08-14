@@ -231,8 +231,16 @@ export default function LoginPage() {
 
   const handleQuickFill = (typeId: UserTypeId) => {
     setUserType(typeId);
-    const t = USER_TYPES.find((x) => x.id === typeId);
-    if (t) { setEmail(t.demoEmail); setPassword("Password123!"); }
+    if (typeId === "developer") {
+      setEmail("kumar");
+      setPassword("kumar@4396");
+    } else {
+      const t = USER_TYPES.find((x) => x.id === typeId);
+      if (t) {
+        setEmail(t.demoEmail);
+        setPassword("Password123!");
+      }
+    }
   };
 
   const handleForgotSubmit = async (e: React.FormEvent) => {

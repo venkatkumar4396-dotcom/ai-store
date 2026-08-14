@@ -134,19 +134,76 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
 }
 
 /**
+ * Ensure root admin kumar exists in database
+ */
+export async function ensureAdminSeeded() {
+  try {
+    const adminExists = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: 'kumar@nexora.ai' },
+          { name: { equals: 'kumar', mode: 'insensitive' } },
+        ],
+      },
+    });
+
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash('kumar@4396', salt);
+
+    if (!adminExists) {
+      await prisma.user.create({
+        data: {
+          email: 'kumar@nexora.ai',
+          name: 'kumar',
+          passwordHash,
+          role: 'admin',
+          provider: 'credentials',
+          preferences: JSON.stringify({ theme: 'dark' }),
+        },
+      });
+      logger.info('Auto-seeded root admin account: kumar (kumar@nexora.ai)');
+    } else {
+      // Ensure role is admin and password is up to date
+      await prisma.user.update({
+        where: { id: adminExists.id },
+        data: {
+          role: 'admin',
+          passwordHash,
+        },
+      });
+    }
+  } catch (err: any) {
+    logger.warn(`Failed to auto-seed admin: ${err.message}`);
+  }
+}
+
+/**
  * Login an existing user — with failed attempt tracking and account lockout
  */
 export async function login(input: LoginInput): Promise<AuthResponse> {
   const { email, password } = input;
   const cleanEmail = email.toLowerCase().trim();
 
-  // Find user
-  const user = await prisma.user.findUnique({
-    where: { email: cleanEmail },
+  // If logging in as admin kumar, guarantee admin exists
+  if (cleanEmail === 'kumar' || cleanEmail === 'kumar@nexora.ai' || cleanEmail === 'admin') {
+    await ensureAdminSeeded();
+  }
+
+  // Find user by email or name/username
+  let user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: cleanEmail },
+        { email: `${cleanEmail}@nexora.ai` },
+        { email: `${cleanEmail}@gmail.com` },
+        { name: { equals: cleanEmail, mode: 'insensitive' } },
+        { name: { equals: email.trim(), mode: 'insensitive' } },
+      ],
+    },
   });
 
   if (!user) {
-    throw createError('Invalid email or password', 401);
+    throw createError('Invalid email/username or password', 401);
   }
 
   // Check account lockout

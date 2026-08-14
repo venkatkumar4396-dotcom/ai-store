@@ -55,6 +55,10 @@ initWebSocket(httpServer);
 import { whatsappService } from './services/whatsapp.service';
 whatsappService.restoreActiveSessions();
 
+// Auto-seed root admin account (kumar / kumar@4396)
+import { ensureAdminSeeded } from './services/auth.service';
+ensureAdminSeeded();
+
 import { FallbackProvider } from './services/ai/fallback';
 import { PollinationsProvider } from './services/ai/pollinations';
 
