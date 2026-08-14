@@ -73,26 +73,10 @@ try {
 // ─── Middleware ─────────────────────────────────────────────
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) {
-      callback(null, true);
-      return;
-    }
-    const isAllowed = 
-      env.NODE_ENV === 'development' ||
-      origin === env.CORS_ORIGIN ||
-      origin.includes('onrender.com') ||
-      origin.includes('localhost') ||
-      origin.includes('127.0.0.1') ||
-      origin.includes('192.168.') ||
-      origin.endsWith('.devtunnels.ms');
-    if (isAllowed) {
-      callback(null, origin);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'x-auth-token'],
 }));
 
 app.use(express.json({ limit: '10mb' }));
