@@ -438,15 +438,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Premium background */}
+    <div className="min-h-screen w-full bg-[#05050f] text-foreground flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Premium background — uniform deep dark */}
       <FloatingParticles />
 
-      {/* Grid pattern overlay */}
+      {/* Subtle grid overlay */}
       <div
-        className="absolute inset-0 opacity-[0.015] pointer-events-none"
+        className="absolute inset-0 opacity-[0.012] pointer-events-none"
         style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)`,
           backgroundSize: '60px 60px',
         }}
       />

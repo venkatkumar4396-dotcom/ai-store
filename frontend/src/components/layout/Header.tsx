@@ -130,25 +130,23 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-zinc-200/10 dark:border-white/[0.06] bg-zinc-950/60 backdrop-blur-xl px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 text-zinc-100">
+    <header className="h-14 border-b border-zinc-200/10 dark:border-white/[0.06] bg-zinc-950/80 backdrop-blur-2xl px-3 md:px-6 flex items-center justify-between sticky top-0 z-30 text-zinc-100 shrink-0">
       {/* Left: Mobile nav trigger + Brand / Desktop: Breadcrumbs */}
       <div className="flex items-center gap-3">
         {/* Mobile nav trigger & Brand */}
-        <div className="flex items-center gap-2.5 md:hidden">
+        <div className="flex items-center gap-2 md:hidden">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsMobileNavOpen(true)}
-            className="text-zinc-400 hover:text-zinc-100 h-8 w-8"
+            className="text-zinc-400 hover:text-zinc-100 h-9 w-9 rounded-xl hover:bg-white/[0.06]"
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center font-bold text-[#ffffff] text-xs shadow-lg shadow-indigo-500/20">
-              N
-            </div>
-            <span className="font-semibold text-md">Nexora</span>
-          </div>
+          {/* Current page name on mobile */}
+          <span className="font-semibold text-sm text-white truncate max-w-[140px]">
+            {breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].label : "Nexora"}
+          </span>
         </div>
 
         {/* Desktop Breadcrumbs */}

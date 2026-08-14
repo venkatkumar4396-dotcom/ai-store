@@ -848,3 +848,59 @@ body {
     transform: translateY(0);
   }
 }
+
+/* ═══════════ AUTH PAGE — UNIFORM DARK BACKGROUND ═══════════ */
+
+/* Force body to stay dark on auth pages so no bright patches appear */
+body:has(.auth-page-root) {
+  background-color: #05050f !important;
+}
+
+.auth-page-root {
+  background-color: #05050f;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+/* On mobile, the glass card should be more readable */
+@media (max-width: 640px) {
+  .glass-glow-card {
+    border-radius: 1.25rem;
+    background: rgba(7, 7, 18, 0.85) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+  }
+}
+
+/* ═══════════ MOBILE BOTTOM NAV SAFE AREA ═══════════ */
+
+/* Ensure content doesn't go under iOS home indicator */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-safe-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
+  }
+}
+
+/* ═══════════ MOBILE CARD LAYOUT FIXES ═══════════ */
+
+@media (max-width: 640px) {
+  /* Prevent cards from being too small on mobile */
+  .grid-cols-2 {
+    gap: 0.5rem;
+  }
+  /* Improve touch targets */
+  button, a, [role="button"] {
+    min-height: 36px;
+  }
+}
+
+/* ═══════════ MOBILE HEADER IMPROVEMENTS ═══════════ */
+
+@media (max-width: 768px) {
+  header {
+    height: 3.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+}
