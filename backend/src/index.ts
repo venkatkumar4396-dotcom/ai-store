@@ -60,12 +60,13 @@ import { PollinationsProvider } from './services/ai/pollinations';
 
 // Register AI Providers
 try {
-  aiRouter.registerProvider(new KimiProvider(), true);      // Kimi (Moonshot AI) is primary
-  aiRouter.registerProvider(new GeminiProvider());          // Gemini is secondary
-  aiRouter.registerProvider(new PollinationsProvider());    // Pollinations AI (Zero-config free real online LLM API)
-  aiRouter.registerProvider(new OllamaProvider());          // Ollama is local fallback
-  aiRouter.registerProvider(new FallbackProvider());        // Rules-engine safety net
-  logger.info('AI Providers (Kimi, Gemini, Pollinations, Ollama, Fallback) successfully registered in Router.');
+  const hasGemini = !!env.GEMINI_API_KEY;
+  aiRouter.registerProvider(new GeminiProvider(), hasGemini);  // Google Gemini (Primary when API key is provided)
+  aiRouter.registerProvider(new KimiProvider(), !hasGemini);   // Moonshot Kimi AI
+  aiRouter.registerProvider(new PollinationsProvider());      // Pollinations AI (Zero-config free online LLM)
+  aiRouter.registerProvider(new OllamaProvider());            // Ollama local fallback
+  aiRouter.registerProvider(new FallbackProvider());          // Rules-engine safety net
+  logger.info('AI Providers (Gemini, Kimi, Pollinations, Ollama, Fallback) successfully registered in Router.');
 } catch (error: any) {
   logger.error(`Failed to register AI Providers: ${error.message}`);
 }
