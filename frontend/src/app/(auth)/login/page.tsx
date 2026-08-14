@@ -409,7 +409,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-[420px]"
+          className="w-full max-w-[440px] bg-[#0b0c1b]/95 border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-indigo-950/50 backdrop-blur-2xl"
         >
           <AnimatePresence mode="wait">
             {forgotMode ? (
@@ -705,9 +705,9 @@ export default function LoginPage() {
                 </div>
 
                 {/* Sign up link */}
-                <p className="text-center text-sm text-zinc-500">
+                <p className="text-center text-sm font-medium text-zinc-300">
                   New to Nexora?{" "}
-                  <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+                  <Link href="/register" className="text-indigo-300 hover:text-white font-bold transition-colors underline decoration-indigo-500/40 underline-offset-4">
                     Create a free account →
                   </Link>
                 </p>

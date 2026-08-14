@@ -141,13 +141,9 @@ export function Sidebar() {
   };
 
   /** Check if a nav item should be visible based on deployment status */
-  const isNavItemVisible = (href: string): boolean => {
-    const requiredBotId = ROUTE_TO_BOT_ID[href];
-    // If not in the map, it's always visible (Dashboard, Bot Store, Settings, AI Playground)
-    if (!requiredBotId) return true;
-    // While loading, hide gated items to avoid flash
-    if (isBotsLoading) return false;
-    return isBotDeployed(requiredBotId);
+  /** All nav items always visible for immediate workspace access */
+  const isNavItemVisible = (_href: string): boolean => {
+    return true;
   };
 
   const handleLogout = async () => {

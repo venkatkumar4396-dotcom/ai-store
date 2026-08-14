@@ -302,7 +302,7 @@ export default function RegisterPage() {
           <span className="font-extrabold text-xl text-white">Nexora</span>
         </div>
 
-        <div className="w-full max-w-[440px]">
+        <div className="w-full max-w-[460px] bg-[#0b0c1b]/95 border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-indigo-950/50 backdrop-blur-2xl">
           <AnimatePresence mode="wait">
             {/* ───────────── STEP 1 — Identity ───────────── */}
             {step === 1 && (
@@ -318,17 +318,17 @@ export default function RegisterPage() {
                   <StepBar current={1} total={2} />
                   <div className="flex items-center justify-between pt-1">
                     <h2 className="text-2xl font-black text-white tracking-tight">Create your account</h2>
-                    <span className="text-xs text-zinc-600 font-medium">Step 1 / 2</span>
+                    <span className="text-xs text-zinc-300 font-semibold">Step 1 / 2</span>
                   </div>
-                  <p className="text-sm text-zinc-400">Tell us who you are to personalise your workspace.</p>
+                  <p className="text-sm font-medium text-zinc-200">Tell us who you are to personalise your workspace.</p>
                 </div>
 
                 {/* Error */}
                 <AnimatePresence>
                   {error && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                      className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm">
-                      <X className="h-4 w-4 mt-0.5 shrink-0" /><span>{error}</span>
+                      className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-sm font-medium shadow-md">
+                      <X className="h-4 w-4 mt-0.5 shrink-0 text-rose-400" /><span>{error}</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -336,7 +336,7 @@ export default function RegisterPage() {
                 {/* OAuth buttons */}
                 <div className="grid grid-cols-2 gap-3">
                   <button onClick={() => handleOAuth("google")} disabled={isLoading}
-                    className="flex items-center justify-center gap-2.5 h-11 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-zinc-300 text-sm font-semibold transition-all hover:border-white/20">
+                    className="flex items-center justify-center gap-2.5 h-11 rounded-xl border border-white/20 bg-zinc-900/90 hover:bg-white/[0.08] text-white text-sm font-semibold transition-all hover:border-white/40">
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -346,7 +346,7 @@ export default function RegisterPage() {
                     Google
                   </button>
                   <button onClick={() => handleOAuth("github")} disabled={isLoading}
-                    className="flex items-center justify-center gap-2.5 h-11 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-zinc-300 text-sm font-semibold transition-all hover:border-white/20">
+                    className="flex items-center justify-center gap-2.5 h-11 rounded-xl border border-white/20 bg-zinc-900/90 hover:bg-white/[0.08] text-white text-sm font-semibold transition-all hover:border-white/40">
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                     </svg>
@@ -356,33 +356,33 @@ export default function RegisterPage() {
 
                 {/* Divider */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-white/[0.07]" />
-                  <span className="text-xs text-zinc-600 font-medium">or sign up with email</span>
-                  <div className="flex-1 h-px bg-white/[0.07]" />
+                  <div className="flex-1 h-px bg-white/20" />
+                  <span className="text-xs text-zinc-300 font-semibold">or sign up with email</span>
+                  <div className="flex-1 h-px bg-white/20" />
                 </div>
 
                 {/* Form */}
                 <form onSubmit={handleStep1} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Full Name</Label>
+                    <Label className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Full Name</Label>
                     <div className="relative group">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
                       <Input id="reg-name" type="text" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)}
-                        className="pl-10 h-12 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 focus:bg-indigo-500/[0.04] rounded-xl transition-all text-sm" required />
+                        className="pl-10 h-12 bg-zinc-900/90 border-white/20 text-white placeholder:text-zinc-500 focus:border-indigo-400 focus:bg-zinc-900 rounded-xl transition-all text-sm font-medium" required />
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email Address</Label>
+                    <Label className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Email Address</Label>
                     <div className="relative group">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
                       <Input id="reg-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 h-12 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 focus:bg-indigo-500/[0.04] rounded-xl transition-all text-sm" required />
+                        className="pl-10 h-12 bg-zinc-900/90 border-white/20 text-white placeholder:text-zinc-500 focus:border-indigo-400 focus:bg-zinc-900 rounded-xl transition-all text-sm font-medium" required />
                     </div>
                   </div>
 
                   {/* Persona selector */}
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">I am a...</Label>
+                    <Label className="text-xs font-bold text-zinc-200 uppercase tracking-wider">I am a...</Label>
                     <div className="grid grid-cols-2 gap-2">
                       {PERSONAS.map((p) => {
                         const Icon = p.icon;
@@ -394,15 +394,15 @@ export default function RegisterPage() {
                             onClick={() => setSelectedPersona(p.id)}
                             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left text-sm transition-all duration-200 ${
                               isSelected
-                                ? `${p.bg} ${p.border} ring-1 ${p.ring}`
-                                : "bg-white/[0.02] border-white/[0.07] hover:bg-white/[0.04] hover:border-white/15"
+                                ? `${p.bg} ${p.border} ring-1 ${p.ring} shadow-md`
+                                : "bg-zinc-900/80 border-white/10 hover:bg-zinc-800/80 hover:border-white/20"
                             }`}
                           >
-                            <div className={`p-1.5 rounded-lg ${isSelected ? p.bg : "bg-white/[0.04]"}`}>
-                              <Icon className={`h-3.5 w-3.5 ${isSelected ? p.color : "text-zinc-500"}`} />
+                            <div className={`p-1.5 rounded-lg ${isSelected ? p.bg : "bg-white/[0.06]"}`}>
+                              <Icon className={`h-4 w-4 ${isSelected ? p.color : "text-zinc-300"}`} />
                             </div>
-                            <span className={`font-medium text-xs ${isSelected ? "text-white" : "text-zinc-400"}`}>{p.title}</span>
-                            {isSelected && <Check className={`h-3 w-3 ml-auto shrink-0 ${p.color}`} />}
+                            <span className={`font-semibold text-xs ${isSelected ? "text-white" : "text-zinc-200"}`}>{p.title}</span>
+                            {isSelected && <Check className={`h-3.5 w-3.5 ml-auto shrink-0 ${p.color}`} />}
                           </button>
                         );
                       })}
@@ -410,14 +410,14 @@ export default function RegisterPage() {
                   </div>
 
                   <Button id="reg-step1-next" type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 transition-all text-sm">
+                    className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all text-sm">
                     Continue <ArrowRight className="h-4 w-4 ml-1" />
                   </Button>
                 </form>
 
-                <p className="text-center text-sm text-zinc-500">
+                <p className="text-center text-sm font-medium text-zinc-300">
                   Already have an account?{" "}
-                  <Link href="/login" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">Sign in →</Link>
+                  <Link href="/login" className="text-indigo-300 hover:text-white font-bold transition-colors underline decoration-indigo-500/40 underline-offset-4">Sign in →</Link>
                 </p>
               </motion.div>
             )}

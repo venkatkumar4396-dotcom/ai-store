@@ -92,11 +92,9 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
     return parts[0].slice(0, 2).toUpperCase();
   }, [profile.name]);
 
-  const isInstalled = (href: string): boolean => {
-    const requiredBotId = ROUTE_TO_BOT_ID[href];
-    if (!requiredBotId) return true;
-    if (isBotsLoading) return false;
-    return isBotDeployed(requiredBotId);
+  // All bots directly accessible on mobile for seamless navigation
+  const isInstalled = (_href: string): boolean => {
+    return true;
   };
 
   const handleLogout = async () => {
