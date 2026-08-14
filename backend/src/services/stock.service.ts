@@ -20,23 +20,11 @@ import {
 const prisma = new PrismaClient();
 
 // ─── Yahoo Finance Helper ──────────────────────────────────
+import YahooFinance from 'yahoo-finance2';
 
-let yahooFinance: any = null;
+const yahooFinance = new (YahooFinance as any)({ suppressNotices: ['yahooSurvey'] });
 
 async function getYahoo() {
-  if (!yahooFinance) {
-    const mod = await import('yahoo-finance2');
-    const YahooFinanceClass = mod.default || mod;
-    if (typeof YahooFinanceClass === 'function') {
-      try {
-        yahooFinance = new YahooFinanceClass({ suppressNotices: ['yahooSurvey'] });
-      } catch {
-        yahooFinance = YahooFinanceClass;
-      }
-    } else {
-      yahooFinance = YahooFinanceClass;
-    }
-  }
   return yahooFinance;
 }
 
@@ -129,7 +117,43 @@ export async function fetchRealQuote(symbol: string): Promise<{
   }
 
   const yf = await getYahoo();
-  const quote = await yf.quote(cleanSym);
+  let quote: any = null;
+
+  try {
+    quote = await yf.quote(cleanSym);
+  } catch (quoteErr: any) {
+    logger.warn(`Direct quote fetch failed for ${cleanSym}, attempting chart meta fallback: ${quoteErr.message}`);
+    try {
+      const chartData: any = await yf.chart(cleanSym, { period1: getStartDate('5d'), interval: '1d' });
+      if (chartData && chartData.meta) {
+        const meta = chartData.meta;
+        const lastQuote = chartData.quotes?.[chartData.quotes.length - 1] || {};
+        const prevClose = meta.previousClose || meta.chartPreviousClose || lastQuote.close || 0;
+        const currentPrice = meta.regularMarketPrice || lastQuote.close || 0;
+        const change = currentPrice - prevClose;
+        const changePercent = prevClose > 0 ? (change / prevClose) * 100 : 0;
+
+        quote = {
+          regularMarketPrice: currentPrice,
+          regularMarketChange: change,
+          regularMarketChangePercent: changePercent,
+          regularMarketDayHigh: meta.regularMarketDayHigh || lastQuote.high || currentPrice,
+          regularMarketDayLow: meta.regularMarketDayLow || lastQuote.low || currentPrice,
+          regularMarketVolume: meta.regularMarketVolume || lastQuote.volume || 0,
+          averageDailyVolume3Month: meta.regularMarketVolume || 0,
+          marketCap: 0,
+          trailingPE: 0,
+          fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh || currentPrice,
+          fiftyTwoWeekLow: meta.fiftyTwoWeekLow || currentPrice,
+          shortName: meta.shortName || cleanSym,
+          fullExchangeName: meta.exchangeName || '',
+          currency: meta.currency || 'INR',
+        };
+      }
+    } catch (chartErr: any) {
+      logger.error(`Chart fallback also failed for ${cleanSym}: ${chartErr.message}`);
+    }
+  }
 
   if (!quote || quote.regularMarketPrice === undefined || quote.regularMarketPrice === null) {
     throw new Error(`Quote data not available for ${cleanSym}`);
@@ -164,10 +188,24 @@ export async function fetchHistoricalCandles(
   interval: '1d' | '5m' | '15m' | '1h' = '1d'
 ): Promise<OHLCV[]> {
   const yf = await getYahoo();
-  const result = await yf.chart(symbol, {
-    period1: getStartDate(period),
-    interval: interval,
-  });
+  let result: any = null;
+
+  try {
+    result = await yf.chart(symbol, {
+      period1: getStartDate(period),
+      interval: interval,
+    });
+  } catch (err: any) {
+    logger.warn(`Chart fetch failed for ${symbol} with interval ${interval}: ${err.message}. Retrying with daily interval...`);
+    if (interval !== '1d') {
+      result = await yf.chart(symbol, {
+        period1: getStartDate('6mo'),
+        interval: '1d',
+      });
+    } else {
+      throw err;
+    }
+  }
 
   if (!result?.quotes || result.quotes.length === 0) {
     throw new Error(`No historical data found for ${symbol}`);
