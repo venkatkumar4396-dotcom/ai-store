@@ -55,6 +55,33 @@ router.put('/users/:id', async (req: Request, res: Response, next: NextFunction)
 });
 
 /**
+ * @route   GET /api/admin/live-feed
+ * @desc    Get real-time live activity stream across all users and agents
+ */
+router.get('/live-feed', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const feed = await adminService.getLiveActivityFeed();
+    res.status(200).json(feed);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route   GET /api/admin/users/:id/dossier
+ * @desc    Get complete activity dossier and installed bots for a specific user
+ */
+router.get('/users/:id/dossier', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const targetUserId = req.params.id as string;
+    const dossier = await adminService.getUserDossier(targetUserId);
+    res.status(200).json(dossier);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * @route   GET /api/admin/logs
  * @desc    Get platform health logs and agent audit logs
  */

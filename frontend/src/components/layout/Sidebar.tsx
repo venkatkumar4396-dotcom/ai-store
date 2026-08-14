@@ -27,6 +27,7 @@ import {
   CheckSquare,
   Compass,
   Target,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "System",
     items: [
+      { label: "Admin Console", href: "/admin", icon: "ShieldCheck", badge: "Admin" },
       { label: "Settings", href: "/settings", icon: "Settings" },
     ],
   },
@@ -98,6 +100,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   CheckSquare,
   Compass,
   Target,
+  ShieldCheck,
 };
 
 export function Sidebar() {

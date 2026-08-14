@@ -69,10 +69,11 @@ export class AdminService {
   async getHealthLogs() {
     const logs = await prisma.agentActivityLog.findMany({
       orderBy: { timestamp: 'desc' },
-      take: 50,
+      take: 100,
       include: {
         user: {
           select: {
+            id: true,
             name: true,
             email: true
           }
@@ -80,6 +81,147 @@ export class AdminService {
       }
     });
     return logs;
+  }
+
+  /**
+   * Get unified real-time activity feed combining system logs, AI agent actions, and booking events
+   */
+  async getLiveActivityFeed() {
+    const [agentLogs, activityLogs, bookingSearches] = await Promise.all([
+      prisma.agentActivityLog.findMany({
+        orderBy: { timestamp: 'desc' },
+        take: 40,
+        include: {
+          user: {
+            select: { id: true, name: true, email: true, role: true }
+          }
+        }
+      }),
+      prisma.activityLog.findMany({
+        orderBy: { timestamp: 'desc' },
+        take: 40,
+        include: {
+          user: {
+            select: { id: true, name: true, email: true, role: true }
+          }
+        }
+      }),
+      prisma.bookingSearch.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        include: {
+          user: {
+            select: { id: true, name: true, email: true, role: true }
+          }
+        }
+      })
+    ]);
+
+    // Format into unified stream items
+    const streamItems: any[] = [];
+
+    agentLogs.forEach(log => {
+      streamItems.push({
+        id: `agent-${log.id}`,
+        type: 'agent_activity',
+        agentId: log.agentId,
+        title: log.action,
+        description: log.description,
+        reasoning: log.reasoning,
+        status: log.status,
+        timestamp: log.timestamp,
+        user: log.user
+      });
+    });
+
+    activityLogs.forEach(log => {
+      streamItems.push({
+        id: `activity-${log.id}`,
+        type: 'user_action',
+        agentId: log.entityType || 'system',
+        title: log.action,
+        description: log.metadata || `User performed ${log.action}`,
+        status: 'info',
+        timestamp: log.timestamp,
+        user: log.user
+      });
+    });
+
+    bookingSearches.forEach(search => {
+      streamItems.push({
+        id: `booking-${search.id}`,
+        type: 'travel_search',
+        agentId: 'travel',
+        title: `Search ${search.mode.toUpperCase()}: ${search.origin} → ${search.destination}`,
+        description: `${search.passengers} passenger(s), Status: ${search.status}`,
+        status: search.status === 'completed' ? 'success' : search.status,
+        timestamp: search.createdAt,
+        user: search.user
+      });
+    });
+
+    // Sort descending by timestamp
+    streamItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    return streamItems.slice(0, 60);
+  }
+
+  /**
+   * Get complete deep dossier for a specific user
+   */
+  async getUserDossier(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        provider: true,
+        createdAt: true,
+        updatedAt: true,
+        preferences: true,
+        botInstances: {
+          include: {
+            bot: true
+          }
+        },
+        activityLogs: {
+          orderBy: { timestamp: 'desc' },
+          take: 30
+        },
+        agentLogs: {
+          orderBy: { timestamp: 'desc' },
+          take: 30
+        },
+        bookingSearches: {
+          orderBy: { createdAt: 'desc' },
+          take: 15
+        },
+        bookings: {
+          orderBy: { createdAt: 'desc' },
+          take: 15
+        },
+        documentOperations: {
+          orderBy: { createdAt: 'desc' },
+          take: 15
+        },
+        tasks: {
+          orderBy: { createdAt: 'desc' },
+          take: 20
+        },
+        salesLeads: {
+          orderBy: { createdAt: 'desc' },
+          take: 15
+        }
+      }
+    });
+
+    if (!user) {
+      throw new Error(`User with ID ${userId} not found`);
+    }
+
+    return user;
   }
 
   // ─── Database Explorer Services ──────────────────────────

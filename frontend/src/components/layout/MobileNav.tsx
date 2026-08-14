@@ -8,7 +8,7 @@ import {
   X, LayoutDashboard, Store, MessageCircle, FileSearch, Sparkles, Settings,
   TrendingUp, Rocket, FlaskConical, GraduationCap, Workflow, Plane, FileText,
   Brain, LogOut, Crown, CheckSquare, Compass, Target, Lock, Check, Hotel,
-  ChevronRight,
+  ChevronRight, ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,7 +25,7 @@ interface MobileNavProps {
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Store, MessageCircle, FileSearch, Sparkles, Settings,
   TrendingUp, Rocket, FlaskConical, GraduationCap, Workflow, Plane, FileText,
-  Brain, CheckSquare, Compass, Target, Hotel,
+  Brain, CheckSquare, Compass, Target, Hotel, ShieldCheck,
 };
 
 const NAV_GROUPS = [
@@ -63,6 +63,7 @@ const NAV_GROUPS = [
   {
     label: "System",
     items: [
+      { label: "Admin Console", href: "/admin", icon: "ShieldCheck", alwaysVisible: true },
       { label: "Settings", href: "/settings", icon: "Settings", alwaysVisible: true },
     ],
   },
