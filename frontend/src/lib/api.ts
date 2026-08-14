@@ -34,11 +34,16 @@ const getBaseURL = () => {
         return `https://${backendHost}/api`;
       }
     }
+    
+    // If we are on production frontend (onrender.com), point directly to the backend
+    if (hostname.includes("onrender.com")) {
+      return "https://ai-store-87n2.onrender.com/api";
+    }
 
     // ── Plain local / IP fallback ────────────────────────────────────
     return `${protocol}//${hostname}:5000/api`;
   }
-  return "http://localhost:5000/api";
+  return "https://ai-store-87n2.onrender.com/api";
 };
 
 const api = axios.create({
