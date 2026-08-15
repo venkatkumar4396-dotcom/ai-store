@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "build:backend": "npm --prefix backend run build",
     "build:frontend": "npm --prefix frontend run build",
-    "build": "npx --package=prisma@6.9.0 prisma generate && npx prisma db push --accept-data-loss && cd backend && npm install --production=false && npm run build && cd .. && node -e \"fs.cpSync('backend/dist', 'dist', {recursive: true})\"",
+    "build": "npx --package=prisma@6.9.0 prisma generate && cd backend && npm install --production=false && npm run build && cd .. && node -e \"fs.cpSync('backend/dist', 'dist', {recursive: true})\"",
     "commit": "node scripts/auto-push-deploy.js",
     "push": "node scripts/auto-push-deploy.js",
     "deploy": "docker-compose up -d --build",
