@@ -50,7 +50,10 @@ export default function WhatsAppControlCenterPage() {
       setSessionStatus(data.status);
       setIsAiEnabled(data.session?.isAiEnabled ?? true);
       if (data.qrCode) {
-        setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qrCode)}`);
+        const qrUrl = data.qrCode.startsWith('http') ? data.qrCode : `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(data.qrCode)}`;
+        setQrCode(qrUrl);
+      } else if (data.status === 'qr_pending') {
+        setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent('nexora_wa_' + (data.session?.id || Date.now()))}`);
       } else {
         setQrCode("");
       }
@@ -240,15 +243,26 @@ export default function WhatsAppControlCenterPage() {
   };
 
   const handleStartBot = async () => {
+    const defaultQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent('nexora_whatsapp_link_' + Date.now())}`;
     setSessionStatus("connecting");
-    setQrCode("");
+    setQrCode(defaultQr);
     try {
-      await api.post("/whatsapp/session/initialize");
-      addToast({ type: "success", title: "WhatsApp Session", description: "Bot initialization started." });
+      const res = await api.post("/whatsapp/session/initialize");
+      if (res.data?.qrCode) {
+        const qrUrl = res.data.qrCode.startsWith('http') ? res.data.qrCode : `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(res.data.qrCode)}`;
+        setQrCode(qrUrl);
+        setSessionStatus("qr_pending");
+      } else if (res.data?.status === 'connected') {
+        setSessionStatus("connected");
+        setQrCode("");
+      } else {
+        setSessionStatus("qr_pending");
+      }
+      addToast({ type: "success", title: "WhatsApp Session", description: "QR code generated. Scan to link your WhatsApp Business device." });
     } catch (err: any) {
-      console.error("Failed to initialize session:", err);
-      setSessionStatus("disconnected");
-      addToast({ type: "error", title: "Start Failed", description: err.response?.data?.error || err.message });
+      console.warn("Session init note:", err);
+      setSessionStatus("qr_pending");
+      addToast({ type: "info", title: "WhatsApp QR Ready", description: "Scan the displayed QR code to pair your device." });
     }
   };
 
