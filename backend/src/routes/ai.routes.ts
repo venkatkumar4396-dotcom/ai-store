@@ -6,43 +6,50 @@ import { aiRouter, ChatMessage, ChatOptions } from '../services/ai/provider';
 import { KimiProvider } from '../services/ai/kimi';
 import { GeminiProvider } from '../services/ai/gemini';
 import { OllamaProvider } from '../services/ai/ollama';
+import { FallbackProvider } from '../services/ai/fallback';
 import { decrypt } from '../utils/crypto';
 import { logActivity } from '../services/analytics.service';
 import logger from '../utils/logger';
 
 const router = Router();
 const prisma = new PrismaClient();
+const fallbackProvider = new FallbackProvider();
 
 /**
  * @route   POST /api/ai/chat
- * @desc    Chat with an AI model (Gemini/Ollama) with fallbacks and custom keys
+ * @desc    Chat with an AI model with multi-tier fallback (Kimi -> Meta -> Gemini -> Pollinations -> Fallback)
  * @access  Private
  */
 router.post('/chat', authenticate, aiLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  const userId = req.user!.userId;
+  const { messages, provider, options } = req.body as {
+    messages: ChatMessage[];
+    provider?: string;
+    options?: ChatOptions;
+  };
+
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    res.status(400).json({ error: 'Messages array is required' });
+    return;
+  }
+
+  const selectedProvider = (provider && typeof provider === 'string')
+    ? provider.toLowerCase()
+    : 'kimi';
+
+  logger.info(`AI Route: Processing chat for provider ${selectedProvider} (${messages.length} messages)`);
+  let response;
+
   try {
-    const userId = req.user!.userId;
-    const { messages, provider, options } = req.body as {
-      messages: ChatMessage[];
-      provider?: string;
-      options?: ChatOptions;
-    };
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      res.status(400).json({ error: 'Messages array is required' });
-      return;
-    }
-
-    const selectedProvider = (provider && typeof provider === 'string')
-      ? provider.toLowerCase()
-      : 'kimi'; // Default to primary provider (Kimi/Moonshot AI)
-      
-    logger.info(`AI Route: Selected provider ${selectedProvider} (requested: ${provider || 'default'})`);
-    let response;
-
     // Check if user has their own API key for this provider
-    const userApiKey = await prisma.apiKey.findFirst({
-      where: { userId, provider: selectedProvider, isActive: true },
-    });
+    let userApiKey = null;
+    try {
+      userApiKey = await prisma.apiKey.findFirst({
+        where: { userId, provider: selectedProvider, isActive: true },
+      });
+    } catch {
+      // Prisma error fallback
+    }
 
     if (userApiKey) {
       logger.info(`Using user custom API key for ${selectedProvider} (user: ${userId})`);
@@ -62,11 +69,12 @@ router.post('/chat', authenticate, aiLimiter, async (req: Request, res: Response
           response = await aiRouter.chat(messages, options, selectedProvider);
         }
 
-        // Update last used time on the API key
-        await prisma.apiKey.update({
-          where: { id: userApiKey.id },
-          data: { lastUsedAt: new Date() },
-        });
+        try {
+          await prisma.apiKey.update({
+            where: { id: userApiKey.id },
+            data: { lastUsedAt: new Date() },
+          });
+        } catch {}
       } catch (customKeyError: any) {
         logger.warn(`Custom API key for ${selectedProvider} failed (${customKeyError.message}). Falling back to system AI Router.`);
         response = await aiRouter.chat(messages, options, selectedProvider);
@@ -75,17 +83,20 @@ router.post('/chat', authenticate, aiLimiter, async (req: Request, res: Response
       // Fallback to system-level configuration
       response = await aiRouter.chat(messages, options, selectedProvider);
     }
+  } catch (error: any) {
+    logger.warn(`All online AI providers encountered errors (${error.message}). Activating Nexora Local Intelligence Engine.`);
+    // Ultimate safety net: never leave user hanging
+    response = await fallbackProvider.chat(messages, options);
+  }
 
-    // Log the AI activity
-    await logActivity(userId, 'ai_chat', 'ai', selectedProvider, {
+  try {
+    await logActivity(userId, 'ai_chat', 'ai', response.provider || selectedProvider, {
       model: response.model,
       tokensUsed: response.tokensUsed || 0,
     });
+  } catch {}
 
-    res.status(200).json(response);
-  } catch (error: any) {
-    next(error);
-  }
+  res.status(200).json(response);
 });
 
 /**
@@ -100,7 +111,7 @@ router.get('/providers', authenticate, async (req: Request, res: Response, next:
 
     const result = providers.map(name => ({
       name,
-      isAvailable: availability[name] || false,
+      isAvailable: availability[name] ?? true,
       isPrimary: aiRouter.getPrimaryProvider()?.name === name,
     }));
 

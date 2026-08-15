@@ -50,13 +50,21 @@ export default function BotStorePage() {
     const bot = FEATURED_BOTS.find(b => b.id === botId);
     if (!bot) return;
     if (botId === "bot-1") { window.location.href = "/whatsapp"; return; }
+    if (botId === "bot-2") { window.location.href = "/stock-intelligence"; return; }
+    if (botId === "bot-3") { window.location.href = "/career-accelerator"; return; }
     if (botId === "bot-4") { window.location.href = "/file-tracker"; return; }
+    if (botId === "bot-5") { window.location.href = "/startup-cofounder"; return; }
+    if (botId === "bot-travel" || botId === "bot-hotel") { window.location.href = "/travel-booking"; return; }
+    if (botId === "bot-productivity") { window.location.href = "/productivity"; return; }
+    if (botId === "bot-document") { window.location.href = "/document-agent"; return; }
     if (botId === "bot-compass") { window.location.href = "/compass"; return; }
+    if (botId === "bot-sales") { window.location.href = "/sales-agent"; return; }
+
     switch (bot.category) {
       case "communication": window.location.href = "/whatsapp"; break;
-      case "productivity": window.location.href = "/file-tracker"; break;
-      case "analytics": window.location.href = "/ai-playground"; break;
-      default: window.location.href = "/settings"; break;
+      case "productivity": window.location.href = "/productivity"; break;
+      case "analytics": window.location.href = "/stock-intelligence"; break;
+      default: window.location.href = "/ai-playground"; break;
     }
   };
 

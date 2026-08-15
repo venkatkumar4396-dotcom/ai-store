@@ -3,7 +3,7 @@ import logger from '../../utils/logger';
 
 /**
  * Pollinations AI Provider - Free, Zero-Config Public LLM Engine (Anonymous Access)
- * Uses the anonymous text generation endpoint which is NOT rate-limited for free users.
+ * Uses the free OpenAI-compatible / text generation endpoint.
  */
 export class PollinationsProvider implements AIProvider {
   name = 'pollinations';
@@ -12,18 +12,67 @@ export class PollinationsProvider implements AIProvider {
     try {
       const res = await fetch('https://text.pollinations.ai/Hi', {
         method: 'GET',
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(4000),
       });
       return res.ok;
     } catch {
-      return false;
+      return true; // Still attempt on chat
     }
   }
 
   async chat(messages: ChatMessage[], options?: ChatOptions): Promise<ChatResponse> {
     logger.info(`Pollinations AI generating completion for ${messages.length} messages...`);
 
-    // Build a single prompt from messages
+    const formattedMessages = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    if (options?.systemPrompt && !formattedMessages.some((m) => m.role === 'system')) {
+      formattedMessages.unshift({ role: 'system', content: options.systemPrompt });
+    }
+
+    const models = ['openai', 'mistral', 'llama', 'qwen'];
+    let lastError: Error | null = null;
+
+    // 1. Try POST with JSON messages body (best for multi-turn & formatting)
+    for (const model of models) {
+      try {
+        const response = await fetch('https://text.pollinations.ai/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'text/plain',
+          },
+          body: JSON.stringify({
+            messages: formattedMessages,
+            model,
+            seed: Date.now(),
+            jsonMode: false,
+          }),
+          signal: AbortSignal.timeout(15000),
+        });
+
+        if (response.ok) {
+          const text = await response.text();
+          if (text && text.trim().length > 0) {
+            const content = text.trim();
+            return {
+              content,
+              provider: 'pollinations',
+              model,
+              tokensUsed: Math.floor(content.length / 4),
+              finishReason: 'stop',
+            };
+          }
+        }
+      } catch (err: any) {
+        logger.debug(`Pollinations POST ${model} failed: ${err.message}`);
+        lastError = err;
+      }
+    }
+
+    // 2. Fallback: Try GET with prompt string
     let prompt = '';
     for (const msg of messages) {
       if (msg.role === 'system') {
@@ -36,42 +85,33 @@ export class PollinationsProvider implements AIProvider {
     }
     prompt += 'Assistant:';
 
-    // Try multiple model endpoints
-    const models = ['openai', 'mistral', 'llama', 'qwen'];
-    let lastError: Error | null = null;
-
     for (const model of models) {
       try {
-        const encodedPrompt = encodeURIComponent(prompt.slice(-2000));
+        const encodedPrompt = encodeURIComponent(prompt.slice(-1500));
         const url = `https://text.pollinations.ai/${encodedPrompt}?model=${model}&seed=${Date.now()}`;
 
         const response = await fetch(url, {
           method: 'GET',
           headers: { 'Accept': 'text/plain' },
-          signal: AbortSignal.timeout(15000),
+          signal: AbortSignal.timeout(10000),
         });
 
-        if (!response.ok) {
-          throw new Error(`Pollinations ${model} returned HTTP ${response.status}`);
+        if (response.ok) {
+          const text = await response.text();
+          if (text && text.trim().length > 0) {
+            const content = text.trim();
+            return {
+              content,
+              provider: 'pollinations',
+              model,
+              tokensUsed: Math.floor(content.length / 4),
+              finishReason: 'stop',
+            };
+          }
         }
-
-        const text = await response.text();
-        if (!text || text.trim().length === 0) {
-          throw new Error(`Pollinations ${model} returned empty response`);
-        }
-
-        const content = text.trim();
-        return {
-          content,
-          provider: 'pollinations',
-          model,
-          tokensUsed: Math.floor(content.length / 4),
-          finishReason: 'stop',
-        };
       } catch (err: any) {
-        logger.warn(`Pollinations ${model} failed: ${err.message}`);
+        logger.warn(`Pollinations GET ${model} failed: ${err.message}`);
         lastError = err;
-        continue;
       }
     }
 
