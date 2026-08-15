@@ -311,7 +311,7 @@ export default function LoginPage() {
       if (err.message === "Network Error" || !err.response) {
         setError("Cannot reach Nexora server. Please check your network connection.");
       } else {
-        setError(err.response?.data?.error || "Invalid credentials. Try one-click demo login above.");
+        setError(err.response?.data?.error || "Invalid credentials. Please verify your email and password.");
       }
     } finally {
       setIsLoading(false);
@@ -860,27 +860,6 @@ export default function LoginPage() {
                         );
                       })}
                     </div>
-                  </div>
-
-                  {/* Quick 1-Click Demo Login Pill */}
-                  <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold text-indigo-200 truncate">
-                        Quick Demo: {activeRole.title}
-                      </div>
-                      <div className="text-[10px] text-zinc-400 truncate">
-                        {activeRole.demoEmail}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleOneClickLogin(userType)}
-                      disabled={isLoading}
-                      className="shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5"
-                    >
-                      <Zap className="h-3 w-3 text-amber-300" />
-                      1-Click Sign In
-                    </button>
                   </div>
 
                   {/* Error Notification */}
