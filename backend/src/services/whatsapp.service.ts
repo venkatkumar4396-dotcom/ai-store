@@ -45,9 +45,18 @@ class WhatsAppService {
   /**
    * Initialize a WhatsApp client for a user session
    */
-  async initialize(userId: string, sessionId: string): Promise<{ status: string; qrCode?: string }> {
+  async initialize(userId: string, sessionId: string): Promise<{ status: string; qrCode?: string; message?: string }> {
     if (!Client || !LocalAuth) {
-      throw new Error('WhatsApp module is not available. Please install whatsapp-web.js');
+      logger.warn(`WhatsApp initialization in demo mode — whatsapp-web.js or Puppeteer/Chromium not available`);
+      // Return a demo mode status instead of crashing
+      await prisma.whatsAppSession.update({
+        where: { id: sessionId },
+        data: { status: 'demo_mode' },
+      }).catch(() => {/* session may not exist yet */});
+      return {
+        status: 'demo_mode',
+        message: 'WhatsApp Bot is in Demo Mode. Full WhatsApp integration requires a server with Chromium/Puppeteer installed (not available on free-tier cloud hosting). Deploy on a VPS (DigitalOcean, AWS EC2) for full WhatsApp functionality. You can still configure your bot settings, business profile, and AI prompt — they will activate when connected to a Chromium-enabled server.',
+      };
     }
 
     // Check if client already exists

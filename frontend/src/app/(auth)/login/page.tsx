@@ -618,6 +618,7 @@ export default function LoginPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="pl-10 h-12 bg-zinc-900/90 border-white/20 text-white placeholder:text-zinc-500 focus:border-indigo-400 focus:bg-zinc-900 rounded-xl transition-all text-sm font-medium"
+                        style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                         required
                         autoComplete="username"
                       />
@@ -645,6 +646,7 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="pl-10 pr-10 h-12 bg-zinc-900/90 border-white/20 text-white placeholder:text-zinc-500 focus:border-indigo-400 focus:bg-zinc-900 rounded-xl transition-all text-sm font-medium"
+                        style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }}
                         required
                         autoComplete="current-password"
                       />

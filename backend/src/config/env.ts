@@ -87,8 +87,9 @@ if (env.NODE_ENV === 'production') {
   if (env.ENCRYPTION_KEY === 'default-32-char-encryption-key!!' || env.ENCRYPTION_KEY.length < 32) {
     errors.push('ENCRYPTION_KEY must be set to a secure value (min 32 chars) in production.');
   }
-  if (!env.GEMINI_API_KEY && !process.env.OLLAMA_BASE_URL) {
-    errors.push('At least one AI provider must be configured: GEMINI_API_KEY or OLLAMA_BASE_URL.');
+  if (!env.GEMINI_API_KEY && !env.KIMI_API_KEY && !env.META_API_KEY && !process.env.OLLAMA_BASE_URL) {
+    // Only warn, don't crash — FallbackProvider is always available
+    console.warn('⚠️  No AI provider API keys configured. Using Fallback rules engine. Set GEMINI_API_KEY, KIMI_API_KEY, or META_API_KEY for LLM-powered responses.');
   }
   if (env.DATABASE_URL === 'file:./dev.db') {
     errors.push('DATABASE_URL should not use SQLite dev.db in production. Use PostgreSQL.');

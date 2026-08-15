@@ -462,7 +462,8 @@ export default function RegisterPage() {
                     <div className="relative group">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
                       <Input id="reg-password" type={showPassword ? "text" : "password"} placeholder="Strong password" value={password} onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 pr-10 h-12 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 focus:bg-indigo-500/[0.04] rounded-xl transition-all text-sm" required />
+                        className="pl-10 pr-10 h-12 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/60 focus:bg-indigo-500/[0.04] rounded-xl transition-all text-sm"
+                        style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', caretColor: '#ffffff' }} required />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors">
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>

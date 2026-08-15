@@ -2,98 +2,80 @@ import { AIProvider, ChatMessage, ChatOptions, ChatResponse } from './provider';
 import logger from '../../utils/logger';
 
 /**
- * Pollinations AI Provider - Free, Zero-Config Public OpenAI-Compatible LLM Engine
- * Endpoint: https://text.pollinations.ai/openai/chat/completions
- * Supports automatic fallback across multiple models: openai, mistral, llama, qwen
+ * Pollinations AI Provider - Free, Zero-Config Public LLM Engine (Anonymous Access)
+ * Uses the anonymous text generation endpoint which is NOT rate-limited for free users.
  */
 export class PollinationsProvider implements AIProvider {
   name = 'pollinations';
-  private endpoint = 'https://text.pollinations.ai/openai/chat/completions';
-  private fallbackModels = ['openai', 'mistral', 'llama', 'qwen'];
 
   async isAvailable(): Promise<boolean> {
     try {
-      const res = await fetch(this.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: 'ping' }],
-          max_tokens: 5,
-        }),
-        signal: AbortSignal.timeout(6000),
+      const res = await fetch('https://text.pollinations.ai/Hi', {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000),
       });
       return res.ok;
     } catch {
-      return true; // Assume available as public zero-config service
+      return false;
     }
   }
 
   async chat(messages: ChatMessage[], options?: ChatOptions): Promise<ChatResponse> {
-    logger.info(`Pollinations AI Provider generating completion for ${messages.length} messages...`);
+    logger.info(`Pollinations AI generating completion for ${messages.length} messages...`);
 
-    const formattedMessages: Array<{ role: string; content: string }> = [];
-
-    if (options?.systemPrompt) {
-      formattedMessages.push({ role: 'system', content: options.systemPrompt });
-    }
-
+    // Build a single prompt from messages
+    let prompt = '';
     for (const msg of messages) {
-      formattedMessages.push({
-        role: msg.role,
-        content: msg.content,
-      });
+      if (msg.role === 'system') {
+        prompt += `System: ${msg.content}\n\n`;
+      } else if (msg.role === 'user') {
+        prompt += `User: ${msg.content}\n\n`;
+      } else if (msg.role === 'assistant') {
+        prompt += `Assistant: ${msg.content}\n\n`;
+      }
     }
+    prompt += 'Assistant:';
 
-    const requestedModel = options?.model || 'openai';
-    const modelsToTry = [requestedModel, ...this.fallbackModels.filter(m => m !== requestedModel)];
-
+    // Try multiple model endpoints
+    const models = ['openai', 'mistral', 'llama', 'qwen'];
     let lastError: Error | null = null;
 
-    for (const modelCandidate of modelsToTry) {
+    for (const model of models) {
       try {
-        const payload = {
-          model: modelCandidate,
-          messages: formattedMessages,
-          temperature: options?.temperature ?? 0.7,
-          max_tokens: options?.maxTokens ?? 350,
-        };
+        const encodedPrompt = encodeURIComponent(prompt.slice(-2000));
+        const url = `https://text.pollinations.ai/${encodedPrompt}?model=${model}&seed=${Date.now()}`;
 
-        const response = await fetch(this.endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'text/plain' },
           signal: AbortSignal.timeout(15000),
         });
 
         if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(`Pollinations AI model ${modelCandidate} failed (${response.status}): ${errText}`);
+          throw new Error(`Pollinations ${model} returned HTTP ${response.status}`);
         }
 
-        const data: any = await response.json();
-        const content = data?.choices?.[0]?.message?.content || '';
-
-        if (!content || content.trim().length === 0) {
-          throw new Error(`Pollinations AI model ${modelCandidate} returned empty content`);
+        const text = await response.text();
+        if (!text || text.trim().length === 0) {
+          throw new Error(`Pollinations ${model} returned empty response`);
         }
 
+        const content = text.trim();
         return {
-          content: content.trim(),
+          content,
           provider: 'pollinations',
-          model: data?.model || modelCandidate,
-          tokensUsed: data?.usage?.total_tokens || Math.floor(content.length / 4),
-          finishReason: data?.choices?.[0]?.finish_reason || 'stop',
+          model,
+          tokensUsed: Math.floor(content.length / 4),
+          finishReason: 'stop',
         };
       } catch (err: any) {
-        logger.warn(`Pollinations AI model ${modelCandidate} attempt failed: ${err.message}`);
+        logger.warn(`Pollinations ${model} failed: ${err.message}`);
         lastError = err;
         continue;
       }
     }
 
-    throw lastError || new Error('All Pollinations AI free model fallbacks failed.');
+    throw lastError || new Error('All Pollinations models failed');
   }
 
   async generateText(prompt: string, options?: ChatOptions): Promise<string> {
