@@ -366,17 +366,35 @@ export default function RegisterPage() {
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Full Name</Label>
                     <div className="relative group">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
-                      <Input id="reg-name" type="text" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)}
-                        className="pl-10 h-12 bg-zinc-900/90 border-white/20 text-white placeholder:text-zinc-500 focus:border-indigo-400 focus:bg-zinc-900 rounded-xl transition-all text-sm font-medium" required />
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 pointer-events-none" />
+                      <Input
+                        id="reg-name"
+                        type="text"
+                        placeholder="Your full name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        data-text-black="true"
+                        className="pl-10 h-12 bg-white text-black placeholder:text-zinc-500 border-white/20 focus:border-indigo-500 focus:bg-white rounded-xl transition-all text-sm font-semibold shadow-sm"
+                        style={{ color: '#000000', WebkitTextFillColor: '#000000', caretColor: '#000000' }}
+                        required
+                      />
                     </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Email Address</Label>
                     <div className="relative group">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
-                      <Input id="reg-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 h-12 bg-zinc-900/90 border-white/20 text-white placeholder:text-zinc-500 focus:border-indigo-400 focus:bg-zinc-900 rounded-xl transition-all text-sm font-medium" required />
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 pointer-events-none" />
+                      <Input
+                        id="reg-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        data-text-black="true"
+                        className="pl-10 h-12 bg-white text-black placeholder:text-zinc-500 border-white/20 focus:border-indigo-500 focus:bg-white rounded-xl transition-all text-sm font-semibold shadow-sm"
+                        style={{ color: '#000000', WebkitTextFillColor: '#000000', caretColor: '#000000' }}
+                        required
+                      />
                     </div>
                   </div>
 
@@ -460,10 +478,19 @@ export default function RegisterPage() {
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Create Password</Label>
                     <div className="relative group">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-indigo-400 pointer-events-none" />
-                      <Input id="reg-password" type={showPassword ? "text" : "password"} placeholder="Strong password" value={password} onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 pr-10 h-12 bg-white/[0.04] border-white/10 text-white placeholder:text-zinc-500 focus:border-indigo-500/60 focus:bg-indigo-500/[0.04] rounded-xl transition-all text-sm font-medium" required />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 pointer-events-none" />
+                      <Input
+                        id="reg-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Strong password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        data-text-black="true"
+                        className="pl-10 pr-10 h-12 bg-white text-black placeholder:text-zinc-500 border-white/20 focus:border-indigo-500 focus:bg-white rounded-xl transition-all text-sm font-semibold shadow-sm"
+                        style={{ color: '#000000', WebkitTextFillColor: '#000000', caretColor: '#000000' }}
+                        required
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-black transition-colors">
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
