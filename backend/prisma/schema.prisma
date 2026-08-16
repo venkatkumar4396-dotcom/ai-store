@@ -64,6 +64,9 @@ model User {
   salesEmails          SalesEmail[]
   salesMeetings        SalesMeeting[]
 
+  // Lead Generation Pipeline
+  pipelineRuns         PipelineRun[]
+
   deletedAt            DateTime?
 }
 
@@ -670,12 +673,14 @@ model SalesLead {
   userId       String
   name         String
   email        String
+  phone        String?
   company      String
   industry     String
   role         String
   companySize  String?
   leadScore    Int      @default(0)  // 0-100
-  status       String   @default("new") // "new" | "contacted" | "qualified" | "meeting_set" | "won" | "lost"
+  emailVerified Boolean @default(false)
+  status       String   @default("new") // "new" | "contacted" | "qualified" | "meeting_set" | "won" | "lost" | "unsubscribed" | "invalid_email"
   notes        String?
   enrichment   String?  // JSON: AI-enriched data
   source       String   @default("ai_generated")
@@ -731,3 +736,38 @@ model SalesMeeting {
   @@index([userId])
   @@index([dateTime])
 }
+
+// ─── Lead Generation Pipeline ───────────────────────────────
+
+model PipelineRun {
+  id             String    @id @default(cuid())
+  userId         String
+  status         String    @default("running")   // "running" | "completed" | "failed"
+  criteria       String                           // JSON: { industry, targetRole, companySize }
+  stage          String    @default("discovery") // current stage name
+  leadsFound     Int       @default(0)
+  leadsQualified Int       @default(0)
+  emailsSent     Int       @default(0)
+  stageLog       String    @default("[]")         // JSON array of stage results
+  error          String?
+  dryRun         Boolean   @default(true)
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ─── CAN-SPAM / GDPR Compliance ─────────────────────────────
+
+model UnsubscribedContact {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
