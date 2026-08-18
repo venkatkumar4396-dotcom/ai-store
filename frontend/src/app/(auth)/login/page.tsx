@@ -124,8 +124,6 @@ interface RoleProfile {
   gradient: string;
   activeBg: string;
   activeBorder: string;
-  demoEmail: string;
-  demoPass: string;
   description: string;
   features: string[];
 }
@@ -140,8 +138,6 @@ const USER_TYPES: RoleProfile[] = [
     gradient: "from-indigo-500 to-violet-500",
     activeBg: "bg-indigo-500/15",
     activeBorder: "border-indigo-500/50",
-    demoEmail: "user@nexora.ai",
-    demoPass: "Password123!",
     description: "Multi-modal travel planning, stock intelligence, career accelerator & document analysis.",
     features: ["Travel & Hotel Booker", "Stock RSI & MACD Signals", "Resume ATS Optimizer"],
   },
@@ -154,8 +150,6 @@ const USER_TYPES: RoleProfile[] = [
     gradient: "from-emerald-500 to-teal-500",
     activeBg: "bg-emerald-500/15",
     activeBorder: "border-emerald-500/50",
-    demoEmail: "business@nexora.ai",
-    demoPass: "Password123!",
     description: "Automated WhatsApp chatbots, lead generation, sales workflows & customer management.",
     features: ["24/7 WhatsApp AI Bot", "Cold Email Generator", "Pipeline Automation"],
   },
@@ -168,8 +162,6 @@ const USER_TYPES: RoleProfile[] = [
     gradient: "from-amber-500 to-orange-500",
     activeBg: "bg-amber-500/15",
     activeBorder: "border-amber-500/50",
-    demoEmail: "kumar",
-    demoPass: "kumar@4396",
     description: "Direct access to AI Playground, custom LLM keys (Gemini, Llama, Kimi), and admin diagnostics.",
     features: ["AI Model Playground", "Custom API Keys Vault", "System Telemetry"],
   },
@@ -226,61 +218,10 @@ export default function LoginPage() {
 
   const passwordStrength = React.useMemo(() => getPasswordStrength(newPassword), [newPassword]);
 
-  // Set default demo email on first mount
-  React.useEffect(() => {
-    setEmail(USER_TYPES[0].demoEmail);
-    setPassword(USER_TYPES[0].demoPass);
-  }, []);
-
-  // Switch role and update form defaults
+  // Switch role tab
   const handleSelectRole = (typeId: UserTypeId) => {
     setUserType(typeId);
     setError("");
-    const role = USER_TYPES.find((x) => x.id === typeId);
-    if (role) {
-      setEmail(role.demoEmail);
-      setPassword(role.demoPass);
-    }
-  };
-
-  // 1-Click Instant Demo Login
-  const handleOneClickLogin = async (typeId: UserTypeId) => {
-    setUserType(typeId);
-    const role = USER_TYPES.find((x) => x.id === typeId);
-    if (!role) return;
-    setEmail(role.demoEmail);
-    setPassword(role.demoPass);
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const cleanEmail = role.demoEmail.trim().toLowerCase();
-      const { data } = await api.post("/auth/login", {
-        email: cleanEmail,
-        password: role.demoPass,
-        userType: typeId,
-      });
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem("nexora_logged_in", "true");
-        localStorage.setItem("nexora_user_type", typeId);
-        if (data?.token) localStorage.setItem("nexora_auth_token", data.token);
-      }
-      router.push("/dashboard");
-    } catch (err: any) {
-      if (err.message === "Network Error" || !err.response) {
-        // Fallback for seamless offline/dev testing
-        if (typeof window !== "undefined") {
-          localStorage.setItem("nexora_logged_in", "true");
-          localStorage.setItem("nexora_user_type", typeId);
-        }
-        router.push("/dashboard");
-      } else {
-        setError(err.response?.data?.error || "Login failed. Please verify credentials.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   // Standard Form Submit
@@ -305,6 +246,7 @@ export default function LoginPage() {
         localStorage.setItem("nexora_logged_in", "true");
         localStorage.setItem("nexora_user_type", userType);
         if (data?.token) localStorage.setItem("nexora_auth_token", data.token);
+        if (data?.user) localStorage.setItem("nexora_user", JSON.stringify(data.user));
       }
       router.push("/dashboard");
     } catch (err: any) {
@@ -827,7 +769,7 @@ export default function LoginPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="font-bold text-zinc-300 uppercase tracking-wider">Select Workspace Role</span>
-                      <span className="text-indigo-300 font-medium">Click to switch demo</span>
+                      <span className="text-indigo-300 font-medium">Select workspace profile</span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
@@ -889,7 +831,7 @@ export default function LoginPage() {
                         <Input
                           id="login-email"
                           type="text"
-                          placeholder="kumar or user@nexora.ai"
+                          placeholder="name@example.com or username"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="pl-10 h-11 bg-white/[0.04] border-white/15 text-white placeholder:text-zinc-500 rounded-xl focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-sm font-medium"
@@ -921,7 +863,7 @@ export default function LoginPage() {
                         <Input
                           id="login-password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Your password"
+                          placeholder="Enter your password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="pl-10 pr-10 h-11 bg-white/[0.04] border-white/15 text-white placeholder:text-zinc-500 rounded-xl focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-sm font-medium"
