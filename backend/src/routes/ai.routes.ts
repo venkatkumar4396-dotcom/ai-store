@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { authenticate } from '../middleware/auth';
 import { aiLimiter } from '../middleware/rateLimit';
 import { aiRouter, ChatMessage, ChatOptions } from '../services/ai/provider';
+import { GroqProvider } from '../services/ai/groq';
 import { KimiProvider } from '../services/ai/kimi';
 import { GeminiProvider } from '../services/ai/gemini';
 import { OllamaProvider } from '../services/ai/ollama';
@@ -56,7 +57,10 @@ router.post('/chat', authenticate, aiLimiter, async (req: Request, res: Response
       const decryptedKey = decrypt(userApiKey.encryptedKey);
 
       try {
-        if (selectedProvider === 'kimi') {
+        if (selectedProvider === 'groq') {
+          const groq = new GroqProvider(decryptedKey);
+          response = await groq.chat(messages, options);
+        } else if (selectedProvider === 'kimi') {
           const kimi = new KimiProvider(decryptedKey);
           response = await kimi.chat(messages, options);
         } else if (selectedProvider === 'gemini') {

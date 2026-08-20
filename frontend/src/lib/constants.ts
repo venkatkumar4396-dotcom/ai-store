@@ -225,6 +225,49 @@ export const FEATURED_BOTS: Bot[] = [
 
 export const AI_PROVIDERS: AIProvider[] = [
   {
+    id: "gemini",
+    name: "Google Gemini (Free Tier)",
+    icon: "Sparkles",
+    status: "active",
+    models: [
+      { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash", providerId: "gemini", maxTokens: 1048576, costPer1kTokens: 0, capabilities: ["text", "vision", "code", "reasoning", "speed"] },
+      { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash", providerId: "gemini", maxTokens: 1048576, costPer1kTokens: 0, capabilities: ["text", "code", "reasoning"] },
+    ],
+  },
+  {
+    id: "groq",
+    name: "Groq (Free Tier)",
+    icon: "Zap",
+    status: "active",
+    models: [
+      { id: "llama-3.3-70b-versatile", name: "LLaMA 3.3 70B", providerId: "groq", maxTokens: 128000, costPer1kTokens: 0, capabilities: ["text", "code", "reasoning", "fast"] },
+      { id: "deepseek-r1-distill-llama-70b", name: "DeepSeek R1 70B", providerId: "groq", maxTokens: 128000, costPer1kTokens: 0, capabilities: ["text", "code", "deep-reasoning"] },
+      { id: "mixtral-8x7b-32768", name: "Mixtral 8x7B", providerId: "groq", maxTokens: 32768, costPer1kTokens: 0, capabilities: ["text", "code"] },
+    ],
+  },
+  {
+    id: "pollinations",
+    name: "Pollinations AI (Zero-Config Free)",
+    icon: "Cpu",
+    status: "active",
+    models: [
+      { id: "openai", name: "Pollinations OpenAI", providerId: "pollinations", maxTokens: 8192, costPer1kTokens: 0, capabilities: ["text", "code", "free"] },
+      { id: "mistral", name: "Pollinations Mistral", providerId: "pollinations", maxTokens: 8192, costPer1kTokens: 0, capabilities: ["text", "code", "free"] },
+      { id: "llama", name: "Pollinations LLaMA", providerId: "pollinations", maxTokens: 8192, costPer1kTokens: 0, capabilities: ["text", "code", "free"] },
+    ],
+  },
+  {
+    id: "ollama",
+    name: "Ollama (Local Offline Free)",
+    icon: "Server",
+    status: "active",
+    models: [
+      { id: "llama3", name: "LLaMA 3 / 3.2", providerId: "ollama", maxTokens: 8192, costPer1kTokens: 0, capabilities: ["text", "code", "offline"] },
+      { id: "mistral", name: "Mistral 7B", providerId: "ollama", maxTokens: 8192, costPer1kTokens: 0, capabilities: ["text", "code", "offline"] },
+      { id: "deepseek-r1", name: "DeepSeek R1", providerId: "ollama", maxTokens: 8192, costPer1kTokens: 0, capabilities: ["text", "reasoning", "offline"] },
+    ],
+  },
+  {
     id: "kimi",
     name: "Kimi (Moonshot AI)",
     icon: "Moon",
@@ -232,17 +275,6 @@ export const AI_PROVIDERS: AIProvider[] = [
     models: [
       { id: "moonshot-v1-128k", name: "Moonshot v1 128K", providerId: "kimi", maxTokens: 128000, costPer1kTokens: 0.012, capabilities: ["text", "code", "reasoning", "long-context"] },
       { id: "moonshot-v1-32k", name: "Moonshot v1 32K", providerId: "kimi", maxTokens: 32000, costPer1kTokens: 0.008, capabilities: ["text", "code", "reasoning"] },
-      { id: "moonshot-v1-8k", name: "Moonshot v1 8K", providerId: "kimi", maxTokens: 8192, costPer1kTokens: 0.004, capabilities: ["text", "code"] },
-    ],
-  },
-  {
-    id: "gemini",
-    name: "Google Gemini",
-    icon: "Sparkles",
-    status: "active",
-    models: [
-      { id: "gemini-pro", name: "Gemini Pro", providerId: "gemini", maxTokens: 32000, costPer1kTokens: 0.001, capabilities: ["text", "code", "reasoning"] },
-      { id: "gemini-pro-vision", name: "Gemini Pro Vision", providerId: "gemini", maxTokens: 16000, costPer1kTokens: 0.002, capabilities: ["text", "vision", "code"] },
     ],
   },
   {
@@ -251,9 +283,8 @@ export const AI_PROVIDERS: AIProvider[] = [
     icon: "Brain",
     status: "active",
     models: [
-      { id: "gpt-4", name: "GPT-4", providerId: "openai", maxTokens: 8192, costPer1kTokens: 0.03, capabilities: ["text", "code", "reasoning"] },
-      { id: "gpt-4-turbo", name: "GPT-4 Turbo", providerId: "openai", maxTokens: 128000, costPer1kTokens: 0.01, capabilities: ["text", "code", "reasoning", "vision"] },
-      { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo", providerId: "openai", maxTokens: 16385, costPer1kTokens: 0.001, capabilities: ["text", "code"] },
+      { id: "gpt-4o", name: "GPT-4o", providerId: "openai", maxTokens: 128000, costPer1kTokens: 0.005, capabilities: ["text", "code", "reasoning", "vision"] },
+      { id: "gpt-4o-mini", name: "GPT-4o Mini", providerId: "openai", maxTokens: 128000, costPer1kTokens: 0.00015, capabilities: ["text", "code"] },
     ],
   },
   {
@@ -262,28 +293,7 @@ export const AI_PROVIDERS: AIProvider[] = [
     icon: "Bot",
     status: "active",
     models: [
-      { id: "claude-3-opus", name: "Claude 3 Opus", providerId: "claude", maxTokens: 200000, costPer1kTokens: 0.015, capabilities: ["text", "code", "reasoning", "vision"] },
-      { id: "claude-3-sonnet", name: "Claude 3 Sonnet", providerId: "claude", maxTokens: 200000, costPer1kTokens: 0.003, capabilities: ["text", "code", "reasoning", "vision"] },
-    ],
-  },
-  {
-    id: "groq",
-    name: "Groq",
-    icon: "Zap",
-    status: "active",
-    models: [
-      { id: "llama-3-70b", name: "LLaMA 3 70B", providerId: "groq", maxTokens: 8192, costPer1kTokens: 0.0007, capabilities: ["text", "code"] },
-      { id: "mixtral-8x7b", name: "Mixtral 8x7B", providerId: "groq", maxTokens: 32768, costPer1kTokens: 0.0003, capabilities: ["text", "code"] },
-    ],
-  },
-  {
-    id: "ollama",
-    name: "Ollama (Local)",
-    icon: "Server",
-    status: "active",
-    models: [
-      { id: "llama3", name: "LLaMA 3", providerId: "ollama", maxTokens: 8192, costPer1kTokens: 0, capabilities: ["text", "code"] },
-      { id: "mistral", name: "Mistral", providerId: "ollama", maxTokens: 8192, costPer1kTokens: 0, capabilities: ["text", "code"] },
+      { id: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet", providerId: "claude", maxTokens: 200000, costPer1kTokens: 0.003, capabilities: ["text", "code", "reasoning", "vision"] },
     ],
   },
 ];

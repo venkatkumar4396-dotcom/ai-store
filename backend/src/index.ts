@@ -13,9 +13,13 @@ import { initWebSocket } from './websocket';
 
 // AI Services & Providers
 import { aiRouter } from './services/ai/provider';
-import { KimiProvider } from './services/ai/kimi';
+import { GroqProvider } from './services/ai/groq';
 import { GeminiProvider } from './services/ai/gemini';
+import { PollinationsProvider } from './services/ai/pollinations';
 import { OllamaProvider } from './services/ai/ollama';
+import { KimiProvider } from './services/ai/kimi';
+import { MetaLlamaProvider } from './services/ai/meta';
+import { FallbackProvider } from './services/ai/fallback';
 
 // Services needing cleanups
 import { fileTrackerService } from './services/fileTracker.service';
@@ -59,19 +63,29 @@ whatsappService.restoreActiveSessions();
 import { ensureAdminSeeded } from './services/auth.service';
 ensureAdminSeeded();
 
-import { MetaLlamaProvider } from './services/ai/meta';
-import { FallbackProvider } from './services/ai/fallback';
-import { PollinationsProvider } from './services/ai/pollinations';
-
-// Register AI Providers (Priority: 1. Kimi -> 2. Meta Llama -> 3. Gemini -> 4. Pollinations -> 5. Ollama -> 6. Fallback)
+// Register AI Providers with Smart Auto-Detection:
+// 1. Google Gemini (if GEMINI_API_KEY present)
+// 2. Groq (if GROQ_API_KEY present - ultra-fast free tier)
+// 3. Pollinations AI (100% Free, Zero-Config public LLM)
+// 4. Ollama (Local free on-device)
+// 5. Kimi (if KIMI_API_KEY present)
+// 6. Meta Llama (if META_API_KEY present)
+// 7. Fallback (Deterministic safety net)
 try {
-  aiRouter.registerProvider(new KimiProvider(), true);       // 1. Kimi (Moonshot AI - Primary)
-  aiRouter.registerProvider(new MetaLlamaProvider(), false); // 2. Meta / Llama API (Secondary)
-  aiRouter.registerProvider(new GeminiProvider(), false);    // 3. Google Gemini (Tertiary)
-  aiRouter.registerProvider(new PollinationsProvider());     // 4. Pollinations AI (Zero-config free online LLM)
-  aiRouter.registerProvider(new OllamaProvider());           // 5. Ollama local fallback
-  aiRouter.registerProvider(new FallbackProvider());         // 6. Rules-engine safety net
-  logger.info('AI Provider Chain configured: Kimi (Primary) → Meta Llama (Secondary) → Gemini (Tertiary) → Pollinations → Ollama → Fallback.');
+  const isGeminiPrimary = Boolean(env.GEMINI_API_KEY);
+  const isGroqPrimary = !isGeminiPrimary && Boolean(env.GROQ_API_KEY);
+  const isKimiPrimary = !isGeminiPrimary && !isGroqPrimary && Boolean(env.KIMI_API_KEY);
+  const isPollinationsPrimary = !isGeminiPrimary && !isGroqPrimary && !isKimiPrimary;
+
+  aiRouter.registerProvider(new GeminiProvider(), isGeminiPrimary);
+  aiRouter.registerProvider(new GroqProvider(), isGroqPrimary);
+  aiRouter.registerProvider(new PollinationsProvider(), isPollinationsPrimary);
+  aiRouter.registerProvider(new OllamaProvider(), false);
+  aiRouter.registerProvider(new KimiProvider(), isKimiPrimary);
+  aiRouter.registerProvider(new MetaLlamaProvider(), false);
+  aiRouter.registerProvider(new FallbackProvider(), false);
+
+  logger.info(`AI Provider Chain initialized. Primary: ${aiRouter.getPrimaryProvider()?.name || 'pollinations'}`);
 } catch (error: any) {
   logger.error(`Failed to register AI Providers: ${error.message}`);
 }

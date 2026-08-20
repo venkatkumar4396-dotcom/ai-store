@@ -11,6 +11,8 @@ interface EnvConfig {
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
   ENCRYPTION_KEY: string;
+  GROQ_API_KEY: string;
+  GROQ_MODEL: string;
   GEMINI_API_KEY: string;
   KIMI_API_KEY: string;
   KIMI_BASE_URL: string;
@@ -53,6 +55,8 @@ const env: EnvConfig = {
   JWT_SECRET: getEnvString('JWT_SECRET', 'default-dev-secret-change-me'),
   JWT_EXPIRES_IN: getEnvString('JWT_EXPIRES_IN', '7d'),
   ENCRYPTION_KEY: getEnvString('ENCRYPTION_KEY', 'default-32-char-encryption-key!!'),
+  GROQ_API_KEY: getEnvString('GROQ_API_KEY', ''),
+  GROQ_MODEL: getEnvString('GROQ_MODEL', 'llama-3.3-70b-versatile'),
   GEMINI_API_KEY: getEnvString('GEMINI_API_KEY', ''),
   KIMI_API_KEY: getEnvString('KIMI_API_KEY', ''),
   KIMI_BASE_URL: getEnvString('KIMI_BASE_URL', 'https://api.moonshot.ai/v1'),
