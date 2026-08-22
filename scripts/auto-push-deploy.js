@@ -48,21 +48,41 @@ function getDeployHooks() {
 
 function triggerHook(hook) {
   return new Promise((resolve) => {
-    const client = hook.url.startsWith('https') ? https : http;
-    const req = client.get(hook.url, (res) => {
-      let data = '';
-      res.on('data', (c) => (data += c));
-      res.on('end', () => {
-        resolve({ name: hook.name, ok: res.statusCode >= 200 && res.statusCode < 300, statusCode: res.statusCode });
+    try {
+      const urlObj = new URL(hook.url);
+      const client = urlObj.protocol === 'http:' ? http : https;
+      const options = {
+        hostname: urlObj.hostname,
+        port: urlObj.port || (urlObj.protocol === 'http:' ? 80 : 443),
+        path: urlObj.pathname + urlObj.search,
+        method: 'POST',
+        headers: {
+          'Content-Length': 0,
+          'User-Agent': 'Nexora-Deploy-Script/1.0'
+        }
+      };
+
+      const req = client.request(options, (res) => {
+        let data = '';
+        res.on('data', (c) => (data += c));
+        res.on('end', () => {
+          resolve({ name: hook.name, ok: res.statusCode >= 200 && res.statusCode < 300, statusCode: res.statusCode });
+        });
       });
-    });
-    req.on('error', (err) => {
-      resolve({ name: hook.name, ok: false, error: err.message });
-    });
-    req.setTimeout(10000, () => {
-      req.destroy();
-      resolve({ name: hook.name, ok: false, error: 'Timeout' });
-    });
+
+      req.on('error', (err) => {
+        resolve({ name: hook.name, ok: false, error: err.message });
+      });
+
+      req.setTimeout(20000, () => {
+        req.destroy();
+        resolve({ name: hook.name, ok: false, error: 'Timeout (20s)' });
+      });
+
+      req.end();
+    } catch (e) {
+      resolve({ name: hook.name, ok: false, error: e.message });
+    }
   });
 }
 
