@@ -13,7 +13,6 @@ import {
   RefreshCw,
   BarChart3,
   Activity,
-  DollarSign,
   Shield,
   Brain,
   ArrowUpRight,
@@ -602,6 +601,13 @@ export default function StockIntelligencePage() {
 
   const recStyle = analysis ? getRecommendationStyle(analysis.recommendation) : null;
 
+  // Dynamic currency symbol: ₹ for Indian stocks (.NS / .BO), $ for everything else
+  const getCurrencySymbol = (sym: string) => {
+    const upper = sym.toUpperCase();
+    return upper.endsWith(".NS") || upper.endsWith(".BO") ? "₹" : "$";
+  };
+  const currencySymbol = analysis ? getCurrencySymbol(analysis.symbol) : "$";
+
   return (
     <div className="space-y-6 stock-intelligence-page">
       {/* ═══ Page Header ═══ */}
@@ -657,7 +663,7 @@ export default function StockIntelligencePage() {
                 }}
                 onFocus={() => ticker.trim().length >= 2 && setShowSuggestions(true)}
                 onKeyDown={(e) => e.key === "Enter" && analyzeStock()}
-                className="pl-10 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-600 h-12 font-mono text-sm tracking-wide rounded-xl focus:border-emerald-500/40 focus:ring-emerald-500/20"
+                className="pl-10 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-600 h-12 text-sm tracking-wide rounded-xl focus:border-emerald-500/40 focus:ring-emerald-500/20"
               />
 
               {/* Suggestions Dropdown */}
@@ -756,9 +762,9 @@ export default function StockIntelligencePage() {
           <TabsTrigger value="watchlist" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-500 rounded-lg gap-2">
             <Eye className="h-4 w-4" /> Watchlist <span className="text-[10px] ml-0.5 opacity-60">({watchlist.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="portfolio" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-500 rounded-lg gap-2">
-            <DollarSign className="h-4 w-4" /> Portfolio
-          </TabsTrigger>
+           <TabsTrigger value="portfolio" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-500 rounded-lg gap-2">
+             <BarChart3 className="h-4 w-4" /> Portfolio
+           </TabsTrigger>
           <TabsTrigger value="practice" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-zinc-500 rounded-lg gap-2">
             <Zap className="h-4 w-4" /> Practice
           </TabsTrigger>
@@ -841,7 +847,7 @@ export default function StockIntelligencePage() {
                       {/* Right: Price */}
                       <div className="text-right space-y-1">
                         <div className="text-4xl font-extrabold text-white font-mono tabular-nums tracking-tight">
-                          ${analysis.currentPrice.toFixed(2)}
+                          {currencySymbol}{analysis.currentPrice.toFixed(2)}
                         </div>
                         <div className={`flex items-center justify-end gap-1.5 text-sm font-semibold ${analysis.change >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
                           {analysis.change >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
@@ -892,7 +898,7 @@ export default function StockIntelligencePage() {
                         <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Stop Loss</span>
                       </div>
                       <div className="text-2xl font-extrabold tracking-tight text-rose-400 font-mono tabular-nums">
-                        ${analysis.stopLoss.toFixed(2)}
+                        {currencySymbol}{analysis.stopLoss.toFixed(2)}
                       </div>
                       <p className="text-[11px] text-zinc-600 mt-2 leading-relaxed">
                         Exit below this level to limit downside risk based on ATR volatility.
@@ -909,7 +915,7 @@ export default function StockIntelligencePage() {
                         <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Profit Target</span>
                       </div>
                       <div className="text-2xl font-extrabold tracking-tight text-emerald-400 font-mono tabular-nums">
-                        ${analysis.profitTarget.toFixed(2)}
+                        {currencySymbol}{analysis.profitTarget.toFixed(2)}
                       </div>
                       <p className="text-[11px] text-zinc-600 mt-2 leading-relaxed">
                         Target exit for optimal risk/reward ratio of ~1:1.5.
@@ -1087,8 +1093,8 @@ export default function StockIntelligencePage() {
                         {[
                           { label: "MACD", value: analysis.technicalIndicators.macd.value, colored: true, histogram: analysis.technicalIndicators.macd.histogram },
                           { label: "MACD Signal", value: analysis.technicalIndicators.macd.signal },
-                          { label: "Bollinger Upper", value: analysis.technicalIndicators.bollingerBands.upper, prefix: "$" },
-                          { label: "Bollinger Lower", value: analysis.technicalIndicators.bollingerBands.lower, prefix: "$" },
+                          { label: "Bollinger Upper", value: analysis.technicalIndicators.bollingerBands.upper, prefix: currencySymbol },
+                          { label: "Bollinger Lower", value: analysis.technicalIndicators.bollingerBands.lower, prefix: currencySymbol },
                           { label: "Volume", value: analysis.technicalIndicators.volume / 1e6, suffix: "M" },
                         ].map((item, i) => (
                           <div key={i} className="flex justify-between items-center text-sm">
@@ -1133,7 +1139,7 @@ export default function StockIntelligencePage() {
                             <div className="text-xs text-zinc-600 font-mono">None detected</div>
                           ) : (
                             analysis.supportLevels.map((s, i) => (
-                              <div key={i} className="text-sm font-mono font-semibold text-emerald-300 tabular-nums">${s.toFixed(2)}</div>
+                              <div key={i} className="text-sm font-mono font-semibold text-emerald-300 tabular-nums">{currencySymbol}{s.toFixed(2)}</div>
                             ))
                           )}
                         </div>
@@ -1143,7 +1149,7 @@ export default function StockIntelligencePage() {
                             <div className="text-xs text-zinc-600 font-mono">None detected</div>
                           ) : (
                             analysis.resistanceLevels.map((r, i) => (
-                              <div key={i} className="text-sm font-mono font-semibold text-rose-300 tabular-nums">${r.toFixed(2)}</div>
+                              <div key={i} className="text-sm font-mono font-semibold text-rose-300 tabular-nums">{currencySymbol}{r.toFixed(2)}</div>
                             ))
                           )}
                         </div>
@@ -1265,7 +1271,7 @@ export default function StockIntelligencePage() {
           <Card className="border border-white/[0.06] bg-zinc-950/40 backdrop-blur-xl">
             <CardHeader>
               <CardTitle className="text-base font-semibold text-white flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-emerald-400" /> Portfolio Tracker
+                <BarChart3 className="h-5 w-5 text-emerald-400" /> Portfolio Tracker
               </CardTitle>
               <CardDescription className="text-zinc-500 text-sm">Track your positions, calculate P&L and total value.</CardDescription>
             </CardHeader>
@@ -1300,7 +1306,7 @@ export default function StockIntelligencePage() {
               {/* Portfolio list */}
               {portfolio.length === 0 ? (
                 <div className="text-center py-12 text-zinc-600 text-sm">
-                  <DollarSign className="h-8 w-8 mx-auto mb-3 text-zinc-700" />
+                  <BarChart3 className="h-8 w-8 mx-auto mb-3 text-zinc-700" />
                   No positions yet. Add your first stock position above.
                 </div>
               ) : (
@@ -1319,8 +1325,8 @@ export default function StockIntelligencePage() {
                         <tr key={item.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition">
                           <td className="py-3.5 font-semibold text-emerald-400">{item.symbol}</td>
                           <td className="py-3.5 text-right font-mono tabular-nums">{item.shares}</td>
-                          <td className="py-3.5 text-right font-mono tabular-nums">${item.averagePrice.toFixed(2)}</td>
-                          <td className="py-3.5 text-right font-mono tabular-nums">${(item.shares * item.averagePrice).toFixed(2)}</td>
+                          <td className="py-3.5 text-right font-mono tabular-nums">{getCurrencySymbol(item.symbol)}{item.averagePrice.toFixed(2)}</td>
+                          <td className="py-3.5 text-right font-mono tabular-nums">{getCurrencySymbol(item.symbol)}{(item.shares * item.averagePrice).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -1340,7 +1346,7 @@ export default function StockIntelligencePage() {
               <Badge className="bg-emerald-500/10 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 text-[10px] practice-mode-badge">Virtual</Badge>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Practice trading with $100,000 in virtual funds. No real money involved — perfect for learning strategies, testing ideas, and building confidence before you invest real capital.
+              Practice trading with virtual funds. No real money involved — perfect for learning strategies, testing ideas, and building confidence before you invest real capital.
             </p>
           </div>
           <PaperTradingPanel 

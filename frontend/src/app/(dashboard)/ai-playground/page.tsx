@@ -397,18 +397,20 @@ export default function AiPlaygroundPage() {
         options: {
           temperature: 0.7,
           maxTokens: 1000,
+          model: selectedModelId,
         },
       });
 
       const latency = Date.now() - startTime;
       const tokens = response.tokensUsed || Math.floor(userMsg.content.length / 4) + 50;
       const cost = activeModel.costPer1kTokens > 0 ? (tokens / 1000) * activeModel.costPer1kTokens : 0;
+      const matchedProvider = providers.find((p) => p.id === response.provider || p.name.toLowerCase().includes(response.provider?.toLowerCase()));
 
       const assistantMsg: ChatMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
         content: response.content || response.text || "No response received.",
-        provider: activeProvider.name,
+        provider: matchedProvider?.name || response.provider || activeProvider.name,
         model: response.model || activeModel.name,
         tokens,
         latency,
@@ -420,41 +422,26 @@ export default function AiPlaygroundPage() {
       setTotalTokens((t) => t + tokens);
       setTotalCost((c) => c + cost);
     } catch (error: any) {
-      console.warn("AI remote API error, generating local intelligent completion:", error);
+      console.error("AI Playground Chat Error:", error);
 
       const latency = Date.now() - startTime || 450;
-      const tokens = Math.floor(userMsg.content.length / 4) + 120;
-      const cost = 0;
+      const errDetail = error.response?.data?.error || error.response?.data?.message || error.message || "Unknown error";
 
-      // Smart local response generator
-      let localReply = "";
-      const lower = userMsg.content.toLowerCase();
-
-      if (lower.includes("stock") || lower.includes("price") || lower.includes("aapl") || lower.includes("trade") || lower.includes("rsi")) {
-        localReply = `### 📈 Stock Intelligence Analysis\n\n**Asset Overview:** ${userMsg.content}\n\n- **Technical Bias:** Bullish consolidation\n- **RSI (14):** 54.2 *(Neutral-Bullish)*\n- **MACD (12, 26, 9):** Positive histogram divergence (+1.42)\n- **Support Levels:** $182.40 · $179.80\n- **Resistance Levels:** $190.50 · $194.20\n\n**Strategy Recommendation:** Consider scaling in on minor pullbacks towards support with a stop-loss below the 50-day moving average.`;
-      } else if (lower.includes("travel") || lower.includes("trip") || lower.includes("flight") || lower.includes("hotel") || lower.includes("itinerary")) {
-        localReply = `### ✈️ Travel & Trip Planning Itinerary\n\nHere is a curated itinerary plan for **${userMsg.content}**:\n\n1. **Day 1: Arrival & Exploration** — Check into central accommodations, explore the historic district, and enjoy local culinary specialties.\n2. **Day 2: Top Sights & Landmarks** — Morning guided tour, scenic viewpoints, and afternoon museum/cultural discovery.\n3. **Day 3: Adventure & Excursions** — Day-trip to nearby natural parks or iconic scenic spots.\n4. **Day 4: Leisure & Local Markets** — Artisan shopping, coffee tours, and relaxing evening dining.\n\n*Estimated Budget Range:* $650 - $1,200 per traveler depending on cabin and hotel class.`;
-      } else if (lower.includes("code") || lower.includes("python") || lower.includes("javascript") || lower.includes("typescript") || lower.includes("api") || lower.includes("function")) {
-        localReply = `### 💻 Code Solution\n\nHere is an optimized implementation for your request:\n\n\`\`\`typescript\n// Autonomous AI Agent Handler\nexport async function processAgentTask(input: string, options: { maxTokens?: number } = {}) {\n  try {\n    console.log(\`[Agent] Processing: \${input}\`);\n    // Execute structured reasoning\n    const result = {\n      status: 'completed',\n      timestamp: new Date().toISOString(),\n      output: \`Processed: \${input.trim()}\`\n    };\n    return result;\n  } catch (error) {\n    console.error('[Agent Error]', error);\n    throw error;\n  }\n}\n\`\`\`\n\n**Key Highlights:**\n- Full TypeScript strict typing and clean async error handling\n- Modular structure ready for microservices or serverless functions`;
-      } else {
-        localReply = `### 🤖 Nexora AI Completion\n\nI have analyzed your query: **"${userMsg.content}"**.\n\n**Key Insights & Next Steps:**\n1. **Core Summary:** Clear objectives identified with high execution feasibility.\n2. **Recommendations:** Break down the workflow into modular milestones and automate repetitive stages.\n3. **Available Toolkits:** You can test real-time stock signals, travel booking, resume ATS optimization, and WhatsApp business flows directly from the sidebar.`;
-      }
+      const errorReply = `⚠️ **AI Service Communication Error**\n\n${errDetail}\n\n*Suggestions to resolve:*\n- If running locally, make sure the backend server on port 5000 is running.\n- You can select another AI Provider from the left panel (e.g. Pollinations AI, Google Gemini, or Groq).\n- If you have an API key, add it in **Settings → API Keys**.`;
 
       const assistantMsg: ChatMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
-        content: localReply,
-        provider: "Nexora Intelligence Engine",
+        content: errorReply,
+        provider: activeProvider.name,
         model: activeModel.name,
-        tokens,
+        tokens: 0,
         latency,
-        cost,
+        cost: 0,
         timestamp: new Date().toISOString(),
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
-      setTotalTokens((t) => t + tokens);
-      setTotalCost((c) => c + cost);
     } finally {
       setIsLoading(false);
     }
