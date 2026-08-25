@@ -23,6 +23,7 @@ import {
   TrendingUp,
   MessageSquare,
   Bot,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +53,7 @@ function getPasswordStrength(password: string): PasswordStrength {
     2: { label: "Fair", color: "bg-amber-500" },
     3: { label: "Good", color: "bg-yellow-400" },
     4: { label: "Strong", color: "bg-emerald-500" },
-    5: { label: "Very strong", color: "bg-emerald-400" },
+    5: { label: "Very strong", color: "bg-emerald-500" },
   };
   return { score, ...levels[score], checks };
 }
@@ -105,7 +106,7 @@ function OtpInput({ value, onChange }: { value: string; onChange: (val: string) 
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={handlePaste}
-          className="w-10 h-12 sm:w-11 sm:h-12 text-center text-lg font-bold rounded-xl border border-white/10 bg-white/[0.04] text-white focus:outline-none focus:border-indigo-500/70 focus:bg-indigo-500/10 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+          className="w-10 h-12 sm:w-11 sm:h-12 text-center text-lg font-bold rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all duration-150 shadow-sm"
         />
       ))}
     </div>
@@ -121,71 +122,48 @@ interface RoleProfile {
   subtitle: string;
   badge: string;
   icon: any;
-  gradient: string;
   activeBg: string;
   activeBorder: string;
-  description: string;
-  features: string[];
+  activeText: string;
+  iconColor: string;
 }
 
 const USER_TYPES: RoleProfile[] = [
   {
     id: "user",
-    title: "Individual",
-    subtitle: "Personal AI Workspace",
-    badge: "Most Popular",
+    title: "Personal",
+    subtitle: "Individual User",
+    badge: "Popular",
     icon: User,
-    gradient: "from-indigo-500 to-violet-500",
-    activeBg: "bg-indigo-500/15",
-    activeBorder: "border-indigo-500/50",
-    description: "Multi-modal travel planning, stock intelligence, career accelerator & document analysis.",
-    features: ["Travel & Hotel Booker", "Stock RSI & MACD Signals", "Resume ATS Optimizer"],
+    activeBg: "bg-indigo-50",
+    activeBorder: "border-indigo-600",
+    activeText: "text-indigo-700",
+    iconColor: "text-indigo-600",
   },
   {
     id: "business",
     title: "Business",
-    subtitle: "Sales & WhatsApp Bot",
-    badge: "Enterprise",
+    subtitle: "Sales & Bot",
+    badge: "Team",
     icon: Briefcase,
-    gradient: "from-emerald-500 to-teal-500",
-    activeBg: "bg-emerald-500/15",
-    activeBorder: "border-emerald-500/50",
-    description: "Automated WhatsApp chatbots, lead generation, sales workflows & customer management.",
-    features: ["24/7 WhatsApp AI Bot", "Cold Email Generator", "Pipeline Automation"],
+    activeBg: "bg-emerald-50",
+    activeBorder: "border-emerald-600",
+    activeText: "text-emerald-700",
+    iconColor: "text-emerald-600",
   },
   {
     id: "developer",
-    title: "Developer / Admin",
-    subtitle: "Full LLM Control & API",
-    badge: "Full Access",
+    title: "Developer",
+    subtitle: "Full API & Control",
+    badge: "Admin",
     icon: Terminal,
-    gradient: "from-amber-500 to-orange-500",
-    activeBg: "bg-amber-500/15",
-    activeBorder: "border-amber-500/50",
-    description: "Direct access to AI Playground, custom LLM keys (Gemini, Llama, Kimi), and admin diagnostics.",
-    features: ["AI Model Playground", "Custom API Keys Vault", "System Telemetry"],
+    activeBg: "bg-amber-50",
+    activeBorder: "border-amber-600",
+    activeText: "text-amber-700",
+    iconColor: "text-amber-600",
   },
 ];
 
-// ─── Ambient Glowing Background ───────────────────────────────────
-function AmbientBg() {
-  return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden>
-      <div className="login-orb-1 absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-indigo-600/15 blur-[140px]" />
-      <div className="login-orb-2 absolute top-1/2 -right-40 w-[550px] h-[550px] rounded-full bg-violet-600/15 blur-[130px]" />
-      <div className="login-orb-3 absolute -bottom-32 left-1/3 w-[500px] h-[500px] rounded-full bg-cyan-600/10 blur-[120px]" />
-      <div
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px)`,
-          backgroundSize: "32px 32px",
-        }}
-      />
-    </div>
-  );
-}
-
-// ─── Main Login Page ─────────────────────────────────────────────
 export default function LoginPage() {
   const router = useRouter();
 
@@ -211,10 +189,6 @@ export default function LoginPage() {
   const [showOAuthModal, setShowOAuthModal] = React.useState(false);
   const [oauthProvider, setOauthProvider] = React.useState<"google" | "github">("google");
   const [customOAuthEmail, setCustomOAuthEmail] = React.useState("");
-
-  const activeRole = React.useMemo(() => {
-    return USER_TYPES.find((t) => t.id === userType) || USER_TYPES[0];
-  }, [userType]);
 
   const passwordStrength = React.useMemo(() => getPasswordStrength(newPassword), [newPassword]);
 
@@ -251,7 +225,7 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (err: any) {
       if (err.message === "Network Error" || !err.response) {
-        setError("Cannot reach Nexora server. Please check your network connection.");
+        setError("Cannot reach Nexora server. Please check your connection.");
       } else {
         setError(err.response?.data?.error || "Invalid credentials. Please verify your email and password.");
       }
@@ -295,7 +269,6 @@ export default function LoginPage() {
       }
       router.push("/dashboard");
     } catch (err: any) {
-      // Fallback for demo OAuth
       if (typeof window !== "undefined") {
         localStorage.setItem("nexora_logged_in", "true");
         localStorage.setItem("nexora_user_type", userType);
@@ -319,11 +292,11 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const res = await api.post("/auth/forgot-password", { email: cleanEmail });
-      setForgotSuccess(res.data?.message || "Verification OTP generated!");
+      setForgotSuccess(res.data?.message || "Verification code generated!");
       if (res.data?.debugOtp) setOtp(res.data.debugOtp);
       setStep(2);
     } catch (err: any) {
-      setForgotSuccess("OTP generated! Use code: 123456");
+      setForgotSuccess("Verification code sent! (Use demo code: 123456)");
       setOtp("123456");
       setStep(2);
     } finally {
@@ -343,7 +316,7 @@ export default function LoginPage() {
     try {
       const res = await api.post("/auth/verify-otp", { email: forgotEmail.trim(), otp });
       setResetPermissionToken(res.data?.resetPermissionToken || "demo-token");
-      setForgotSuccess("Code verified! Choose your new password.");
+      setForgotSuccess("Code verified! Enter your new password.");
       setStep(3);
     } catch (err: any) {
       setResetPermissionToken("demo-token");
@@ -363,7 +336,7 @@ export default function LoginPage() {
       return;
     }
     if (passwordStrength.score < 3) {
-      setForgotError("Please create a stronger password with letters and numbers.");
+      setForgotError("Please choose a stronger password with letters and numbers.");
       return;
     }
     setIsLoading(true);
@@ -398,161 +371,130 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-page-root min-h-screen w-full bg-[#050510] text-white flex items-center justify-center p-4 sm:p-6 lg:p-10 relative overflow-hidden selection:bg-indigo-500/30">
-      <AmbientBg />
-
+    <div className="min-h-screen w-full bg-slate-50 text-slate-900 flex items-center justify-center p-4 sm:p-6 lg:p-10 relative">
+      
       {/* Main Container */}
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         
         {/* ── LEFT SHOWCASE PANEL (Desktop) ── */}
-        <div className="hidden lg:flex lg:col-span-6 flex-col justify-between space-y-8 pr-4">
+        <div className="hidden lg:flex lg:col-span-6 flex-col justify-between space-y-8 pr-2">
           
           {/* Logo & Brand Header */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <Link href="/" className="inline-flex items-center gap-3 group">
-              <div className="relative">
-                <div className="absolute inset-0 bg-indigo-500/40 rounded-2xl blur-xl group-hover:scale-110 transition-transform duration-300" />
-                <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center shadow-xl shadow-indigo-600/30 border border-white/20">
-                  <Sparkles className="h-6 w-6 text-white" />
-                </div>
+              <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-600/20">
+                <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
-                <span className="font-extrabold text-2xl text-white tracking-tight">Nexora</span>
+                <span className="font-bold text-2xl text-slate-900 tracking-tight">Nexora</span>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-                    11 Autonomous Agents Online
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="text-[11px] text-emerald-700 font-semibold uppercase tracking-wide">
+                    11 AI Agents Active
                   </span>
                 </div>
               </div>
             </Link>
 
-            <div className="pt-4 space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 text-xs font-semibold">
-                <Zap className="h-3.5 w-3.5 text-indigo-400" />
-                Next-Gen Multi-Agent Workspace
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold">
+                <Zap className="h-3.5 w-3.5 text-indigo-600" />
+                All-in-One AI Platform
               </div>
-              <h1 className="text-4xl xl:text-5xl font-black leading-tight text-white tracking-tight">
-                Intelligence,{" "}
-                <span className="bg-gradient-to-r from-indigo-400 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
-                  Automated.
-                </span>
+              <h1 className="text-3xl xl:text-4xl font-extrabold text-slate-900 leading-tight">
+                Simple, powerful AI tools for everyone.
               </h1>
-              <p className="text-zinc-400 text-sm xl:text-base leading-relaxed max-w-md">
-                One unified platform for autonomous travel booking, real-time stock signals, WhatsApp business automation, and document intelligence.
+              <p className="text-slate-600 text-sm xl:text-base leading-relaxed">
+                Log in to access travel planning, stock market signals, WhatsApp automation, and resume optimization in one place.
               </p>
             </div>
           </div>
 
-          {/* Interactive Live Agent Highlights */}
-          <div className="space-y-3">
-            <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-              <Bot className="h-3.5 w-3.5 text-indigo-400" />
-              Featured Intelligence Engines
+          {/* Simple Feature Highlights */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
+                  <Plane className="h-4 w-4" />
+                </div>
+                <div className="text-xs font-bold text-slate-900">Travel Booker</div>
+              </div>
+              <div className="text-xs text-slate-500">
+                Compare flights, trains, and hotels automatically.
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-indigo-500/30 transition-all group backdrop-blur-sm">
-                <div className="flex items-center gap-2.5 mb-1.5">
-                  <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 group-hover:scale-105 transition-transform">
-                    <Plane className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">Travel & Hotel</div>
-                    <div className="text-[10px] text-zinc-400">Multi-modal booking</div>
-                  </div>
-                </div>
-                <div className="text-[11px] text-zinc-400 leading-snug">
-                  Autonomous flight, bus & train routes with instant price comparison.
-                </div>
-              </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-emerald-500/30 transition-all group backdrop-blur-sm">
-                <div className="flex items-center gap-2.5 mb-1.5">
-                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:scale-105 transition-transform">
-                    <TrendingUp className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">Stock Signals</div>
-                    <div className="text-[10px] text-zinc-400">RSI & MACD analysis</div>
-                  </div>
+            <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                  <TrendingUp className="h-4 w-4" />
                 </div>
-                <div className="text-[11px] text-zinc-400 leading-snug">
-                  Real-time market analytics with technical indicators and AI signals.
-                </div>
+                <div className="text-xs font-bold text-slate-900">Stock Insights</div>
               </div>
-
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-violet-500/30 transition-all group backdrop-blur-sm">
-                <div className="flex items-center gap-2.5 mb-1.5">
-                  <div className="p-2 rounded-xl bg-violet-500/10 text-violet-400 group-hover:scale-105 transition-transform">
-                    <MessageSquare className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">WhatsApp Bot</div>
-                    <div className="text-[10px] text-zinc-400">CRM & 24/7 AI chat</div>
-                  </div>
-                </div>
-                <div className="text-[11px] text-zinc-400 leading-snug">
-                  Automated customer conversations with natural language processing.
-                </div>
+              <div className="text-xs text-slate-500">
+                Real-time technical indicators and alerts.
               </div>
+            </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-500/30 transition-all group backdrop-blur-sm">
-                <div className="flex items-center gap-2.5 mb-1.5">
-                  <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 group-hover:scale-105 transition-transform">
-                    <Sparkles className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">AI Playground</div>
-                    <div className="text-[10px] text-zinc-400">Multi-model router</div>
-                  </div>
+            <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <div className="p-2 rounded-lg bg-violet-50 text-violet-600">
+                  <MessageSquare className="h-4 w-4" />
                 </div>
-                <div className="text-[11px] text-zinc-400 leading-snug">
-                  Seamless fallback across Kimi, Meta Llama, Gemini & Local AI.
+                <div className="text-xs font-bold text-slate-900">WhatsApp AI</div>
+              </div>
+              <div className="text-xs text-slate-500">
+                Automated customer chat & lead follow-up.
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <div className="p-2 rounded-lg bg-amber-50 text-amber-600">
+                  <Bot className="h-4 w-4" />
                 </div>
+                <div className="text-xs font-bold text-slate-900">AI Playground</div>
+              </div>
+              <div className="text-xs text-slate-500">
+                Multi-model chat with Gemini, Llama, and Kimi.
               </div>
             </div>
           </div>
 
-          {/* Stats Bar */}
-          <div className="grid grid-cols-4 gap-2 pt-2 border-t border-white/[0.06]">
-            {[
-              { val: "11+", label: "Agents" },
-              { val: "99.9%", label: "Uptime" },
-              { val: "< 1.2s", label: "Latency" },
-              { val: "100%", label: "Free Tier" },
-            ].map((st, i) => (
-              <div key={i} className="text-center p-2 rounded-xl bg-white/[0.02]">
-                <div className="text-sm font-black text-white">{st.val}</div>
-                <div className="text-[10px] text-zinc-500 font-medium">{st.label}</div>
-              </div>
-            ))}
+          {/* Trust badges */}
+          <div className="flex items-center gap-6 pt-2 border-t border-slate-200 text-xs font-medium text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              Secure 256-bit Auth
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-indigo-600" />
+              99.9% Uptime
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Zap className="h-4 w-4 text-amber-600" />
+              Instant Access
+            </span>
           </div>
         </div>
 
         {/* ── RIGHT AUTH CARD (Forms) ── */}
         <div className="lg:col-span-6 flex justify-center w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="w-full max-w-[460px] rounded-3xl border border-white/[0.12] bg-[#0c0e22]/90 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-indigo-950/60 relative overflow-hidden"
-          >
-            {/* Top glowing edge */}
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400 opacity-80" />
-
+          <div className="w-full max-w-[440px] rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/50 relative">
+            
             {/* Mobile Brand Header */}
-            <div className="flex lg:hidden items-center justify-between mb-6 pb-4 border-b border-white/[0.08]">
+            <div className="flex lg:hidden items-center justify-between mb-6 pb-4 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-600/30">
-                  <Sparkles className="h-4.5 w-4.5 text-white" />
+                <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm">
+                  <Sparkles className="h-4 w-4" />
                 </div>
                 <div>
-                  <span className="font-black text-lg text-white">Nexora</span>
-                  <div className="text-[10px] text-emerald-400 font-semibold">11 Agents Active</div>
+                  <span className="font-bold text-lg text-slate-900">Nexora</span>
+                  <div className="text-[10px] text-emerald-600 font-semibold">11 Agents Active</div>
                 </div>
               </div>
-              <Link href="/" className="text-xs text-zinc-400 hover:text-white transition-colors">
-                Back to Home →
+              <Link href="/" className="text-xs text-slate-500 hover:text-slate-900 font-medium">
+                Home →
               </Link>
             </div>
 
@@ -561,24 +503,25 @@ export default function LoginPage() {
                 /* ══════════ FORGOT PASSWORD FLOW ══════════ */
                 <motion.div
                   key="forgot-view"
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 15 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.25 }}
+                  exit={{ opacity: 0, x: -15 }}
+                  transition={{ duration: 0.2 }}
                   className="space-y-5"
                 >
                   <div>
                     <button
+                      type="button"
                       onClick={resetForgotState}
-                      className="text-xs font-semibold text-indigo-300 hover:text-white transition-colors flex items-center gap-1.5 mb-3"
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1 mb-2.5"
                     >
                       ← Back to Sign In
                     </button>
-                    <h2 className="text-2xl font-black text-white tracking-tight">Account Recovery</h2>
-                    <p className="text-xs text-zinc-400 mt-1">
-                      {step === 1 && "Enter your email address to receive a 6-digit verification code."}
-                      {step === 2 && "Enter the 6-digit code sent to your email to verify identity."}
-                      {step === 3 && "Create a secure new password for your account."}
+                    <h2 className="text-2xl font-bold text-slate-900">Reset Password</h2>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {step === 1 && "Enter your registered email to receive a verification code."}
+                      {step === 2 && "Enter the 6-digit code sent to your email."}
+                      {step === 3 && "Create a new secure password for your account."}
                       {step === 4 && "Password changed successfully! You can now sign in."}
                     </p>
                   </div>
@@ -588,8 +531,8 @@ export default function LoginPage() {
                     {[1, 2, 3, 4].map((s) => (
                       <div
                         key={s}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          step >= s ? "bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" : "bg-white/10"
+                        className={`h-1.5 rounded-full transition-all duration-200 ${
+                          step >= s ? "bg-indigo-600" : "bg-slate-200"
                         }`}
                       />
                     ))}
@@ -597,39 +540,37 @@ export default function LoginPage() {
 
                   {/* Feedback Notification */}
                   {(forgotError || forgotSuccess) && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
+                    <div
                       className={`flex items-start gap-2.5 p-3 rounded-xl border text-xs font-medium ${
                         forgotError
-                          ? "bg-rose-500/15 border-rose-500/30 text-rose-200"
-                          : "bg-emerald-500/15 border-emerald-500/30 text-emerald-200"
+                          ? "bg-rose-50 border-rose-200 text-rose-700"
+                          : "bg-emerald-50 border-emerald-200 text-emerald-800"
                       }`}
                     >
                       {forgotError ? (
-                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-rose-400" />
+                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-rose-600" />
                       ) : (
-                        <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-emerald-400" />
+                        <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" />
                       )}
                       <span>{forgotError || forgotSuccess}</span>
-                    </motion.div>
+                    </div>
                   )}
 
                   {/* Step 1: Email Input */}
                   {step === 1 && (
                     <form onSubmit={handleForgotSubmit} className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
+                        <Label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                           Email Address
                         </Label>
                         <div className="relative">
-                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
+                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                           <Input
                             type="email"
                             placeholder="you@example.com"
                             value={forgotEmail}
                             onChange={(e) => setForgotEmail(e.target.value)}
-                            className="pl-10 h-11 bg-white/[0.04] border-white/15 text-white placeholder:text-zinc-500 rounded-xl focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                            className="pl-10 h-11 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                             required
                           />
                         </div>
@@ -637,7 +578,7 @@ export default function LoginPage() {
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30"
+                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm"
                       >
                         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Verification Code"}
                       </Button>
@@ -648,7 +589,7 @@ export default function LoginPage() {
                   {step === 2 && (
                     <form onSubmit={handleOtpVerify} className="space-y-4">
                       <div className="space-y-2 text-center">
-                        <Label className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
+                        <Label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block">
                           6-Digit Verification Code
                         </Label>
                         <OtpInput value={otp} onChange={setOtp} />
@@ -656,7 +597,7 @@ export default function LoginPage() {
                       <Button
                         type="submit"
                         disabled={isLoading || otp.length !== 6}
-                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30"
+                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm"
                       >
                         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify Code"}
                       </Button>
@@ -664,9 +605,9 @@ export default function LoginPage() {
                         <button
                           type="button"
                           onClick={() => setStep(1)}
-                          className="text-xs text-zinc-400 hover:text-white transition-colors"
+                          className="text-xs text-slate-500 hover:text-indigo-600 font-medium transition-colors"
                         >
-                          Didn't get the code? Change email or resend
+                          Didn't receive the code? Resend or change email
                         </button>
                       </div>
                     </form>
@@ -676,23 +617,23 @@ export default function LoginPage() {
                   {step === 3 && (
                     <form onSubmit={handleResetSubmit} className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                          New Secure Password
+                        <Label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                          New Password
                         </Label>
                         <div className="relative">
-                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                           <Input
                             type={showNewPassword ? "text" : "password"}
-                            placeholder="Min 8 characters with letters & numbers"
+                            placeholder="At least 8 characters"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="pl-10 pr-10 h-11 bg-white/[0.04] border-white/15 text-white placeholder:text-zinc-500 rounded-xl focus:border-indigo-400"
+                            className="pl-10 pr-10 h-11 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                             required
                           />
                           <button
                             type="button"
                             onClick={() => setShowNewPassword(!showNewPassword)}
-                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
                           >
                             {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
@@ -700,19 +641,19 @@ export default function LoginPage() {
 
                         {/* Password strength indicators */}
                         {newPassword && (
-                          <div className="space-y-1.5 pt-2">
+                          <div className="space-y-1.5 pt-1">
                             <div className="flex gap-1">
                               {Array.from({ length: 5 }).map((_, i) => (
                                 <div
                                   key={i}
-                                  className={`h-1 flex-1 rounded-full transition-all ${
-                                    i < passwordStrength.score ? passwordStrength.color : "bg-white/10"
+                                  className={`h-1.5 flex-1 rounded-full transition-all ${
+                                    i < passwordStrength.score ? passwordStrength.color : "bg-slate-200"
                                   }`}
                                 />
                               ))}
                             </div>
-                            <div className="text-[11px] font-semibold text-zinc-400">
-                              Strength: <span className="text-white">{passwordStrength.label}</span>
+                            <div className="text-[11px] font-medium text-slate-500">
+                              Strength: <span className="font-semibold text-slate-800">{passwordStrength.label}</span>
                             </div>
                           </div>
                         )}
@@ -721,7 +662,7 @@ export default function LoginPage() {
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30"
+                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm"
                       >
                         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save New Password"}
                       </Button>
@@ -730,19 +671,20 @@ export default function LoginPage() {
 
                   {/* Step 4: Reset Success */}
                   {step === 4 && (
-                    <div className="text-center space-y-4 py-3">
-                      <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                        <CheckCircle2 className="h-7 w-7" />
+                    <div className="text-center space-y-4 py-2">
+                      <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                        <CheckCircle2 className="h-6 w-6" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-white">Password Updated</h3>
-                        <p className="text-xs text-zinc-400 mt-1">Your new password is now active.</p>
+                        <h3 className="text-lg font-bold text-slate-900">Password Updated</h3>
+                        <p className="text-xs text-slate-500 mt-1">Your new password is set. You can now sign in.</p>
                       </div>
                       <Button
+                        type="button"
                         onClick={resetForgotState}
-                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30"
+                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm"
                       >
-                        Sign In with New Password
+                        Sign In Now
                       </Button>
                     </div>
                   )}
@@ -751,28 +693,26 @@ export default function LoginPage() {
                 /* ══════════ MAIN LOGIN FORM ══════════ */
                 <motion.div
                   key="login-view"
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -15 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.25 }}
+                  exit={{ opacity: 0, x: 15 }}
+                  transition={{ duration: 0.2 }}
                   className="space-y-5"
                 >
                   {/* Form Header */}
                   <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Welcome Back</h2>
-                    <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-                      Sign in to manage your agents and automation workspace.
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Sign In</h2>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                      Welcome back! Enter your details to continue.
                     </p>
                   </div>
 
                   {/* Role Selector Tabs */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-bold text-zinc-300 uppercase tracking-wider">Select Workspace Role</span>
-                      <span className="text-indigo-300 font-medium">Select workspace profile</span>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block">
+                      Account Type
+                    </Label>
+                    <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200">
                       {USER_TYPES.map((type) => {
                         const Icon = type.icon;
                         const isActive = userType === type.id;
@@ -781,22 +721,15 @@ export default function LoginPage() {
                             key={type.id}
                             type="button"
                             onClick={() => handleSelectRole(type.id)}
-                            className={`flex flex-col items-center gap-1.5 py-2.5 px-2 rounded-xl text-center transition-all duration-200 border ${
+                            className={`flex flex-col items-center gap-1 py-2 px-2 rounded-lg text-center transition-all duration-150 ${
                               isActive
-                                ? `${type.activeBg} ${type.activeBorder} shadow-lg shadow-black/40`
-                                : "border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.04]"
+                                ? "bg-white text-slate-900 shadow-sm font-bold border border-slate-200"
+                                : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 font-medium"
                             }`}
                           >
-                            <div className={`p-1.5 rounded-lg ${isActive ? `bg-gradient-to-br ${type.gradient} text-white` : "bg-white/[0.06] text-zinc-400"}`}>
-                              <Icon className="h-4 w-4" />
-                            </div>
-                            <div className="leading-tight">
-                              <div className={`text-[11px] font-bold ${isActive ? "text-white" : "text-zinc-300"}`}>
-                                {type.title}
-                              </div>
-                              <div className="text-[9px] text-zinc-500 font-medium hidden sm:block">
-                                {type.badge}
-                              </div>
+                            <div className="flex items-center gap-1.5">
+                              <Icon className={`h-3.5 w-3.5 ${isActive ? type.iconColor : "text-slate-400"}`} />
+                              <span className="text-xs">{type.title}</span>
                             </div>
                           </button>
                         );
@@ -808,12 +741,12 @@ export default function LoginPage() {
                   <AnimatePresence>
                     {error && (
                       <motion.div
-                        initial={{ opacity: 0, y: -6, height: 0 }}
-                        animate={{ opacity: 1, y: 0, height: "auto" }}
-                        exit={{ opacity: 0, y: -6, height: 0 }}
-                        className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-medium"
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
                       >
-                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-rose-400" />
+                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-rose-600" />
                         <span>{error}</span>
                       </motion.div>
                     )}
@@ -823,18 +756,18 @@ export default function LoginPage() {
                   <form onSubmit={handleLogin} className="space-y-4">
                     {/* Email / Username */}
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
+                      <Label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                         Email or Username
                       </Label>
                       <div className="relative">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                         <Input
                           id="login-email"
                           type="text"
-                          placeholder="name@example.com or username"
+                          placeholder="name@example.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="pl-10 h-11 bg-white/[0.04] border-white/15 text-white placeholder:text-zinc-500 rounded-xl focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-sm font-medium"
+                          className="pl-10 h-11 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 text-sm font-medium"
                           required
                           autoComplete="username"
                         />
@@ -844,7 +777,7 @@ export default function LoginPage() {
                     {/* Password */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <Label className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
+                        <Label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                           Password
                         </Label>
                         <button
@@ -853,27 +786,27 @@ export default function LoginPage() {
                             setForgotMode(true);
                             setForgotEmail(email);
                           }}
-                          className="text-xs font-semibold text-indigo-300 hover:text-white transition-colors"
+                          className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
                         >
                           Forgot password?
                         </button>
                       </div>
                       <div className="relative">
-                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                         <Input
                           id="login-password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
+                          placeholder="Enter password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="pl-10 pr-10 h-11 bg-white/[0.04] border-white/15 text-white placeholder:text-zinc-500 rounded-xl focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 text-sm font-medium"
+                          className="pl-10 pr-10 h-11 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 text-sm font-medium"
                           required
                           autoComplete="current-password"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -885,27 +818,27 @@ export default function LoginPage() {
                       id="login-submit"
                       type="submit"
                       disabled={isLoading}
-                      className="w-full h-11 bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition-all duration-300 text-sm"
+                      className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
                     >
                       {isLoading ? (
                         <span className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" /> Authenticating...
+                          <Loader2 className="h-4 w-4 animate-spin" /> Signing in...
                         </span>
                       ) : (
                         <span className="flex items-center gap-2">
-                          Sign In to Workspace <ArrowRight className="h-4 w-4" />
+                          Sign In <ArrowRight className="h-4 w-4" />
                         </span>
                       )}
                     </Button>
                   </form>
 
                   {/* Social Divider */}
-                  <div className="flex items-center gap-3 py-1">
-                    <div className="flex-1 h-px bg-white/10" />
-                    <span className="text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">
+                  <div className="flex items-center gap-3 py-0.5">
+                    <div className="flex-1 h-px bg-slate-200" />
+                    <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
                       or continue with
                     </span>
-                    <div className="flex-1 h-px bg-white/10" />
+                    <div className="flex-1 h-px bg-slate-200" />
                   </div>
 
                   {/* OAuth Buttons */}
@@ -914,7 +847,7 @@ export default function LoginPage() {
                       type="button"
                       onClick={() => handleOAuthLogin("google")}
                       disabled={isLoading}
-                      className="flex items-center justify-center gap-2.5 h-10 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-zinc-200 text-xs font-bold transition-all duration-200"
+                      className="flex items-center justify-center gap-2 h-10 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all shadow-xs"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -929,7 +862,7 @@ export default function LoginPage() {
                       type="button"
                       onClick={() => handleOAuthLogin("github")}
                       disabled={isLoading}
-                      className="flex items-center justify-center gap-2.5 h-10 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-zinc-200 text-xs font-bold transition-all duration-200"
+                      className="flex items-center justify-center gap-2 h-10 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all shadow-xs"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
@@ -939,37 +872,37 @@ export default function LoginPage() {
                   </div>
 
                   {/* Register Link */}
-                  <div className="text-center pt-2">
-                    <p className="text-xs text-zinc-400">
-                      New to Nexora?{" "}
+                  <div className="text-center pt-1">
+                    <p className="text-xs text-slate-500">
+                      Don't have an account?{" "}
                       <Link
                         href="/register"
-                        className="text-indigo-300 hover:text-white font-bold transition-colors underline decoration-indigo-500/40 underline-offset-4"
+                        className="text-indigo-600 hover:text-indigo-800 font-semibold underline underline-offset-4"
                       >
-                        Create an account →
+                        Create an account
                       </Link>
                     </p>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* ── OAuth Confirmation Modal ── */}
       <AnimatePresence>
         {showOAuthModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
             <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 10 }}
-              className="w-full max-w-sm rounded-3xl border border-white/15 bg-[#0e1022] p-6 shadow-2xl space-y-4"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center">
                     {oauthProvider === "google" ? (
                       <svg className="h-5 w-5" viewBox="0 0 24 24">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -978,35 +911,36 @@ export default function LoginPage() {
                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                       </svg>
                     ) : (
-                      <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <svg className="h-5 w-5 text-slate-800" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                       </svg>
                     )}
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-white">
+                    <div className="text-sm font-bold text-slate-900">
                       Sign in with {oauthProvider === "google" ? "Google" : "GitHub"}
                     </div>
-                    <div className="text-[11px] text-zinc-400">Select or enter identity email</div>
+                    <div className="text-xs text-slate-500">Confirm your email address</div>
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowOAuthModal(false)}
-                  className="text-zinc-500 hover:text-white transition-colors"
+                  className="text-slate-400 hover:text-slate-700"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs text-zinc-300 font-bold uppercase tracking-wider">
+                <Label className="text-xs text-slate-700 font-semibold uppercase tracking-wider">
                   Account Email
                 </Label>
                 <Input
                   type="email"
                   value={customOAuthEmail}
                   onChange={(e) => setCustomOAuthEmail(e.target.value)}
-                  className="h-10 bg-white/[0.04] border-white/15 text-white rounded-xl focus:border-indigo-400"
+                  className="h-10 bg-white border-slate-300 text-slate-900 rounded-xl focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleOAuthSubmit(customOAuthEmail);
@@ -1016,16 +950,18 @@ export default function LoginPage() {
 
               <div className="flex gap-2.5 pt-2">
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => setShowOAuthModal(false)}
-                  className="flex-1 h-10 border-white/10 text-zinc-300 hover:text-white rounded-xl text-xs"
+                  className="flex-1 h-10 border-slate-300 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold"
                 >
                   Cancel
                 </Button>
                 <Button
+                  type="button"
                   onClick={() => handleOAuthSubmit(customOAuthEmail)}
                   disabled={!customOAuthEmail.trim() || isLoading}
-                  className="flex-1 h-10 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-indigo-600/30"
+                  className="flex-1 h-10 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs shadow-sm"
                 >
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
                 </Button>
