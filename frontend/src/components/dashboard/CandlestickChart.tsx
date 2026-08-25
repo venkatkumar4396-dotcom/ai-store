@@ -7,11 +7,23 @@ import {
   LineStyle,
   CandlestickSeries,
   HistogramSeries,
+  LineSeries,
   CrosshairMode,
   createSeriesMarkers,
 } from "lightweight-charts";
 import { useTheme } from "@/components/layout/ThemeProvider";
-import { Maximize2, Minimize2, Sparkles, TrendingUp, TrendingDown } from "lucide-react";
+import {
+  Maximize2,
+  Minimize2,
+  Sparkles,
+  TrendingUp,
+  TrendingDown,
+  Layers,
+  Eye,
+  EyeOff,
+  Activity,
+  SlidersHorizontal,
+} from "lucide-react";
 
 interface CandleData {
   date: string;
@@ -40,9 +52,12 @@ interface CandlestickChartProps {
   liveQuote?: { price: number; volume: number; timestamp: string };
   timezoneMode?: "exchange" | "local";
   avgPrice?: number;
+  onPeriodChange?: (period: "5d" | "1mo" | "3mo" | "6mo" | "1y") => void;
+  currentPeriod?: string;
+  isIntraday?: boolean;
 }
 
-/** Format large numbers compactly (1.2M, 345K, etc.) */
+/** Format large numbers compactly */
 function formatVolume(vol: number): string {
   if (!vol || isNaN(vol)) return "0";
   if (vol >= 1_000_000_000) return (vol / 1_000_000_000).toFixed(2) + "B";
@@ -61,6 +76,44 @@ function formatPrice(price: number): string {
   return price.toFixed(6);
 }
 
+// Indicator calculation helpers
+function calculateEMA(data: CandleData[], period: number) {
+  if (data.length < period) return [];
+  const k = 2 / (period + 1);
+  let ema = data.slice(0, period).reduce((sum, d) => sum + d.close, 0) / period;
+  const result: { time: any; value: number }[] = [];
+
+  for (let i = period - 1; i < data.length; i++) {
+    const d = data[i];
+    const hasTime = d.date.includes("T") || d.date.includes(" ");
+    const time = hasTime ? Math.floor(new Date(d.date).getTime() / 1000) : d.date;
+
+    if (i === period - 1) {
+      result.push({ time: time as any, value: ema });
+    } else {
+      ema = d.close * k + ema * (1 - k);
+      result.push({ time: time as any, value: ema });
+    }
+  }
+  return result;
+}
+
+function calculateSMA(data: CandleData[], period: number) {
+  if (data.length < period) return [];
+  const result: { time: any; value: number }[] = [];
+
+  for (let i = period - 1; i < data.length; i++) {
+    const d = data[i];
+    const hasTime = d.date.includes("T") || d.date.includes(" ");
+    const time = hasTime ? Math.floor(new Date(d.date).getTime() / 1000) : d.date;
+
+    const slice = data.slice(i - period + 1, i + 1);
+    const sum = slice.reduce((acc, curr) => acc + curr.close, 0);
+    result.push({ time: time as any, value: sum / period });
+  }
+  return result;
+}
+
 export default function CandlestickChart({
   data,
   symbol,
@@ -72,17 +125,26 @@ export default function CandlestickChart({
   liveQuote,
   timezoneMode = "exchange",
   avgPrice,
+  onPeriodChange,
+  currentPeriod = "6mo",
+  isIntraday = false,
 }: CandlestickChartProps) {
   const { theme } = useTheme();
   const isLightMode = theme === "light";
   const containerRef = useRef<HTMLDivElement>(null);
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
   const candlestickSeriesRef = useRef<any>(null);
   const volumeSeriesRef = useRef<any>(null);
 
+  // Indicators toggle state
+  const [showEMA20, setShowEMA20] = useState(true);
+  const [showSMA50, setShowSMA50] = useState(true);
+  const [showSMA200, setShowSMA200] = useState(false);
+  const [showSignals, setShowSignals] = useState(true);
+  const [showPriceLevels, setShowPriceLevels] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
   const [hoverData, setHoverData] = useState<{
     open: number;
     high: number;
@@ -147,7 +209,7 @@ export default function CandlestickChart({
       if (chartRef.current && chartContainerRef.current) {
         chartRef.current.applyOptions({
           width: chartContainerRef.current.clientWidth,
-          height: document.fullscreenElement ? window.innerHeight - 80 : 540,
+          height: document.fullscreenElement ? window.innerHeight - 90 : 560,
         });
         chartRef.current.timeScale().fitContent();
       }
@@ -167,11 +229,11 @@ export default function CandlestickChart({
     else if (minPrice < 1) { precision = 4; minMove = 0.0001; }
     else if (minPrice < 10) { precision = 3; minMove = 0.001; }
 
-    const chartBg = isLightMode ? "#ffffff" : "rgba(9, 9, 11, 0.6)";
+    const chartBg = isLightMode ? "#ffffff" : "rgba(10, 10, 15, 0.95)";
     const textColor = isLightMode ? "#475569" : "#94a3b8";
-    const gridColor = isLightMode ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0.03)";
-    const borderColor = isLightMode ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.08)";
-    const chartHeight = isFullscreen ? window.innerHeight - 80 : 540;
+    const gridColor = isLightMode ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.04)";
+    const borderColor = isLightMode ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.09)";
+    const chartHeight = isFullscreen ? window.innerHeight - 90 : 560;
 
     const chart = createChart(chartContainerRef.current, {
       layout: {
@@ -186,13 +248,13 @@ export default function CandlestickChart({
       crosshair: {
         mode: CrosshairMode.Normal,
         vertLine: {
-          color: "rgba(139, 92, 246, 0.4)",
+          color: "rgba(99, 102, 241, 0.5)",
           width: 1,
           style: LineStyle.Dashed,
           labelBackgroundColor: "#6366f1",
         },
         horzLine: {
-          color: "rgba(139, 92, 246, 0.4)",
+          color: "rgba(99, 102, 241, 0.5)",
           width: 1,
           style: LineStyle.Dashed,
           labelBackgroundColor: "#6366f1",
@@ -212,6 +274,8 @@ export default function CandlestickChart({
         timeVisible: true,
         fixLeftEdge: true,
         fixRightEdge: true,
+        rightOffset: 8,
+        barSpacing: Math.max(6, Math.min(20, Math.floor(800 / Math.max(data.length, 1)))),
       },
       localization: {
         priceFormatter: (price: number) => `${currencySymbol}${formatPrice(price)}`,
@@ -295,8 +359,51 @@ export default function CandlestickChart({
 
     volumeSeries.setData(volumeData);
 
-    // ── Buy / Sell Markers (Clean, compact icons without cluttering long text) ───
-    if (signals && signals.length > 0) {
+    // ── Technical Indicators Lines ──────────────────────────
+    if (showEMA20) {
+      const emaData = calculateEMA(data, 20);
+      if (emaData.length > 0) {
+        const emaSeries = chart.addSeries(LineSeries, {
+          color: "#f59e0b", // amber-500
+          lineWidth: 1,
+          priceLineVisible: false,
+          crosshairMarkerVisible: false,
+          title: "EMA 20",
+        });
+        emaSeries.setData(emaData);
+      }
+    }
+
+    if (showSMA50) {
+      const sma50Data = calculateSMA(data, 50);
+      if (sma50Data.length > 0) {
+        const sma50Series = chart.addSeries(LineSeries, {
+          color: "#06b6d4", // cyan-500
+          lineWidth: 1,
+          priceLineVisible: false,
+          crosshairMarkerVisible: false,
+          title: "SMA 50",
+        });
+        sma50Series.setData(sma50Data);
+      }
+    }
+
+    if (showSMA200) {
+      const sma200Data = calculateSMA(data, 200);
+      if (sma200Data.length > 0) {
+        const sma200Series = chart.addSeries(LineSeries, {
+          color: "#a855f7", // purple-500
+          lineWidth: 2,
+          priceLineVisible: false,
+          crosshairMarkerVisible: false,
+          title: "SMA 200",
+        });
+        sma200Series.setData(sma200Data);
+      }
+    }
+
+    // ── Buy / Sell Markers (Compact arrow badges without giant text strings) ───
+    if (showSignals && signals && signals.length > 0) {
       const validDates = new Set(data.map((d) => d.date));
       const markers = signals
         .filter((s) => validDates.has(s.date))
@@ -321,60 +428,62 @@ export default function CandlestickChart({
     }
 
     // ── Price Lines ──────────────────────────────────────────
-    if (stopLoss) {
-      candlestickSeries.createPriceLine({
-        price: stopLoss,
-        color: "#f43f5e",
-        lineWidth: 2,
-        lineStyle: LineStyle.Dashed,
-        axisLabelVisible: true,
-        title: "Stop Loss",
+    if (showPriceLevels) {
+      if (stopLoss) {
+        candlestickSeries.createPriceLine({
+          price: stopLoss,
+          color: "#f43f5e",
+          lineWidth: 2,
+          lineStyle: LineStyle.Dashed,
+          axisLabelVisible: true,
+          title: "Stop Loss",
+        });
+      }
+
+      if (profitTarget) {
+        candlestickSeries.createPriceLine({
+          price: profitTarget,
+          color: "#10b981",
+          lineWidth: 2,
+          lineStyle: LineStyle.Dashed,
+          axisLabelVisible: true,
+          title: "Profit Target",
+        });
+      }
+
+      if (avgPrice && avgPrice > 0) {
+        candlestickSeries.createPriceLine({
+          price: avgPrice,
+          color: "#818cf8",
+          lineWidth: 2,
+          lineStyle: LineStyle.Dashed,
+          axisLabelVisible: true,
+          title: "Avg Cost",
+        });
+      }
+
+      supportLevels.forEach((level) => {
+        candlestickSeries.createPriceLine({
+          price: level,
+          color: "#06b6d4",
+          lineWidth: 1,
+          lineStyle: LineStyle.Dotted,
+          axisLabelVisible: true,
+          title: "Support",
+        });
+      });
+
+      resistanceLevels.forEach((level) => {
+        candlestickSeries.createPriceLine({
+          price: level,
+          color: "#f59e0b",
+          lineWidth: 1,
+          lineStyle: LineStyle.Dotted,
+          axisLabelVisible: true,
+          title: "Resistance",
+        });
       });
     }
-
-    if (profitTarget) {
-      candlestickSeries.createPriceLine({
-        price: profitTarget,
-        color: "#10b981",
-        lineWidth: 2,
-        lineStyle: LineStyle.Dashed,
-        axisLabelVisible: true,
-        title: "Profit Target",
-      });
-    }
-
-    if (avgPrice && avgPrice > 0) {
-      candlestickSeries.createPriceLine({
-        price: avgPrice,
-        color: "#818cf8",
-        lineWidth: 2,
-        lineStyle: LineStyle.Dashed,
-        axisLabelVisible: true,
-        title: "Holding Avg",
-      });
-    }
-
-    supportLevels.forEach((level) => {
-      candlestickSeries.createPriceLine({
-        price: level,
-        color: "#06b6d4",
-        lineWidth: 1,
-        lineStyle: LineStyle.Dotted,
-        axisLabelVisible: true,
-        title: "Support",
-      });
-    });
-
-    resistanceLevels.forEach((level) => {
-      candlestickSeries.createPriceLine({
-        price: level,
-        color: "#f59e0b",
-        lineWidth: 1,
-        lineStyle: LineStyle.Dotted,
-        axisLabelVisible: true,
-        title: "Resistance",
-      });
-    });
 
     // ── Crosshair Hover Handler ─────────────────────────────
     chart.subscribeCrosshairMove((param: any) => {
@@ -447,7 +556,25 @@ export default function CandlestickChart({
       window.removeEventListener("resize", handleResize);
       chart.remove();
     };
-  }, [data, stopLoss, profitTarget, supportLevels, resistanceLevels, signals, isLightMode, activeTimeZone, tzName, avgPrice, isFullscreen, currencySymbol]);
+  }, [
+    data,
+    stopLoss,
+    profitTarget,
+    supportLevels,
+    resistanceLevels,
+    signals,
+    isLightMode,
+    activeTimeZone,
+    tzName,
+    avgPrice,
+    isFullscreen,
+    currencySymbol,
+    showEMA20,
+    showSMA50,
+    showSMA200,
+    showSignals,
+    showPriceLevels,
+  ]);
 
   // Real-time live quote ticks
   useEffect(() => {
@@ -517,45 +644,89 @@ export default function CandlestickChart({
   }, [liveQuote, data.length]);
 
   return (
-    <div ref={containerRef} className="relative w-full rounded-xl overflow-hidden bg-zinc-950/50 border border-white/[0.08]">
-      {/* ─── Top Real-time TradingView-Grade OHLCV Status Bar ─── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 bg-zinc-900/60 border-b border-white/[0.06] text-xs backdrop-blur-md">
+    <div ref={containerRef} className="relative w-full rounded-2xl overflow-hidden bg-zinc-950/70 border border-white/[0.08] shadow-2xl backdrop-blur-xl">
+      {/* ─── Top TradingView-Style Status Bar ─── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-xs backdrop-blur-md">
         <div className="flex flex-wrap items-center gap-3 font-mono">
-          <span className="font-bold text-white tracking-wide">{symbol || "ASSET"}</span>
+          <span className="font-extrabold text-white tracking-wide flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
+            {symbol || "ASSET"}
+          </span>
           {latestBar && (
             <>
-              <span className="text-zinc-500">
+              <span className="text-zinc-400">
                 O: <span className={latestBar.close >= latestBar.open ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>{currencySymbol}{formatPrice(latestBar.open)}</span>
               </span>
-              <span className="text-zinc-500">
+              <span className="text-zinc-400">
                 H: <span className="text-amber-400 font-semibold">{currencySymbol}{formatPrice(latestBar.high)}</span>
               </span>
-              <span className="text-zinc-500">
+              <span className="text-zinc-400">
                 L: <span className="text-cyan-400 font-semibold">{currencySymbol}{formatPrice(latestBar.low)}</span>
               </span>
-              <span className="text-zinc-500">
+              <span className="text-zinc-400">
                 C: <span className={latestBar.close >= latestBar.open ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>{currencySymbol}{formatPrice(latestBar.close)}</span>
               </span>
-              <span className={`font-semibold flex items-center gap-1 ${latestBar.change >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+              <span className={`font-semibold flex items-center gap-1 px-1.5 py-0.5 rounded ${latestBar.change >= 0 ? "text-emerald-400 bg-emerald-500/10" : "text-rose-400 bg-rose-500/10"}`}>
                 {latestBar.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {latestBar.change >= 0 ? "+" : ""}{currencySymbol}{formatPrice(latestBar.change)} ({latestBar.changePct}%)
               </span>
-              <span className="text-zinc-500 hidden sm:inline">
-                Vol: <span className="text-zinc-300 font-semibold">{formatVolume(latestBar.volume)}</span>
+              <span className="text-zinc-400 hidden sm:inline">
+                Vol: <span className="text-zinc-200 font-semibold">{formatVolume(latestBar.volume)}</span>
               </span>
             </>
           )}
         </div>
 
+        {/* Indicator & View Controls */}
         <div className="flex items-center gap-2">
           {latestBar?.signal && (
-            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
-              latestBar.signal.type === "BUY" ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
+            <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm ${
+              latestBar.signal.type === "BUY" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
             }`}>
               <Sparkles className="h-3 w-3" />
               {latestBar.signal.type}: {latestBar.signal.label}
             </span>
           )}
+
+          {/* Indicator toggles */}
+          <div className="hidden lg:flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.06] text-[10px]">
+            <button
+              onClick={() => setShowEMA20(!showEMA20)}
+              className={`px-2 py-0.5 rounded font-semibold transition-all ${
+                showEMA20 ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "text-zinc-500 hover:text-zinc-300"
+              }`}
+              title="Toggle EMA 20 line"
+            >
+              EMA 20
+            </button>
+            <button
+              onClick={() => setShowSMA50(!showSMA50)}
+              className={`px-2 py-0.5 rounded font-semibold transition-all ${
+                showSMA50 ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "text-zinc-500 hover:text-zinc-300"
+              }`}
+              title="Toggle SMA 50 line"
+            >
+              SMA 50
+            </button>
+            <button
+              onClick={() => setShowSMA200(!showSMA200)}
+              className={`px-2 py-0.5 rounded font-semibold transition-all ${
+                showSMA200 ? "bg-purple-500/20 text-purple-300 border border-purple-500/30" : "text-zinc-500 hover:text-zinc-300"
+              }`}
+              title="Toggle SMA 200 line"
+            >
+              SMA 200
+            </button>
+            <button
+              onClick={() => setShowPriceLevels(!showPriceLevels)}
+              className={`px-2 py-0.5 rounded font-semibold transition-all ${
+                showPriceLevels ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "text-zinc-500 hover:text-zinc-300"
+              }`}
+              title="Toggle Stop Loss, Profit Target, Support & Resistance"
+            >
+              Levels
+            </button>
+          </div>
 
           <button
             onClick={toggleFullscreen}
@@ -571,7 +742,7 @@ export default function CandlestickChart({
       <div
         ref={chartContainerRef}
         className="w-full"
-        style={{ height: isFullscreen ? "calc(100vh - 80px)" : "540px" }}
+        style={{ height: isFullscreen ? "calc(100vh - 90px)" : "560px" }}
       />
     </div>
   );

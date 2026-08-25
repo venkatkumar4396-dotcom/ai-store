@@ -213,7 +213,7 @@ export default function StockIntelligencePage() {
   const [activeTab, setActiveTab] = React.useState("analyze");
 
   // Chart state
-  const [chartEngine, setChartEngine] = React.useState<"tradingview" | "quant">("tradingview");
+  const [chartEngine, setChartEngine] = React.useState<"tradingview" | "quant">("quant");
   const [chartData, setChartData] = React.useState<any[] | null>(null);
   const [chartSignals, setChartSignals] = React.useState<any[]>([]);
   const [chartPeriod, setChartPeriod] = React.useState<"5d" | "1mo" | "3mo" | "6mo" | "1y">("6mo");
@@ -1073,7 +1073,11 @@ export default function StockIntelligencePage() {
                     </CardHeader>
                     <CardContent className="p-4 pt-3">
                       {chartEngine === "tradingview" ? (
-                        <TradingViewChart symbol={analysis.symbol} height={560} />
+                        <TradingViewChart
+                          symbol={analysis.symbol}
+                          height={560}
+                          onSwitchToQuant={() => setChartEngine("quant")}
+                        />
                       ) : (
                         chartData ? (
                           <CandlestickChart
@@ -1087,6 +1091,9 @@ export default function StockIntelligencePage() {
                             liveQuote={liveQuote}
                             timezoneMode={timezoneMode}
                             avgPrice={avgCostForChart}
+                            onPeriodChange={setChartPeriod}
+                            currentPeriod={chartPeriod}
+                            isIntraday={isIntraday}
                           />
                         ) : (
                           <div className="w-full h-[540px] flex items-center justify-center text-zinc-600">
