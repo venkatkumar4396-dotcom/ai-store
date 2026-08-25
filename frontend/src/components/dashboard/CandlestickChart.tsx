@@ -1,29 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import {
   createChart,
   ColorType,
   LineStyle,
   CandlestickSeries,
   HistogramSeries,
-  LineSeries,
   CrosshairMode,
   createSeriesMarkers,
 } from "lightweight-charts";
 import { useTheme } from "@/components/layout/ThemeProvider";
-import {
-  Maximize2,
-  Minimize2,
-  Sparkles,
-  TrendingUp,
-  TrendingDown,
-  Layers,
-  Eye,
-  EyeOff,
-  Activity,
-  SlidersHorizontal,
-} from "lucide-react";
 
 interface CandleData {
   date: string;
@@ -52,18 +39,14 @@ interface CandlestickChartProps {
   liveQuote?: { price: number; volume: number; timestamp: string };
   timezoneMode?: "exchange" | "local";
   avgPrice?: number;
-  onPeriodChange?: (period: "5d" | "1mo" | "3mo" | "6mo" | "1y") => void;
-  currentPeriod?: string;
-  isIntraday?: boolean;
 }
 
-/** Format large numbers compactly */
+/** Format large numbers compactly (1.2M, 345K, etc.) */
 function formatVolume(vol: number): string {
-  if (!vol || isNaN(vol)) return "0";
-  if (vol >= 1_000_000_000) return (vol / 1_000_000_000).toFixed(2) + "B";
-  if (vol >= 1_000_000) return (vol / 1_000_000).toFixed(2) + "M";
+  if (vol >= 1_000_000_000) return (vol / 1_000_000_000).toFixed(1) + "B";
+  if (vol >= 1_000_000) return (vol / 1_000_000).toFixed(1) + "M";
   if (vol >= 1_000) return (vol / 1_000).toFixed(1) + "K";
-  return vol.toLocaleString();
+  return vol.toString();
 }
 
 /** Format price with dynamic precision */
@@ -74,44 +57,6 @@ function formatPrice(price: number): string {
   if (abs >= 1) return price.toFixed(3);
   if (abs >= 0.01) return price.toFixed(4);
   return price.toFixed(6);
-}
-
-// Indicator calculation helpers
-function calculateEMA(data: CandleData[], period: number) {
-  if (data.length < period) return [];
-  const k = 2 / (period + 1);
-  let ema = data.slice(0, period).reduce((sum, d) => sum + d.close, 0) / period;
-  const result: { time: any; value: number }[] = [];
-
-  for (let i = period - 1; i < data.length; i++) {
-    const d = data[i];
-    const hasTime = d.date.includes("T") || d.date.includes(" ");
-    const time = hasTime ? Math.floor(new Date(d.date).getTime() / 1000) : d.date;
-
-    if (i === period - 1) {
-      result.push({ time: time as any, value: ema });
-    } else {
-      ema = d.close * k + ema * (1 - k);
-      result.push({ time: time as any, value: ema });
-    }
-  }
-  return result;
-}
-
-function calculateSMA(data: CandleData[], period: number) {
-  if (data.length < period) return [];
-  const result: { time: any; value: number }[] = [];
-
-  for (let i = period - 1; i < data.length; i++) {
-    const d = data[i];
-    const hasTime = d.date.includes("T") || d.date.includes(" ");
-    const time = hasTime ? Math.floor(new Date(d.date).getTime() / 1000) : d.date;
-
-    const slice = data.slice(i - period + 1, i + 1);
-    const sum = slice.reduce((acc, curr) => acc + curr.close, 0);
-    result.push({ time: time as any, value: sum / period });
-  }
-  return result;
 }
 
 export default function CandlestickChart({
@@ -125,45 +70,21 @@ export default function CandlestickChart({
   liveQuote,
   timezoneMode = "exchange",
   avgPrice,
-  onPeriodChange,
-  currentPeriod = "6mo",
-  isIntraday = false,
 }: CandlestickChartProps) {
   const { theme } = useTheme();
   const isLightMode = theme === "light";
-  const containerRef = useRef<HTMLDivElement>(null);
   const chartContainerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
   const candlestickSeriesRef = useRef<any>(null);
   const volumeSeriesRef = useRef<any>(null);
 
-  // Indicators toggle state
-  const [showEMA20, setShowEMA20] = useState(true);
-  const [showSMA50, setShowSMA50] = useState(true);
-  const [showSMA200, setShowSMA200] = useState(false);
-  const [showSignals, setShowSignals] = useState(true);
-  const [showPriceLevels, setShowPriceLevels] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const [hoverData, setHoverData] = useState<{
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    volume: number;
-    change: number;
-    changePct: string;
-    time: string;
-    signal?: CandleSignal;
-  } | null>(null);
-
   const isIndia = symbol?.toUpperCase().endsWith(".NS") || symbol?.toUpperCase().endsWith(".BO");
-  const currencySymbol = isIndia ? "₹" : "$";
   const exchangeTimeZone = isIndia ? "Asia/Kolkata" : "America/New_York";
   const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const activeTimeZone = timezoneMode === "exchange" ? exchangeTimeZone : localTimeZone;
 
-  const tzName = useMemo(() => {
+  const tzName = React.useMemo(() => {
     try {
       const parts = new Intl.DateTimeFormat("en-US", {
         timeZone: activeTimeZone,
@@ -174,49 +95,6 @@ export default function CandlestickChart({
       return "";
     }
   }, [activeTimeZone]);
-
-  // Current or latest bar for the top status line
-  const latestBar = useMemo(() => {
-    if (hoverData) return hoverData;
-    if (!data || data.length === 0) return null;
-    const last = data[data.length - 1];
-    const change = last.close - last.open;
-    const changePct = last.open !== 0 ? ((change / last.open) * 100).toFixed(2) : "0.00";
-    return {
-      open: last.open,
-      high: last.high,
-      low: last.low,
-      close: last.close,
-      volume: last.volume || 0,
-      change,
-      changePct,
-      time: last.date,
-    };
-  }, [hoverData, data]);
-
-  const toggleFullscreen = useCallback(() => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {});
-    } else {
-      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {});
-    }
-  }, []);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-      if (chartRef.current && chartContainerRef.current) {
-        chartRef.current.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-          height: document.fullscreenElement ? window.innerHeight - 90 : 560,
-        });
-        chartRef.current.timeScale().fitContent();
-      }
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -229,17 +107,17 @@ export default function CandlestickChart({
     else if (minPrice < 1) { precision = 4; minMove = 0.0001; }
     else if (minPrice < 10) { precision = 3; minMove = 0.001; }
 
-    const chartBg = isLightMode ? "#ffffff" : "rgba(10, 10, 15, 0.95)";
-    const textColor = isLightMode ? "#475569" : "#94a3b8";
-    const gridColor = isLightMode ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.04)";
-    const borderColor = isLightMode ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.09)";
-    const chartHeight = isFullscreen ? window.innerHeight - 90 : 560;
+    // Create chart with enhanced crosshair
+    const chartBg = isLightMode ? "#ffffff" : "rgba(9, 9, 11, 0.7)";
+    const textColor = isLightMode ? "#606770" : "#a1a1aa";
+    const gridColor = isLightMode ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.03)";
+    const borderColor = isLightMode ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.08)";
 
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: chartBg },
         textColor: textColor,
-        fontSize: 11,
+        fontSize: 12,
       },
       grid: {
         vertLines: { color: gridColor },
@@ -248,60 +126,71 @@ export default function CandlestickChart({
       crosshair: {
         mode: CrosshairMode.Normal,
         vertLine: {
-          color: "rgba(99, 102, 241, 0.5)",
+          color: "rgba(139, 92, 246, 0.4)",
           width: 1,
           style: LineStyle.Dashed,
-          labelBackgroundColor: "#6366f1",
+          labelBackgroundColor: "rgba(139, 92, 246, 0.9)",
         },
         horzLine: {
-          color: "rgba(99, 102, 241, 0.5)",
+          color: "rgba(139, 92, 246, 0.4)",
           width: 1,
           style: LineStyle.Dashed,
-          labelBackgroundColor: "#6366f1",
+          labelBackgroundColor: "rgba(139, 92, 246, 0.9)",
         },
       },
       rightPriceScale: {
         borderColor: borderColor,
         visible: true,
         scaleMargins: {
-          top: 0.08,
-          bottom: 0.20,
+          top: 0.05,
+          bottom: 0.25, // Reserve space for volume
         },
       },
       timeScale: {
         borderColor: borderColor,
         visible: true,
         timeVisible: true,
-        fixLeftEdge: true,
-        fixRightEdge: true,
-        rightOffset: 8,
-        barSpacing: Math.max(6, Math.min(20, Math.floor(800 / Math.max(data.length, 1)))),
       },
       localization: {
-        priceFormatter: (price: number) => `${currencySymbol}${formatPrice(price)}`,
         timeFormatter: (time: any) => {
           if (typeof time === "string") return time;
           const date = new Date(time * 1000);
+          
           return new Intl.DateTimeFormat("en-US", {
             timeZone: activeTimeZone,
             month: "short",
             day: "numeric",
             hour: "2-digit",
             minute: "2-digit",
+            second: "2-digit",
             hour12: false,
           }).format(date);
-        },
+        }
       },
       width: chartContainerRef.current.clientWidth,
-      height: chartHeight,
+      height: 440,
     });
 
     chartRef.current = chart;
 
+    chart.timeScale().applyOptions({
+      tickMarkFormatter: (time: any, tickMarkType: any, locale: any) => {
+        if (typeof time === "string") return time;
+        const date = new Date(time * 1000);
+        
+        return new Intl.DateTimeFormat("en-US", {
+          timeZone: activeTimeZone,
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }).format(date);
+      }
+    } as any);
+
     // ── Candlestick Series ──────────────────────────────────
     const candlestickSeries = chart.addSeries(CandlestickSeries, {
-      upColor: "#10b981",
-      downColor: "#ef4444",
+      upColor: "#10b981", // emerald-500
+      downColor: "#ef4444", // rose-500
       borderVisible: false,
       wickUpColor: "#10b981",
       wickDownColor: "#ef4444",
@@ -340,7 +229,7 @@ export default function CandlestickChart({
 
     chart.priceScale("volume").applyOptions({
       scaleMargins: {
-        top: 0.80,
+        top: 0.82, // Volume takes the bottom 18% of the chart
         bottom: 0,
       },
     });
@@ -352,58 +241,15 @@ export default function CandlestickChart({
         value: d.volume || 0,
         color:
           d.close >= d.open
-            ? "rgba(16, 185, 129, 0.45)"
-            : "rgba(239, 68, 68, 0.45)",
+            ? "rgba(16, 185, 129, 0.4)" // green with alpha
+            : "rgba(239, 68, 68, 0.4)", // red with alpha
       };
     });
 
     volumeSeries.setData(volumeData);
 
-    // ── Technical Indicators Lines ──────────────────────────
-    if (showEMA20) {
-      const emaData = calculateEMA(data, 20);
-      if (emaData.length > 0) {
-        const emaSeries = chart.addSeries(LineSeries, {
-          color: "#f59e0b", // amber-500
-          lineWidth: 1,
-          priceLineVisible: false,
-          crosshairMarkerVisible: false,
-          title: "EMA 20",
-        });
-        emaSeries.setData(emaData);
-      }
-    }
-
-    if (showSMA50) {
-      const sma50Data = calculateSMA(data, 50);
-      if (sma50Data.length > 0) {
-        const sma50Series = chart.addSeries(LineSeries, {
-          color: "#06b6d4", // cyan-500
-          lineWidth: 1,
-          priceLineVisible: false,
-          crosshairMarkerVisible: false,
-          title: "SMA 50",
-        });
-        sma50Series.setData(sma50Data);
-      }
-    }
-
-    if (showSMA200) {
-      const sma200Data = calculateSMA(data, 200);
-      if (sma200Data.length > 0) {
-        const sma200Series = chart.addSeries(LineSeries, {
-          color: "#a855f7", // purple-500
-          lineWidth: 2,
-          priceLineVisible: false,
-          crosshairMarkerVisible: false,
-          title: "SMA 200",
-        });
-        sma200Series.setData(sma200Data);
-      }
-    }
-
-    // ── Buy / Sell Markers (Compact arrow badges without giant text strings) ───
-    if (showSignals && signals && signals.length > 0) {
+    // ── Buy / Sell Markers ───────────────────────────────────
+    if (signals && signals.length > 0) {
       const validDates = new Set(data.map((d) => d.date));
       const markers = signals
         .filter((s) => validDates.has(s.date))
@@ -417,8 +263,8 @@ export default function CandlestickChart({
             position: isBuy ? ("belowBar" as const) : ("aboveBar" as const),
             color: isBuy ? "#10b981" : "#ef4444",
             shape: isBuy ? ("arrowUp" as const) : ("arrowDown" as const),
-            text: isBuy ? "BUY" : "SELL",
-            size: 1,
+            text: `${isBuy ? "BUY" : "SELL"} · ${signal.label}`,
+            size: signal.score >= 50 ? 2 : 1,
           };
         });
 
@@ -428,67 +274,82 @@ export default function CandlestickChart({
     }
 
     // ── Price Lines ──────────────────────────────────────────
-    if (showPriceLevels) {
-      if (stopLoss) {
-        candlestickSeries.createPriceLine({
-          price: stopLoss,
-          color: "#f43f5e",
-          lineWidth: 2,
-          lineStyle: LineStyle.Dashed,
-          axisLabelVisible: true,
-          title: "Stop Loss",
-        });
-      }
 
-      if (profitTarget) {
-        candlestickSeries.createPriceLine({
-          price: profitTarget,
-          color: "#10b981",
-          lineWidth: 2,
-          lineStyle: LineStyle.Dashed,
-          axisLabelVisible: true,
-          title: "Profit Target",
-        });
-      }
-
-      if (avgPrice && avgPrice > 0) {
-        candlestickSeries.createPriceLine({
-          price: avgPrice,
-          color: "#818cf8",
-          lineWidth: 2,
-          lineStyle: LineStyle.Dashed,
-          axisLabelVisible: true,
-          title: "Avg Cost",
-        });
-      }
-
-      supportLevels.forEach((level) => {
-        candlestickSeries.createPriceLine({
-          price: level,
-          color: "#06b6d4",
-          lineWidth: 1,
-          lineStyle: LineStyle.Dotted,
-          axisLabelVisible: true,
-          title: "Support",
-        });
-      });
-
-      resistanceLevels.forEach((level) => {
-        candlestickSeries.createPriceLine({
-          price: level,
-          color: "#f59e0b",
-          lineWidth: 1,
-          lineStyle: LineStyle.Dotted,
-          axisLabelVisible: true,
-          title: "Resistance",
-        });
+    // Add Stop Loss line
+    if (stopLoss) {
+      candlestickSeries.createPriceLine({
+        price: stopLoss,
+        color: "#f43f5e", // rose-500
+        lineWidth: 2,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: "Stop Loss",
       });
     }
 
-    // ── Crosshair Hover Handler ─────────────────────────────
+    // Add Profit Target line
+    if (profitTarget) {
+      candlestickSeries.createPriceLine({
+        price: profitTarget,
+        color: "#10b981", // emerald-500
+        lineWidth: 2,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: "Profit Target",
+      });
+    }
+
+    // Add Avg Cost Price line
+    if (avgPrice && avgPrice > 0) {
+      candlestickSeries.createPriceLine({
+        price: avgPrice,
+        color: "#818cf8", // indigo-400
+        lineWidth: 2,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: "Holding Avg Cost",
+      });
+    }
+
+    // Add Support Levels (dotted cyan)
+    supportLevels.forEach((level) => {
+      candlestickSeries.createPriceLine({
+        price: level,
+        color: "#06b6d4", // cyan-500
+        lineWidth: 1,
+        lineStyle: LineStyle.Dotted,
+        axisLabelVisible: true,
+        title: "Support",
+      });
+    });
+
+    // Add Resistance Levels (dotted amber)
+    resistanceLevels.forEach((level) => {
+      candlestickSeries.createPriceLine({
+        price: level,
+        color: "#f59e0b", // amber-500
+        lineWidth: 1,
+        lineStyle: LineStyle.Dotted,
+        axisLabelVisible: true,
+        title: "Resistance",
+      });
+    });
+
+    // ── Crosshair Tooltip ───────────────────────────────────
+    const tooltip = tooltipRef.current;
+
     chart.subscribeCrosshairMove((param: any) => {
-      if (!param || !param.time || !param.point || param.point.x < 0 || param.point.y < 0) {
-        setHoverData(null);
+      if (!tooltip) return;
+
+      if (
+        !param ||
+        !param.time ||
+        param.point === undefined ||
+        !param.point ||
+        param.point.x < 0 ||
+        param.point.y < 0
+      ) {
+        tooltip.style.display = "none";
         return;
       }
 
@@ -496,7 +357,7 @@ export default function CandlestickChart({
       const volumeInfo = param.seriesData?.get(volumeSeries);
 
       if (!candleInfo) {
-        setHoverData(null);
+        tooltip.style.display = "none";
         return;
       }
 
@@ -504,7 +365,10 @@ export default function CandlestickChart({
       const volume = (volumeInfo as any)?.value || 0;
       const change = close - open;
       const changePct = open !== 0 ? ((change / open) * 100).toFixed(2) : "0.00";
+      const isUp = close >= open;
+      const color = isUp ? "#10b981" : "#ef4444";
 
+      // Find matching signal for this date
       const dateVal = param.time;
       const matchingSignal = signals.find((s) => {
         if (typeof dateVal === "number") {
@@ -517,7 +381,7 @@ export default function CandlestickChart({
       let displayTime = "";
       if (typeof dateVal === "number") {
         const date = new Date(dateVal * 1000);
-        displayTime = new Intl.DateTimeFormat("en-US", {
+        const formatted = new Intl.DateTimeFormat("en-US", {
           timeZone: activeTimeZone,
           month: "short",
           day: "numeric",
@@ -525,25 +389,66 @@ export default function CandlestickChart({
           minute: "2-digit",
           hour12: false,
         }).format(date);
+        displayTime = `${formatted} (${tzName})`;
       } else {
         displayTime = dateVal as string;
       }
 
-      setHoverData({
-        open,
-        high,
-        low,
-        close,
-        volume,
-        change,
-        changePct,
-        time: displayTime,
-        signal: matchingSignal,
-      });
+      tooltip.innerHTML = `
+        <div style="font-size:11px;color:#a1a1aa;margin-bottom:4px;">${displayTime}</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;">
+          <span style="color:#71717a;">O</span><span style="color:${color};font-family:monospace;font-weight:600;">${formatPrice(open)}</span>
+          <span style="color:#71717a;">H</span><span style="color:#fbbf24;font-family:monospace;font-weight:600;">${formatPrice(high)}</span>
+          <span style="color:#71717a;">L</span><span style="color:#60a5fa;font-family:monospace;font-weight:600;">${formatPrice(low)}</span>
+          <span style="color:#71717a;">C</span><span style="color:${color};font-family:monospace;font-weight:600;">${formatPrice(close)}</span>
+        </div>
+        <div style="margin-top:4px;font-size:11px;color:${color};font-weight:600;">
+          ${isUp ? "▲" : "▼"} ${change >= 0 ? "+" : ""}${formatPrice(change)} (${changePct}%)
+        </div>
+        <div style="margin-top:3px;font-size:11px;color:#71717a;">
+          Vol: <span style="color:#d4d4d8;font-family:monospace;">${formatVolume(volume)}</span>
+        </div>
+        ${
+          matchingSignal
+            ? `<div style="margin-top:4px;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:700;background:${
+                matchingSignal.type === "BUY" ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)"
+              };color:${matchingSignal.type === "BUY" ? "#10b981" : "#ef4444"};border:1px solid ${
+                matchingSignal.type === "BUY" ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)"
+              };">
+              ${matchingSignal.type} · ${matchingSignal.label} (${matchingSignal.score}%)
+            </div>`
+            : ""
+        }
+      `;
+
+      tooltip.style.display = "block";
+
+      // Position tooltip near cursor, but keep it on-screen
+      if (!chartContainerRef.current) return;
+      const containerRect = chartContainerRef.current.getBoundingClientRect();
+      const tooltipWidth = 180;
+      const tooltipHeight = tooltip.offsetHeight || 120;
+
+      let left = param.point.x + 16;
+      let top = param.point.y - tooltipHeight / 2;
+
+      // Keep tooltip within chart bounds
+      if (left + tooltipWidth > containerRect.width) {
+        left = param.point.x - tooltipWidth - 16;
+      }
+      if (top < 0) top = 4;
+      if (top + tooltipHeight > containerRect.height) {
+        top = containerRect.height - tooltipHeight - 4;
+      }
+
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
     });
 
+    // Fit content
     chart.timeScale().fitContent();
 
+    // Resize observer to make it responsive
     const handleResize = () => {
       if (chartContainerRef.current) {
         chart.applyOptions({ width: chartContainerRef.current.clientWidth });
@@ -556,27 +461,9 @@ export default function CandlestickChart({
       window.removeEventListener("resize", handleResize);
       chart.remove();
     };
-  }, [
-    data,
-    stopLoss,
-    profitTarget,
-    supportLevels,
-    resistanceLevels,
-    signals,
-    isLightMode,
-    activeTimeZone,
-    tzName,
-    avgPrice,
-    isFullscreen,
-    currencySymbol,
-    showEMA20,
-    showSMA50,
-    showSMA200,
-    showSignals,
-    showPriceLevels,
-  ]);
+  }, [data, stopLoss, profitTarget, supportLevels, resistanceLevels, signals, isLightMode, activeTimeZone, tzName, avgPrice]);
 
-  // Real-time live quote ticks
+  // Handle real-time ticks (live candle updates & new candle creation)
   useEffect(() => {
     if (!candlestickSeriesRef.current || !liveQuote || data.length === 0) return;
 
@@ -588,12 +475,21 @@ export default function CandlestickChart({
     let candleOpen = lastCandle.close;
     let candleHigh = liveQuote.price;
     let candleLow = liveQuote.price;
+    let isNewCandle = false;
 
     if (isIntradayChart) {
       const lastCandleTimeMs = new Date(lastCandle.date).getTime();
       const quoteTimeMs = new Date(liveQuote.timestamp).getTime();
-      const intervalMs = 5 * 60 * 1000;
-      const isNewCandle = quoteTimeMs - lastCandleTimeMs >= intervalMs;
+
+      // Estimate time scale interval dynamically from average delta between last two candles
+      let intervalMs = 5 * 60 * 1000; // Default to 5 minutes
+      if (data.length > 1) {
+        const prevCandleTimeMs = new Date(data[data.length - 2].date).getTime();
+        const delta = lastCandleTimeMs - prevCandleTimeMs;
+        if (delta > 0) intervalMs = delta;
+      }
+
+      isNewCandle = quoteTimeMs - lastCandleTimeMs >= intervalMs;
 
       if (isNewCandle) {
         const alignedTimeMs = Math.floor(quoteTimeMs / intervalMs) * intervalMs;
@@ -606,8 +502,9 @@ export default function CandlestickChart({
         candleLow = Math.min(lastCandle.low, liveQuote.price);
       }
     } else {
+      // Daily chart
       const todayStr = new Date().toISOString().split("T")[0];
-      const isNewCandle = todayStr > lastCandle.date;
+      isNewCandle = todayStr > lastCandle.date;
 
       if (isNewCandle) {
         candleTime = todayStr;
@@ -634,115 +531,40 @@ export default function CandlestickChart({
       if (volumeSeriesRef.current) {
         volumeSeriesRef.current.update({
           time: candleTime,
-          value: liveQuote.volume || lastCandle.volume || 0,
+          value: isNewCandle ? liveQuote.volume : (liveQuote.volume || lastCandle.volume || 0),
           color: updatedCandle.close >= updatedCandle.open
-            ? "rgba(16, 185, 129, 0.45)"
-            : "rgba(239, 68, 68, 0.45)",
+            ? "rgba(16, 185, 129, 0.4)" // Green
+            : "rgba(239, 68, 68, 0.4)", // Red
         });
       }
-    } catch {}
+    } catch (err) {
+      console.warn("Failed to apply real-time candle update:", err);
+    }
   }, [liveQuote, data.length]);
 
   return (
-    <div ref={containerRef} className="relative w-full rounded-2xl overflow-hidden bg-zinc-950/70 border border-white/[0.08] shadow-2xl backdrop-blur-xl">
-      {/* ─── Top TradingView-Style Status Bar ─── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-xs backdrop-blur-md">
-        <div className="flex flex-wrap items-center gap-3 font-mono">
-          <span className="font-extrabold text-white tracking-wide flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
-            {symbol || "ASSET"}
-          </span>
-          {latestBar && (
-            <>
-              <span className="text-zinc-400">
-                O: <span className={latestBar.close >= latestBar.open ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>{currencySymbol}{formatPrice(latestBar.open)}</span>
-              </span>
-              <span className="text-zinc-400">
-                H: <span className="text-amber-400 font-semibold">{currencySymbol}{formatPrice(latestBar.high)}</span>
-              </span>
-              <span className="text-zinc-400">
-                L: <span className="text-cyan-400 font-semibold">{currencySymbol}{formatPrice(latestBar.low)}</span>
-              </span>
-              <span className="text-zinc-400">
-                C: <span className={latestBar.close >= latestBar.open ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>{currencySymbol}{formatPrice(latestBar.close)}</span>
-              </span>
-              <span className={`font-semibold flex items-center gap-1 px-1.5 py-0.5 rounded ${latestBar.change >= 0 ? "text-emerald-400 bg-emerald-500/10" : "text-rose-400 bg-rose-500/10"}`}>
-                {latestBar.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                {latestBar.change >= 0 ? "+" : ""}{currencySymbol}{formatPrice(latestBar.change)} ({latestBar.changePct}%)
-              </span>
-              <span className="text-zinc-400 hidden sm:inline">
-                Vol: <span className="text-zinc-200 font-semibold">{formatVolume(latestBar.volume)}</span>
-              </span>
-            </>
-          )}
-        </div>
-
-        {/* Indicator & View Controls */}
-        <div className="flex items-center gap-2">
-          {latestBar?.signal && (
-            <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm ${
-              latestBar.signal.type === "BUY" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-            }`}>
-              <Sparkles className="h-3 w-3" />
-              {latestBar.signal.type}: {latestBar.signal.label}
-            </span>
-          )}
-
-          {/* Indicator toggles */}
-          <div className="hidden lg:flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.06] text-[10px]">
-            <button
-              onClick={() => setShowEMA20(!showEMA20)}
-              className={`px-2 py-0.5 rounded font-semibold transition-all ${
-                showEMA20 ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "text-zinc-500 hover:text-zinc-300"
-              }`}
-              title="Toggle EMA 20 line"
-            >
-              EMA 20
-            </button>
-            <button
-              onClick={() => setShowSMA50(!showSMA50)}
-              className={`px-2 py-0.5 rounded font-semibold transition-all ${
-                showSMA50 ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "text-zinc-500 hover:text-zinc-300"
-              }`}
-              title="Toggle SMA 50 line"
-            >
-              SMA 50
-            </button>
-            <button
-              onClick={() => setShowSMA200(!showSMA200)}
-              className={`px-2 py-0.5 rounded font-semibold transition-all ${
-                showSMA200 ? "bg-purple-500/20 text-purple-300 border border-purple-500/30" : "text-zinc-500 hover:text-zinc-300"
-              }`}
-              title="Toggle SMA 200 line"
-            >
-              SMA 200
-            </button>
-            <button
-              onClick={() => setShowPriceLevels(!showPriceLevels)}
-              className={`px-2 py-0.5 rounded font-semibold transition-all ${
-                showPriceLevels ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "text-zinc-500 hover:text-zinc-300"
-              }`}
-              title="Toggle Stop Loss, Profit Target, Support & Resistance"
-            >
-              Levels
-            </button>
-          </div>
-
-          <button
-            onClick={toggleFullscreen}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/10 border border-white/5 transition-all"
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen View"}
-          >
-            {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Chart Canvas */}
+    <div className="relative">
       <div
         ref={chartContainerRef}
-        className="w-full"
-        style={{ height: isFullscreen ? "calc(100vh - 90px)" : "560px" }}
+        className="w-full h-[440px] rounded-lg overflow-hidden border border-white/5 bg-zinc-950/40"
+      />
+      {/* Floating OHLCV Tooltip */}
+      <div
+        ref={tooltipRef}
+        style={{
+          display: "none",
+          position: "absolute",
+          zIndex: 50,
+          padding: "10px 12px",
+          background: isLightMode ? "rgba(255, 255, 255, 0.96)" : "rgba(9, 9, 11, 0.92)",
+          backdropFilter: "blur(12px)",
+          border: isLightMode ? "1px solid rgba(0, 0, 0, 0.1)" : "1px solid rgba(255, 255, 255, 0.1)",
+          borderRadius: "10px",
+          pointerEvents: "none",
+          minWidth: "160px",
+          boxShadow: isLightMode ? "0 8px 32px rgba(0,0,0,0.1)" : "0 8px 32px rgba(0,0,0,0.5)",
+          color: isLightMode ? "#1c1e21" : "#f4f4f5",
+        }}
       />
     </div>
   );

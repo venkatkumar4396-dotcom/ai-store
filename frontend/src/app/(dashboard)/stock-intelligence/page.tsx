@@ -54,20 +54,8 @@ const CandlestickChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[540px] flex items-center justify-center bg-zinc-950/40 border border-white/5 rounded-lg text-zinc-400">
+      <div className="w-full h-[440px] flex items-center justify-center bg-zinc-950/40 border border-white/5 rounded-lg text-zinc-400">
         <Loader2 className="h-6 w-6 animate-spin mr-2" /> Loading Chart...
-      </div>
-    ),
-  }
-);
-
-const TradingViewChart = dynamic(
-  () => import("@/components/dashboard/TradingViewChart"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-[560px] flex items-center justify-center bg-zinc-950/40 border border-white/5 rounded-lg text-zinc-400">
-        <Loader2 className="h-6 w-6 animate-spin mr-2" /> Loading TradingView Pro Chart...
       </div>
     ),
   }
@@ -213,7 +201,6 @@ export default function StockIntelligencePage() {
   const [activeTab, setActiveTab] = React.useState("analyze");
 
   // Chart state
-  const [chartEngine, setChartEngine] = React.useState<"tradingview" | "quant">("quant");
   const [chartData, setChartData] = React.useState<any[] | null>(null);
   const [chartSignals, setChartSignals] = React.useState<any[]>([]);
   const [chartPeriod, setChartPeriod] = React.useState<"5d" | "1mo" | "3mo" | "6mo" | "1y">("6mo");
@@ -962,59 +949,33 @@ export default function StockIntelligencePage() {
                 </Card>
 
                 {/* ─── Candlestick Chart + Market Situation ─── */}
-                {/* ─── Candlestick Chart + Market Situation ─── */}
                 <div className="flex flex-col lg:flex-row gap-5">
-                  <Card className="border border-white/[0.08] bg-zinc-950/50 backdrop-blur-xl flex-1 min-w-0 shadow-2xl">
-                    <CardHeader className="pb-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 space-y-0 border-b border-white/[0.04]">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center bg-white/[0.04] p-1 rounded-xl border border-white/[0.06]">
-                          <button
-                            onClick={() => setChartEngine("tradingview")}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                              chartEngine === "tradingview"
-                                ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25"
-                                : "text-zinc-400 hover:text-white"
-                            }`}
-                          >
-                            <BarChart3 className="h-3.5 w-3.5" />
-                            <span>TradingView Pro</span>
-                          </button>
-                          <button
-                            onClick={() => setChartEngine("quant")}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                              chartEngine === "quant"
-                                ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25"
-                                : "text-zinc-400 hover:text-white"
-                            }`}
-                          >
-                            <Zap className="h-3.5 w-3.5" />
-                            <span>Nexora Quant AI</span>
-                          </button>
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
+                  <Card className="border border-white/[0.06] bg-zinc-950/40 backdrop-blur-xl flex-1 min-w-0">
+                    <CardHeader className="pb-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 space-y-0">
+                      <CardTitle className="text-base font-semibold text-white flex items-center gap-2">
+                        <LineChart className="h-5 w-5 text-emerald-400" /> Price Chart
+                        <div className="flex items-center gap-1.5 ml-2.5">
                           <button
                             onClick={() => handleQuickTrade("buy")}
-                            className="w-7 h-7 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-[11px] font-extrabold rounded-lg text-white transition-all shadow-md shadow-emerald-600/25 cursor-pointer flex items-center justify-center border border-emerald-500/30"
+                            className="w-6.5 h-6.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-[10px] font-extrabold rounded-md text-white transition-all shadow shadow-emerald-600/25 cursor-pointer flex items-center justify-center border border-emerald-500/20"
                             title="Quick Buy Order"
                           >
                             B
                           </button>
                           <button
                             onClick={() => handleQuickTrade("sell")}
-                            className="w-7 h-7 bg-rose-600 hover:bg-rose-500 active:scale-95 text-[11px] font-extrabold rounded-lg text-white transition-all shadow-md shadow-rose-600/25 cursor-pointer flex items-center justify-center border border-rose-500/30"
+                            className="w-6.5 h-6.5 bg-rose-600 hover:bg-rose-500 active:scale-95 text-[10px] font-extrabold rounded-md text-white transition-all shadow shadow-rose-600/25 cursor-pointer flex items-center justify-center border border-rose-500/20"
                             title="Quick Sell Order"
                           >
                             S
                           </button>
                         </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2 self-end md:self-auto">
+                      </CardTitle>
+                      <div className="flex items-center gap-2.5 self-end md:self-auto">
                         <Button
                           size="sm"
                           onClick={() => fetchMarketSituation(analysis.symbol)}
-                          className={`text-xs h-8 rounded-lg font-semibold transition-all ${
+                          className={`text-xs h-8 rounded-lg transition-all ${
                             isSituationOpen
                               ? "bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-600/20"
                               : "bg-white/[0.04] border border-violet-500/25 text-violet-400 hover:bg-violet-500/10"
@@ -1027,7 +988,7 @@ export default function StockIntelligencePage() {
                           size="sm"
                           variant="outline"
                           onClick={() => setIsRefreshDialogOpen(true)}
-                          className={`text-xs h-8 rounded-lg font-medium transition-all ${
+                          className={`text-xs h-8 rounded-lg transition-all ${
                             isAutoRefreshEnabled
                               ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 shadow-lg shadow-emerald-500/5"
                               : "bg-white/[0.04] border-white/[0.08] text-zinc-400 hover:bg-white/5 hover:text-zinc-300"
@@ -1046,71 +1007,57 @@ export default function StockIntelligencePage() {
                           <Globe className="h-3.5 w-3.5" />
                           <span>{timezoneMode === "exchange" ? `Exchange` : `Local`} ({tzName})</span>
                         </Button>
-                        {chartEngine === "quant" && (
-                          !isIntraday ? (
-                            <div className="flex bg-white/[0.03] rounded-lg p-0.5 border border-white/[0.05]">
-                              {(["1mo", "3mo", "6mo", "1y"] as const).map((period) => (
-                                <button
-                                  key={period}
-                                  onClick={() => setChartPeriod(period)}
-                                  className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
-                                    chartPeriod === period
-                                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                                      : "text-zinc-500 hover:text-zinc-300"
-                                  }`}
-                                >
-                                  {period.toUpperCase()}
-                                </button>
-                              ))}
-                            </div>
-                          ) : (
-                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 text-[11px] font-bold">
-                              5D · 5M
-                            </Badge>
-                          )
+                        {!isIntraday ? (
+                          <div className="flex bg-white/[0.03] rounded-lg p-0.5 border border-white/[0.05]">
+                            {(["1mo", "3mo", "6mo", "1y"] as const).map((period) => (
+                              <button
+                                key={period}
+                                onClick={() => setChartPeriod(period)}
+                                className={`px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all ${
+                                  chartPeriod === period
+                                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                                    : "text-zinc-500 hover:text-zinc-300"
+                                }`}
+                              >
+                                {period.toUpperCase()}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1.5 text-[11px] font-bold">
+                            5D · 5M
+                          </Badge>
                         )}
                       </div>
                     </CardHeader>
-                    <CardContent className="p-4 pt-3">
-                      {chartEngine === "tradingview" ? (
-                        <TradingViewChart
+                    <CardContent className="pt-0">
+                      {chartData ? (
+                        <CandlestickChart
+                          data={chartData}
                           symbol={analysis.symbol}
-                          height={560}
-                          onSwitchToQuant={() => setChartEngine("quant")}
+                          stopLoss={analysis.stopLoss}
+                          profitTarget={analysis.profitTarget}
+                          supportLevels={analysis.supportLevels}
+                          resistanceLevels={analysis.resistanceLevels}
+                          signals={chartSignals}
+                          liveQuote={liveQuote}
+                          timezoneMode={timezoneMode}
+                          avgPrice={avgCostForChart}
                         />
                       ) : (
-                        chartData ? (
-                          <CandlestickChart
-                            data={chartData}
-                            symbol={analysis.symbol}
-                            stopLoss={analysis.stopLoss}
-                            profitTarget={analysis.profitTarget}
-                            supportLevels={analysis.supportLevels}
-                            resistanceLevels={analysis.resistanceLevels}
-                            signals={chartSignals}
-                            liveQuote={liveQuote}
-                            timezoneMode={timezoneMode}
-                            avgPrice={avgCostForChart}
-                            onPeriodChange={setChartPeriod}
-                            currentPeriod={chartPeriod}
-                            isIntraday={isIntraday}
-                          />
-                        ) : (
-                          <div className="w-full h-[540px] flex items-center justify-center text-zinc-600">
-                            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading quant chart...
-                          </div>
-                        )
-                      )}
-                      {chartEngine === "quant" && (
-                        <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 justify-center text-[11px] text-zinc-500">
-                          <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 border-t border-dashed border-rose-500 inline-block" /> Stop Loss</span>
-                          <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 border-t border-dashed border-emerald-500 inline-block" /> Profit Target</span>
-                          <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 border-t border-dotted border-cyan-500 inline-block" /> Support</span>
-                          <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 border-t border-dotted border-amber-500 inline-block" /> Resistance</span>
-                          <span className="flex items-center gap-1.5"><svg width="10" height="10" viewBox="0 0 12 12"><polygon points="6,0 12,12 0,12" fill="#10b981" /></svg> Buy</span>
-                          <span className="flex items-center gap-1.5"><svg width="10" height="10" viewBox="0 0 12 12"><polygon points="6,12 12,0 0,0" fill="#ef4444" /></svg> Sell</span>
+                        <div className="w-full h-[440px] flex items-center justify-center text-zinc-600">
+                          <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading chart...
                         </div>
                       )}
+                      {/* Chart Legend */}
+                      <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 justify-center text-[11px] text-zinc-500">
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 border-t border-dashed border-rose-500 inline-block" /> Stop Loss</span>
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 border-t border-dashed border-emerald-500 inline-block" /> Profit Target</span>
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 border-t border-dotted border-cyan-500 inline-block" /> Support</span>
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 border-t border-dotted border-amber-500 inline-block" /> Resistance</span>
+                        <span className="flex items-center gap-1.5"><svg width="10" height="10" viewBox="0 0 12 12"><polygon points="6,0 12,12 0,12" fill="#10b981" /></svg> Buy</span>
+                        <span className="flex items-center gap-1.5"><svg width="10" height="10" viewBox="0 0 12 12"><polygon points="6,12 12,0 0,0" fill="#ef4444" /></svg> Sell</span>
+                      </div>
                     </CardContent>
                   </Card>
 

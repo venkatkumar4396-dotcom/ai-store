@@ -298,24 +298,30 @@ export async function fetchHistoricalCandles(
   const yf = await getYahoo();
   let result: any = null;
 
-  // Intraday intervals on Yahoo only support up to 60d (5m best with 5d or 1mo)
-  const isIntraday = interval !== '1d';
-  const effectivePeriod = isIntraday ? (period === '1mo' ? '1mo' : '5d') : period;
-
   // 1. Try Yahoo SDK
   try {
     result = await yf.chart(symbol, {
-      period1: getStartDate(effectivePeriod),
+      period1: getStartDate(period),
       interval: interval,
     });
   } catch (err: any) {
     logger.warn(`Yahoo SDK chart fetch failed for ${symbol}: ${err.message}`);
+    if (interval !== '1d') {
+      try {
+        result = await yf.chart(symbol, {
+          period1: getStartDate('6mo'),
+          interval: '1d',
+        });
+      } catch {
+        // fall through to direct fetch
+      }
+    }
   }
 
   // 2. Try Direct HTTP Yahoo Chart
   if (!result?.quotes || result.quotes.length === 0) {
     try {
-      const directData = await fetchDirectYahooChart(symbol, effectivePeriod, interval);
+      const directData = await fetchDirectYahooChart(symbol, period === '5d' ? '5d' : '6mo', interval === '5m' ? '5m' : '1d');
       const timestamps = directData.timestamp || [];
       const quotesData = directData.indicators?.quote?.[0] || {};
       const opens = quotesData.open || [];
@@ -349,38 +355,25 @@ export async function fetchHistoricalCandles(
   if (!result?.quotes || result.quotes.length === 0) {
     logger.warn(`Using benchmark candle generator for ${symbol}`);
     const benchmark = BENCHMARK_PRICES[symbol.toUpperCase()] || { price: 500 };
-    return generateRobustCandles(symbol, benchmark.price, effectivePeriod, interval);
+    return generateRobustCandles(symbol, benchmark.price, period, interval);
   }
 
-  // Deduplicate and sort chronologically
-  const seenDates = new Set<string>();
-  const mapped: OHLCV[] = [];
-
-  for (const q of result.quotes) {
-    if (q.open == null || q.close == null || q.high == null || q.low == null) continue;
-    const dateStr = isIntraday 
-      ? new Date(q.date).toISOString() 
-      : new Date(q.date).toISOString().split('T')[0];
-
-    if (seenDates.has(dateStr)) continue;
-    seenDates.add(dateStr);
-
-    mapped.push({
-      date: dateStr,
+  let mapped = result.quotes
+    .filter((q: any) => q.open != null && q.close != null && q.high != null && q.low != null)
+    .map((q: any) => ({
+      date: interval === '1d' 
+        ? new Date(q.date).toISOString().split('T')[0] 
+        : new Date(q.date).toISOString(),
       open: formatPreciseNumber(q.open),
       high: formatPreciseNumber(q.high),
       low: formatPreciseNumber(q.low),
       close: formatPreciseNumber(q.close),
       volume: q.volume || 0,
-    });
-  }
-
-  // Sort ascending
-  mapped.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }));
 
   if (mapped.length === 0) {
     const benchmark = BENCHMARK_PRICES[symbol.toUpperCase()] || { price: 500 };
-    return generateRobustCandles(symbol, benchmark.price, effectivePeriod, interval);
+    return generateRobustCandles(symbol, benchmark.price, period, interval);
   }
 
   return mapped;
