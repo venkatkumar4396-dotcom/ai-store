@@ -23,10 +23,4 @@ export function verifyToken(token: string): JwtPayload {
   return jwt.verify(token, env.JWT_SECRET) as JwtPayload;
 }
 
-/**
- * Decode a JWT token without verification (for debugging)
- */
-export function decodeToken(token: string): JwtPayload | null {
-  const decoded = jwt.decode(token);
-  return decoded as JwtPayload | null;
-}
+

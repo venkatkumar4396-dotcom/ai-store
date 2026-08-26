@@ -5,32 +5,39 @@ services:
     image: postgres:16-alpine
     container_name: nexusforge-db
     environment:
-      POSTGRES_USER: nexusforge
-      POSTGRES_PASSWORD: nexusforge_secret
-      POSTGRES_DB: nexusforge
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-nexusforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_DB: ${POSTGRES_DB:-nexusforge}
+    # DB only accessible from within docker network — not exposed to host
+    expose:
+      - "5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - internal
 
   # Redis (for caching and rate limiting)
   redis:
     image: redis:7-alpine
     container_name: nexusforge-redis
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     restart: unless-stopped
+    networks:
+      - internal
 
   # Python AI Service
   ai-service:
     build: ./ai-service
     container_name: nexusforge-ai-service
-    ports:
-      - "8001:8001"
+    expose:
+      - "8001"
     environment:
-      - AI_SERVICE_TOKEN=default-ai-service-token-change-me
+      - AI_SERVICE_TOKEN=${AI_SERVICE_TOKEN:?AI_SERVICE_TOKEN must be set}
     restart: unless-stopped
+    networks:
+      - internal
 
   # Node.js backend API
   backend:
@@ -41,16 +48,19 @@ services:
     environment:
       - PORT=5000
       - NODE_ENV=production
-      - CORS_ORIGIN=http://localhost:3000
-      - DATABASE_URL=postgresql://nexusforge:nexusforge_secret@postgres:5432/nexusforge?schema=public
-      - JWT_SECRET=your-production-super-secret-jwt-key
-      - ENCRYPTION_KEY=your-production-32-char-key!!!!
-      - GEMINI_API_KEY=your-gemini-api-key-here
+      - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN must be set}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-nexusforge}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-nexusforge}?schema=public
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set (min 32 chars)}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set (min 32 chars)}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - REDIS_URL=redis://redis:6379
     depends_on:
       - postgres
       - redis
     restart: unless-stopped
+    networks:
+      - internal
+      - external
 
   # Next.js frontend
   frontend:
@@ -59,10 +69,19 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5000
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000}
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - external
 
 volumes:
   pgdata:
+
+networks:
+  internal:
+    driver: bridge
+    internal: true   # No external access — DB and Redis isolated
+  external:
+    driver: bridge

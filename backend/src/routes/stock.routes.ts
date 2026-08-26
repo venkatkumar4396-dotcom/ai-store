@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { stockService } from '../services/stock.service';
 import { authenticate } from '../middleware/auth';
 import { aiLimiter } from '../middleware/rateLimit';
+import { logSecurityEvent } from '../utils/securityLogger';
 
 const router = Router();
 
@@ -199,6 +200,18 @@ router.post('/alpaca-proxy', authenticate, async (req: Request, res: Response, n
 
     if (!endpoint || !keyId || !secretKey) {
       res.status(400).json({ error: 'endpoint, x-alpaca-key-id, and x-alpaca-secret-key headers are required' });
+      return;
+    }
+
+    // SSRF Protection: only allow /v2/ Alpaca API paths
+    const allowedPrefixes = ['/v2/', '/v1/'];
+    const isAllowed = allowedPrefixes.some(prefix => endpoint.startsWith(prefix));
+    if (!isAllowed || endpoint.includes('..') || endpoint.includes('://')) {
+      logSecurityEvent('SSRF_BLOCKED', `Blocked Alpaca proxy to disallowed endpoint: ${endpoint}`, {
+        req,
+        userId: req.user!.userId,
+      });
+      res.status(400).json({ error: 'Invalid endpoint. Only Alpaca API v1/v2 paths are allowed.' });
       return;
     }
 

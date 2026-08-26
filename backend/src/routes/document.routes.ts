@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { documentService } from '../services/document.service';
 import { authenticate } from '../middleware/auth';
+import { uploadLimiter } from '../middleware/rateLimit';
+import { validateUploadedFile } from '../middleware/fileValidator';
 import multer from 'multer';
 import { extractTextFromBuffer } from '../utils/fileParser';
 
@@ -14,7 +16,7 @@ const upload = multer({
  * @route   POST /api/agents/document/upload
  * @desc    Upload a PDF or TXT file and extract its plain text content
  */
-router.post('/upload', authenticate, upload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
+router.post('/upload', authenticate, uploadLimiter, upload.single('file'), validateUploadedFile('document'), async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.file) {
       res.status(400).json({ error: 'No file uploaded' });
@@ -83,8 +85,9 @@ router.post('/generate-pdf', authenticate, async (req: Request, res: Response, n
     }
     const pdfBuffer = await documentService.generatePdfDocument(userId, title, content);
     
+    const safeTitle = title.replace(/[\r\n"']/g, '').trim().slice(0, 100) || 'document';
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=${encodeURIComponent(title)}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(safeTitle)}.pdf"`);
     res.setHeader('Content-Length', pdfBuffer.length);
     res.status(200).send(pdfBuffer);
   } catch (error) {

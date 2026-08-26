@@ -203,19 +203,40 @@ export default function CandlestickChart({
 
     candlestickSeriesRef.current = candlestickSeries;
 
-    // Format data for lightweight-charts
-    const formattedData = data.map((d) => {
+    // ── Clean, deduplicate and chronologically sort candle data ──────
+    const map = new Map<number | string, CandleData>();
+    for (const d of data) {
+      if (d.open == null || d.close == null || isNaN(d.open) || isNaN(d.close)) continue;
       const hasTime = d.date.includes("T") || d.date.includes(" ");
-      return {
-        time: (hasTime ? Math.floor(new Date(d.date).getTime() / 1000) : d.date) as any,
+      const t = hasTime ? Math.floor(new Date(d.date).getTime() / 1000) : d.date;
+      if (!map.has(t) || (d.volume && d.volume > 0)) {
+        map.set(t, d);
+      }
+    }
+
+    const sortedData = Array.from(map.entries())
+      .map(([timeKey, d]) => ({
+        time: timeKey as any,
+        open: d.open,
+        high: d.high || Math.max(d.open, d.close),
+        low: d.low || Math.min(d.open, d.close),
+        close: d.close,
+        volume: d.volume || 0,
+      }))
+      .sort((a, b) => {
+        if (typeof a.time === "number" && typeof b.time === "number") return a.time - b.time;
+        return String(a.time).localeCompare(String(b.time));
+      });
+
+    candlestickSeries.setData(
+      sortedData.map((d) => ({
+        time: d.time,
         open: d.open,
         high: d.high,
         low: d.low,
         close: d.close,
-      };
-    });
-
-    candlestickSeries.setData(formattedData);
+      }))
+    );
 
     // ── Volume Histogram ────────────────────────────────────
     const volumeSeries = chart.addSeries(HistogramSeries, {
@@ -234,26 +255,21 @@ export default function CandlestickChart({
       },
     });
 
-    const volumeData = data.map((d) => {
-      const hasTime = d.date.includes("T") || d.date.includes(" ");
-      return {
-        time: (hasTime ? Math.floor(new Date(d.date).getTime() / 1000) : d.date) as any,
-        value: d.volume || 0,
-        color:
-          d.close >= d.open
-            ? "rgba(16, 185, 129, 0.4)" // green with alpha
-            : "rgba(239, 68, 68, 0.4)", // red with alpha
-      };
-    });
+    const volumeData = sortedData.map((d) => ({
+      time: d.time,
+      value: d.volume || 0,
+      color:
+        d.close >= d.open
+          ? "rgba(16, 185, 129, 0.4)" // green with alpha
+          : "rgba(239, 68, 68, 0.4)", // red with alpha
+    }));
 
     volumeSeries.setData(volumeData);
 
-    // ── Buy / Sell Markers ───────────────────────────────────
+    // ── Buy / Sell Markers (Clean & Compact) ─────────────────
     if (signals && signals.length > 0) {
-      const validDates = new Set(data.map((d) => d.date));
+      const validTimeSet = new Set(sortedData.map((d) => String(d.time)));
       const markers = signals
-        .filter((s) => validDates.has(s.date))
-        .sort((a, b) => a.date.localeCompare(b.date))
         .map((signal) => {
           const isBuy = signal.type === "BUY";
           const hasTime = signal.date.includes("T") || signal.date.includes(" ");
@@ -263,9 +279,14 @@ export default function CandlestickChart({
             position: isBuy ? ("belowBar" as const) : ("aboveBar" as const),
             color: isBuy ? "#10b981" : "#ef4444",
             shape: isBuy ? ("arrowUp" as const) : ("arrowDown" as const),
-            text: `${isBuy ? "BUY" : "SELL"} · ${signal.label}`,
-            size: signal.score >= 50 ? 2 : 1,
+            text: isBuy ? "BUY" : "SELL",
+            size: 1,
           };
+        })
+        .filter((m) => validTimeSet.has(String(m.time)))
+        .sort((a, b) => {
+          if (typeof a.time === "number" && typeof b.time === "number") return a.time - b.time;
+          return String(a.time).localeCompare(String(b.time));
         });
 
       if (markers.length > 0) {

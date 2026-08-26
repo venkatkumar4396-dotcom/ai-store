@@ -6,7 +6,7 @@ import env from '../config/env';
  */
 export const apiLimiter = rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS,
-  max: env.NODE_ENV === 'development' ? 10000 : env.RATE_LIMIT_MAX_REQUESTS,
+  max: env.NODE_ENV === 'development' ? 200 : env.RATE_LIMIT_MAX_REQUESTS,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -25,7 +25,7 @@ export const apiLimiter = rateLimit({
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: env.NODE_ENV === 'development' ? 10000 : 10, // 10 attempts per window
+  max: env.NODE_ENV === 'development' ? 30 : 10, // 10 attempts per window in prod
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -40,7 +40,7 @@ export const authLimiter = rateLimit({
  */
 export const aiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: env.NODE_ENV === 'development' ? 10000 : 20, // 20 requests per minute
+  max: env.NODE_ENV === 'development' ? 50 : 20, // 20 requests per minute in prod
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -58,7 +58,7 @@ export const aiLimiter = rateLimit({
  */
 export const otpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: env.NODE_ENV === 'development' ? 10000 : 3, // 3 attempts per window
+  max: env.NODE_ENV === 'development' ? 10 : 3, // 3 attempts per window in prod
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -73,12 +73,45 @@ export const otpLimiter = rateLimit({
  */
 export const broadcastLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: env.NODE_ENV === 'development' ? 10000 : 5, // 5 broadcasts per hour
+  max: env.NODE_ENV === 'development' ? 20 : 5, // 5 broadcasts per hour in prod
   standardHeaders: true,
   legacyHeaders: false,
   message: {
     error: 'Broadcast rate limit exceeded',
     message: 'Too many broadcasts. Please try again later.',
+    statusCode: 429,
+  },
+  keyGenerator: (req) => {
+    return (req as any).user?.userId || req.ip || 'unknown';
+  },
+});
+
+/**
+ * Rate limiter for account creation (prevent mass registration)
+ */
+export const registrationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: env.NODE_ENV === 'development' ? 20 : 5, // 5 registrations per hour per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Too many accounts created',
+    message: 'Too many account registrations from this address. Please try again later.',
+    statusCode: 429,
+  },
+});
+
+/**
+ * Rate limiter for file upload endpoints
+ */
+export const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: env.NODE_ENV === 'development' ? 50 : 20, // 20 uploads per 15 min
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Upload rate limit exceeded',
+    message: 'Too many file uploads. Please try again later.',
     statusCode: 429,
   },
   keyGenerator: (req) => {

@@ -10,6 +10,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { apiLimiter } from './middleware/rateLimit';
 import { inputSanitizer } from './middleware/sanitizer';
 import { initWebSocket } from './websocket';
+import { logSecurityEvent } from './utils/securityLogger';
 
 // AI Services & Providers
 import { aiRouter } from './services/ai/provider';
@@ -59,7 +60,7 @@ initWebSocket(httpServer);
 import { whatsappService } from './services/whatsapp.service';
 whatsappService.restoreActiveSessions();
 
-// Auto-seed root admin account (kumar / kumar@4396)
+// Auto-seed admin account (uses ADMIN_SEED_EMAIL / ADMIN_SEED_PASSWORD env vars)
 import { ensureAdminSeeded } from './services/auth.service';
 ensureAdminSeeded();
 
@@ -93,7 +94,9 @@ try {
 // ─── Middleware ─────────────────────────────────────────────
 
 app.use(cors({
-  origin: true,
+  origin: env.NODE_ENV === 'production'
+    ? env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : true, // Allow all origins in development only
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'x-auth-token'],
@@ -102,10 +105,23 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// Apply security headers protection (Helmet)
+// Apply security headers protection (Helmet) with Content-Security-Policy
 app.use(helmet({
-  contentSecurityPolicy: false, // Turn off CSP restriction for easy local media loading
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  contentSecurityPolicy: env.NODE_ENV === 'production' ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", env.CORS_ORIGIN],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  } : false, // Disable CSP in development for easier debugging
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  hsts: env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
 }));
 
 // Sanitize all incoming user input (XSS protection)

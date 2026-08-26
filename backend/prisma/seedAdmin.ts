@@ -7,25 +7,28 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function createAdmin() {
-  const password = 'kumar@4396';
+  const email = (process.env.ADMIN_SEED_EMAIL || 'admin@nexora.ai').toLowerCase().trim();
+  const password = process.env.ADMIN_SEED_PASSWORD || 'ChangeMeImmediately!123';
+  const name = process.env.ADMIN_SEED_NAME || 'Admin';
+
   const salt = await bcrypt.genSalt(12);
   const passwordHash = await bcrypt.hash(password, salt);
 
-  console.log('Upserting admin account: kumar (kumar@nexora.ai)...');
+  console.log(`Upserting admin account: ${name} (${email})...`);
 
-  // Upsert user with email kumar@nexora.ai
+  // Upsert user with admin credentials
   const adminUser = await prisma.user.upsert({
-    where: { email: 'kumar@nexora.ai' },
+    where: { email },
     update: {
-      name: 'kumar',
+      name,
       passwordHash,
       role: 'admin',
       provider: 'credentials',
       preferences: JSON.stringify({ theme: 'dark', failedLoginAttempts: 0 }),
     },
     create: {
-      email: 'kumar@nexora.ai',
-      name: 'kumar',
+      email,
+      name,
       passwordHash,
       role: 'admin',
       provider: 'credentials',
@@ -38,7 +41,6 @@ async function createAdmin() {
   console.log(`   Name:  ${adminUser.name}`);
   console.log(`   Email: ${adminUser.email}`);
   console.log(`   Role:  ${adminUser.role}`);
-  console.log(`   Pass:  kumar@4396`);
 }
 
 createAdmin()

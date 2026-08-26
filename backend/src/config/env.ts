@@ -61,7 +61,7 @@ const env: EnvConfig = {
   KIMI_API_KEY: getEnvString('KIMI_API_KEY', ''),
   KIMI_BASE_URL: getEnvString('KIMI_BASE_URL', 'https://api.moonshot.ai/v1'),
   KIMI_MODEL: getEnvString('KIMI_MODEL', 'moonshot-v1-128k'),
-  META_API_KEY: getEnvString('META_API_KEY', 'LLM_1958630808184263_hfZ4QHw6laX-PjUxOg5Io0y8mKs'),
+  META_API_KEY: getEnvString('META_API_KEY', ''),
   META_BASE_URL: getEnvString('META_BASE_URL', 'https://api.llama-api.com'),
   META_MODEL: getEnvString('META_MODEL', 'llama3.3-70b'),
   OLLAMA_BASE_URL: getEnvString('OLLAMA_BASE_URL', 'http://localhost:11434'),
@@ -97,6 +97,9 @@ if (env.NODE_ENV === 'production') {
   }
   if (env.DATABASE_URL === 'file:./dev.db') {
     errors.push('DATABASE_URL should not use SQLite dev.db in production. Use PostgreSQL.');
+  }
+  if (!env.CORS_ORIGIN || env.CORS_ORIGIN === '*') {
+    errors.push('CORS_ORIGIN must be set to a specific frontend URL in production (not wildcard).');
   }
 
   if (errors.length > 0) {

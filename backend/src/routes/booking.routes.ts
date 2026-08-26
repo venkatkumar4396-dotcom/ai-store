@@ -1,6 +1,9 @@
 /**
  * Booking Routes — REST API for the 5-bot booking agent system
  * Mounts at: /api/booking
+ * 
+ * SECURITY: All endpoints require authentication. User data is scoped
+ * to the authenticated user's ID — no query-param userId override.
  */
 
 import { Router, Request, Response, NextFunction } from 'express';
@@ -8,6 +11,8 @@ import { orchestratorAgent, TransportMode } from '../services/agents/orchestrato
 import { trainAgent } from '../services/agents/train.agent';
 import { notifierAgent } from '../services/agents/notifier.agent';
 import { PrismaClient } from '@prisma/client';
+import { authenticate } from '../middleware/auth';
+import { logSecurityEvent } from '../utils/securityLogger';
 import logger from '../utils/logger';
 
 const router = Router();
@@ -15,8 +20,9 @@ const prisma = new PrismaClient();
 
 // ─── POST /api/booking/search ───────────────────────────────
 // Trigger multi-agent search via orchestrator
-router.post('/search', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/search', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user!.userId;
     const {
       origin,
       destination,
@@ -31,9 +37,6 @@ router.post('/search', async (req: Request, res: Response, next: NextFunction) =
       res.status(400).json({ error: 'origin, destination, and date are required' });
       return;
     }
-
-    // Get userId from auth header (JWT) if available
-    const userId = (req as any).user?.userId || 'anonymous';
 
     const result = await orchestratorAgent.search({
       origin,
@@ -55,16 +58,15 @@ router.post('/search', async (req: Request, res: Response, next: NextFunction) =
 
 // ─── POST /api/booking/book ─────────────────────────────────
 // Confirm a booking through the orchestrator
-router.post('/book', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/book', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user!.userId;
     const { mode, itemId, passengerInfo } = req.body;
 
     if (!mode || !itemId || !passengerInfo) {
       res.status(400).json({ error: 'mode, itemId, and passengerInfo are required' });
       return;
     }
-
-    const userId = (req as any).user?.userId || 'anonymous';
 
     const result = await orchestratorAgent.book({
       mode: mode as 'flight' | 'bus' | 'train' | 'hotel',
@@ -81,16 +83,16 @@ router.post('/book', async (req: Request, res: Response, next: NextFunction) => 
 });
 
 // ─── GET /api/booking/history ───────────────────────────────
-// Get user's booking history
-router.get('/history', async (req: Request, res: Response, next: NextFunction) => {
+// Get authenticated user's booking history only
+router.get('/history', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = (req as any).user?.userId || req.query.userId as string || 'anonymous';
+    const userId = req.user!.userId;
     const limit = parseInt(req.query.limit as string, 10) || 20;
 
     const bookings = await prisma.booking.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      take: limit,
+      take: Math.min(limit, 100), // Cap at 100
     });
 
     res.json({ success: true, data: bookings });
@@ -101,10 +103,10 @@ router.get('/history', async (req: Request, res: Response, next: NextFunction) =
 });
 
 // ─── GET /api/booking/searches ──────────────────────────────
-// Get user's recent searches
-router.get('/searches', async (req: Request, res: Response, next: NextFunction) => {
+// Get authenticated user's recent searches
+router.get('/searches', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = (req as any).user?.userId || req.query.userId as string || 'anonymous';
+    const userId = req.user!.userId;
 
     const searches = await prisma.bookingSearch.findMany({
       where: { userId },
@@ -119,7 +121,7 @@ router.get('/searches', async (req: Request, res: Response, next: NextFunction) 
 });
 
 // ─── GET /api/booking/health ────────────────────────────────
-// Get health status of all 5 agents
+// Get health status of all 5 agents (public — no user data exposed)
 router.get('/health', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const agents = await orchestratorAgent.getAllAgentHealth();
@@ -131,9 +133,10 @@ router.get('/health', async (req: Request, res: Response, next: NextFunction) =>
 });
 
 // ─── GET /api/booking/pnr/:pnr ──────────────────────────────
-// PNR status check
-router.get('/pnr/:pnr', async (req: Request, res: Response, next: NextFunction) => {
+// PNR status check — requires auth and ownership verification
+router.get('/pnr/:pnr', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user!.userId;
     const pnrParam = req.params.pnr;
     const pnr = typeof pnrParam === 'string' ? pnrParam : Array.isArray(pnrParam) ? pnrParam[0] : undefined;
     if (!pnr) {
@@ -141,12 +144,19 @@ router.get('/pnr/:pnr', async (req: Request, res: Response, next: NextFunction) 
       return;
     }
 
-    // Check in database
+    // Check in database — verify ownership
     const booking = await prisma.booking.findUnique({ where: { pnr } });
     if (!booking) {
-      // Try train PNR check
+      // Try train PNR check (generic lookup, no user data)
       const status = await trainAgent.checkPNR(pnr);
       res.json({ success: true, data: status });
+      return;
+    }
+
+    // Verify the booking belongs to the authenticated user
+    if (booking.userId !== userId) {
+      logSecurityEvent('IDOR_ATTEMPT', `User ${userId} tried to access PNR ${pnr} owned by ${booking.userId}`, { userId });
+      res.status(403).json({ error: 'You do not have permission to view this booking' });
       return;
     }
 
@@ -175,10 +185,10 @@ router.get('/pnr/:pnr', async (req: Request, res: Response, next: NextFunction) 
 });
 
 // ─── GET /api/booking/notifications ────────────────────────
-// Get user's booking notifications
-router.get('/notifications', async (req: Request, res: Response, next: NextFunction) => {
+// Get authenticated user's booking notifications
+router.get('/notifications', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = (req as any).user?.userId || req.query.userId as string || 'anonymous';
+    const userId = req.user!.userId;
     const notifications = await notifierAgent.getUserNotifications(userId);
     res.json({ success: true, data: notifications });
   } catch (error: any) {

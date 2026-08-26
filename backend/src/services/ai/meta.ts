@@ -41,7 +41,7 @@ export class MetaLlamaProvider implements AIProvider {
   private readonly AVAILABILITY_CHECK_INTERVAL_MS = 300_000; // 5 minutes
 
   constructor(apiKey?: string, baseUrl?: string, model?: string) {
-    this.apiKey = apiKey || env.META_API_KEY || 'LLM_1958630808184263_hfZ4QHw6laX-PjUxOg5Io0y8mKs';
+    this.apiKey = apiKey || env.META_API_KEY || '';
     this.baseUrl = (baseUrl || env.META_BASE_URL || 'https://api.llama-api.com').replace(/\/+$/, '');
     this.defaultModel = model || env.META_MODEL || 'llama3.3-70b';
 

@@ -14,7 +14,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: ENCRYPTION_KEY
-        value: nexora_32_character_key_prod!!
+        generateValue: true
       - key: CORS_ORIGIN
         sync: false
 

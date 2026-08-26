@@ -6,10 +6,16 @@ import path from 'path';
 import { fileTrackerService } from '../services/fileTracker.service';
 import { authenticate } from '../middleware/auth';
 import { logActivity } from '../services/analytics.service';
+import { sanitizeFilename, validateUploadedFile } from '../middleware/fileValidator';
+import { uploadLimiter } from '../middleware/rateLimit';
+import { logSecurityEvent } from '../utils/securityLogger';
 
 const router = Router();
 const prisma = new PrismaClient();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+});
 
 /**
  * @route   GET /api/file-tracker
@@ -38,6 +44,21 @@ router.post('/', authenticate, async (req: Request, res: Response, next: NextFun
 
     if (!name || !watchPath) {
       res.status(400).json({ error: 'Name and watchPath are required' });
+      return;
+    }
+
+    // Validate watchPath — block access to sensitive system directories
+    const normalizedPath = path.resolve(watchPath);
+    const blockedPrefixes = [
+      'C:\\Windows', 'C:\\Program Files', 'C:\\ProgramData',
+      '/etc', '/usr', '/bin', '/sbin', '/var', '/root', '/boot', '/proc', '/sys',
+    ];
+    const isBlocked = blockedPrefixes.some(prefix =>
+      normalizedPath.toLowerCase().startsWith(prefix.toLowerCase())
+    );
+    if (isBlocked) {
+      logSecurityEvent('SUSPICIOUS_INPUT', `Blocked watchPath to sensitive directory: ${watchPath}`, { req, userId });
+      res.status(400).json({ error: 'Cannot watch system directories for security reasons' });
       return;
     }
 
@@ -192,7 +213,7 @@ router.get('/:id/contents', authenticate, async (req: Request, res: Response, ne
  * @desc    Upload a file directly into the tracked folder
  * @access  Private
  */
-router.post('/:id/upload', authenticate, upload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
+router.post('/:id/upload', authenticate, uploadLimiter, upload.single('file'), validateUploadedFile('general'), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.userId;
     const id = req.params.id as string;
@@ -214,13 +235,25 @@ router.post('/:id/upload', authenticate, upload.single('file'), async (req: Requ
       return;
     }
 
+    // Filename already sanitized by validateUploadedFile middleware
+
     // Ensure watch path exists
     if (!fs.existsSync(tracker.watchPath)) {
       fs.mkdirSync(tracker.watchPath, { recursive: true });
     }
 
-    // Write file to the tracked folder
+    // Write file to the tracked folder with sanitized name
     const destPath = path.join(tracker.watchPath, file.originalname);
+
+    // Final safety check — ensure destPath is within watchPath
+    const resolvedDest = path.resolve(destPath);
+    const resolvedWatch = path.resolve(tracker.watchPath);
+    if (!resolvedDest.startsWith(resolvedWatch)) {
+      logSecurityEvent('SUSPICIOUS_INPUT', `Path traversal attempt in upload: ${file.originalname}`, { req, userId });
+      res.status(400).json({ error: 'Invalid filename' });
+      return;
+    }
+
     fs.writeFileSync(destPath, file.buffer);
 
     // Call service to log the activity and update DB

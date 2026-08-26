@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 import { signToken, JwtPayload } from '../utils/jwt';
 import logger from '../utils/logger';
+import { logSecurityEvent } from '../utils/securityLogger';
 import * as crypto from 'crypto';
 import { sendOtpEmail } from '../utils/email';
 
@@ -118,7 +119,7 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
     },
   });
 
-  logger.info(`User registered: ${user.email}`);
+  logSecurityEvent('REGISTER_SUCCESS', `New user registered: ${user.email}`, { email: user.email, userId: user.id });
 
   return {
     user: {
@@ -134,44 +135,39 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
 }
 
 /**
- * Ensure root admin kumar exists in database
+ * Ensure admin account exists — uses ADMIN_SEED_EMAIL / ADMIN_SEED_PASSWORD env vars.
+ * Only creates the account if it doesn't already exist (no password overwrites).
  */
 export async function ensureAdminSeeded() {
   try {
-    const adminExists = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: 'kumar@nexora.ai' },
-          { name: { equals: 'kumar', mode: 'insensitive' } },
-        ],
-      },
+    const seedEmail = (process.env.ADMIN_SEED_EMAIL || 'admin@nexora.ai').toLowerCase().trim();
+    const seedPassword = process.env.ADMIN_SEED_PASSWORD;
+
+    if (!seedPassword) {
+      // No admin seed password configured — skip seeding
+      return;
+    }
+
+    const adminExists = await prisma.user.findUnique({
+      where: { email: seedEmail },
     });
 
-    const salt = await bcrypt.genSalt(12);
-    const passwordHash = await bcrypt.hash('kumar@4396', salt);
-
     if (!adminExists) {
+      const passwordHash = await bcrypt.hash(seedPassword, SALT_ROUNDS);
       await prisma.user.create({
         data: {
-          email: 'kumar@nexora.ai',
-          name: 'kumar',
+          email: seedEmail,
+          name: 'Admin',
           passwordHash,
           role: 'admin',
           provider: 'credentials',
           preferences: JSON.stringify({ theme: 'dark' }),
         },
       });
-      logger.info('Auto-seeded root admin account: kumar (kumar@nexora.ai)');
-    } else {
-      // Ensure role is admin and password is up to date
-      await prisma.user.update({
-        where: { id: adminExists.id },
-        data: {
-          role: 'admin',
-          passwordHash,
-        },
-      });
+      logger.info(`Auto-seeded admin account: ${seedEmail}`);
+      logSecurityEvent('REGISTER_SUCCESS', `Admin account seeded: ${seedEmail}`, { email: seedEmail });
     }
+    // If admin already exists, do NOT overwrite their password
   } catch (err: any) {
     logger.warn(`Failed to auto-seed admin: ${err.message}`);
   }
@@ -184,50 +180,20 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
   const { email, password } = input;
   const cleanEmail = email.toLowerCase().trim();
 
-  // If logging in as admin kumar, guarantee admin exists
-  const isKumarAdminAttempt =
-    cleanEmail === 'kumar' ||
-    cleanEmail === 'kumar@nexora.ai' ||
-    cleanEmail.startsWith('kumar');
-  const isAdminPassword =
-    password === 'kumar@4396' ||
-    password === 'Kumar@4396' ||
-    password.toLowerCase() === 'kumar@4396';
-
-  if (isKumarAdminAttempt && isAdminPassword) {
-    await ensureAdminSeeded();
-  }
-
-  // Find user by email or name/username
+  // Find user by email or username
   let user = await prisma.user.findFirst({
     where: {
       OR: [
         { email: cleanEmail },
         { email: `${cleanEmail}@nexora.ai` },
-        { email: `${cleanEmail}@gmail.com` },
         { name: { equals: cleanEmail, mode: 'insensitive' } },
         { name: { equals: email.trim(), mode: 'insensitive' } },
       ],
     },
   });
 
-  // If still not found but valid admin credentials provided, create immediately
-  if (!user && isKumarAdminAttempt && isAdminPassword) {
-    const salt = await bcrypt.genSalt(12);
-    const passwordHash = await bcrypt.hash(password, salt);
-    user = await prisma.user.create({
-      data: {
-        email: 'kumar@nexora.ai',
-        name: 'kumar',
-        passwordHash,
-        role: 'admin',
-        provider: 'credentials',
-        preferences: JSON.stringify({ theme: 'dark' }),
-      },
-    });
-  }
-
   if (!user) {
+    logSecurityEvent('LOGIN_FAILED', `No account found for: ${cleanEmail}`, { email: cleanEmail });
     throw createError('Invalid email/username or password', 401);
   }
 
@@ -235,6 +201,7 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
   const prefs = parsePreferences(user.preferences);
   if (prefs.loginLockedUntil && Date.now() < prefs.loginLockedUntil) {
     const minutesLeft = Math.ceil((prefs.loginLockedUntil - Date.now()) / 60000);
+    logSecurityEvent('LOGIN_LOCKOUT', `Locked account login attempt: ${user.email}`, { email: user.email, userId: user.id });
     throw createError(`Account temporarily locked. Try again in ${minutesLeft} minute(s).`, 423);
   }
 
@@ -243,19 +210,8 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
     throw createError(`This account uses ${user.provider} sign-in. Please use the ${user.provider} button.`, 400);
   }
 
-  // Verify password (with admin fallback support)
-  let isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-
-  if (!isPasswordValid && isKumarAdminAttempt && isAdminPassword) {
-    // Update hash to match entered admin password
-    const salt = await bcrypt.genSalt(12);
-    const newHash = await bcrypt.hash(password, salt);
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash: newHash, role: 'admin' },
-    });
-    isPasswordValid = true;
-  }
+  // Verify password — no backdoors, no special cases
+  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
   if (!isPasswordValid) {
     // Track failed attempts
@@ -265,7 +221,7 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
     if (failedAttempts >= MAX_LOGIN_ATTEMPTS) {
       updatedPrefs.loginLockedUntil = Date.now() + LOGIN_LOCKOUT_MS;
       updatedPrefs.failedLoginAttempts = 0;
-      logger.warn(`Account locked for ${user.email} after ${MAX_LOGIN_ATTEMPTS} failed attempts`);
+      logSecurityEvent('LOGIN_LOCKOUT', `Account locked for ${user.email} after ${MAX_LOGIN_ATTEMPTS} failed attempts`, { email: user.email, userId: user.id });
     }
 
     await prisma.user.update({
@@ -273,6 +229,7 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
       data: { preferences: JSON.stringify(updatedPrefs) },
     });
 
+    logSecurityEvent('LOGIN_FAILED', `Invalid password for ${user.email} (attempt ${failedAttempts})`, { email: user.email, userId: user.id });
     throw createError('Invalid email/username or password', 401);
   }
 
@@ -305,7 +262,7 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
     },
   });
 
-  logger.info(`User logged in: ${user.email}`);
+  logSecurityEvent('LOGIN_SUCCESS', `User logged in: ${user.email}`, { email: user.email, userId: user.id });
 
   return {
     user: {
@@ -568,19 +525,17 @@ export async function forgotPassword(email: string): Promise<{ message: string; 
   // Send OTP via email (or console in dev)
   await sendOtpEmail(cleanEmail, otp);
 
-  logger.info(`OTP generated for password reset: ${cleanEmail}`);
+  logSecurityEvent('PASSWORD_RESET_REQUEST', `OTP generated for: ${cleanEmail}`, { email: cleanEmail });
 
   const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
   const smtpConfigured = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
 
   if (isDev && !smtpConfigured) {
-    return {
-      message: genericMessage,
-      devNote: `[DEV MODE] OTP: ${otp}`,
-      debugOtp: otp,
-    };
+    // Log OTP to server console only — NEVER send in API response
+    logger.info(`[DEV MODE] OTP for ${cleanEmail}: ${otp}`);
   }
 
+  // Always return the same generic message — no OTP in response body
   return { message: genericMessage };
 }
 

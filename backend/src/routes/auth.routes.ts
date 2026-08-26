@@ -42,7 +42,8 @@ router.post('/register', authLimiter, async (req: Request, res: Response, next: 
     }
     const result = await register({ email, name, password });
     setAuthCookie(req, res, result.token);
-    res.status(201).json(result);
+    // Token is only in httpOnly cookie — not in response body
+    res.status(201).json({ user: result.user });
   } catch (error) {
     next(error);
   }
@@ -62,7 +63,8 @@ router.post('/login', authLimiter, async (req: Request, res: Response, next: Nex
     }
     const result = await login({ email, password });
     setAuthCookie(req, res, result.token);
-    res.status(200).json(result);
+    // Token is only in httpOnly cookie — not in response body
+    res.status(200).json({ user: result.user });
   } catch (error) {
     next(error);
   }
@@ -82,7 +84,7 @@ router.post('/google', authLimiter, async (req: Request, res: Response, next: Ne
     }
     const result = await loginWithOAuth('google', providerId, email, name, avatar);
     setAuthCookie(req, res, result.token);
-    res.status(200).json(result);
+    res.status(200).json({ user: result.user });
   } catch (error) {
     next(error);
   }
@@ -102,7 +104,7 @@ router.post('/github', authLimiter, async (req: Request, res: Response, next: Ne
     }
     const result = await loginWithOAuth('github', providerId, email, name, avatar);
     setAuthCookie(req, res, result.token);
-    res.status(200).json(result);
+    res.status(200).json({ user: result.user });
   } catch (error) {
     next(error);
   }
@@ -140,12 +142,8 @@ router.post('/forgot-password', otpLimiter, async (req: Request, res: Response, 
       return;
     }
     const result = await forgotPassword(email);
-    // Return the generic message. In dev mode (no SMTP), also include devNote + debugOtp
-    // so the frontend OTP auto-fill works during local/tunnel development.
-    const responsePayload: Record<string, any> = { message: result.message };
-    if (result.devNote) responsePayload.devNote = result.devNote;
-    if (result.debugOtp) responsePayload.debugOtp = result.debugOtp;
-    res.status(200).json(responsePayload);
+    // Only return the generic message — never expose OTP or dev hints
+    res.status(200).json({ message: result.message });
 
   } catch (error) {
     next(error);
