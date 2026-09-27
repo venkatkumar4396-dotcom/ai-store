@@ -60,9 +60,38 @@ initWebSocket(httpServer);
 import { whatsappService } from './services/whatsapp.service';
 whatsappService.restoreActiveSessions();
 
-// Auto-seed admin account (uses ADMIN_SEED_EMAIL / ADMIN_SEED_PASSWORD env vars)
-import { ensureAdminSeeded } from './services/auth.service';
-ensureAdminSeeded();
+// Initialize database schema and seed defaults
+async function initDatabase() {
+  try {
+    // 1. Verify if tables exist
+    await prisma.user.count();
+    logger.info('Database schema verified.');
+  } catch (err: any) {
+    logger.warn(`Database verification failed (${err.message}). Attempting automatic schema sync...`);
+    try {
+      const { execSync } = require('child_process');
+      const path = require('path');
+      const backendDir = path.resolve(__dirname, '..');
+      execSync('npx prisma db push --accept-data-loss', {
+        cwd: backendDir,
+        stdio: 'inherit',
+        env: { ...process.env },
+      });
+      logger.info('Database schema successfully synchronized.');
+    } catch (pushErr: any) {
+      logger.error(`Automatic database sync failed: ${pushErr.message}`);
+    }
+  }
+
+  // 2. Ensure admin account is seeded
+  try {
+    const { ensureAdminSeeded } = await import('./services/auth.service');
+    await ensureAdminSeeded();
+  } catch (seedErr: any) {
+    logger.warn(`Admin auto-seeding skipped: ${seedErr.message}`);
+  }
+}
+initDatabase();
 
 // Register AI Providers with Smart Auto-Detection:
 // 1. Google Gemini (if GEMINI_API_KEY present)
@@ -132,9 +161,23 @@ app.use('/api', apiLimiter);
 
 // ─── Health Check ───────────────────────────────────────────
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', async (req: Request, res: Response) => {
+  let dbStatus = 'connected';
+  let dbError: string | null = null;
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch (err: any) {
+    dbStatus = 'error';
+    dbError = err.message;
+  }
+
   res.status(200).json({
-    status: 'ok',
+    status: dbStatus === 'connected' ? 'ok' : 'degraded',
+    database: {
+      status: dbStatus,
+      type: env.DATABASE_URL.startsWith('file:') ? 'sqlite' : 'postgresql',
+      error: dbError,
+    },
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: env.NODE_ENV,

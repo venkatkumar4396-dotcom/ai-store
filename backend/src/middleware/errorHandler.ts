@@ -76,19 +76,16 @@ export function errorHandler(err: AppError, req: Request, res: Response, _next: 
   }
 
   // Build response
+  const isDev = process.env.NODE_ENV === 'development';
   const response: Record<string, any> = {
-    error: statusCode >= 500 ? 'Internal Server Error' : message,
+    error: message,
+    message,
     statusCode,
   };
 
   // Include stack trace in development
-  if (process.env.NODE_ENV === 'development' && err.stack) {
+  if (isDev && err.stack) {
     response.stack = err.stack;
-  }
-
-  // Include original message in development for 500 errors
-  if (process.env.NODE_ENV === 'development' && statusCode >= 500) {
-    response.message = message;
   }
 
   res.status(statusCode).json(response);

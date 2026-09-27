@@ -7,7 +7,7 @@ echo ========================================================
 
 REM Run backend in a new window
 echo Starting Backend (SQLite DB) in a new window...
-start "Backend Service" cmd /k "cd /d %~dp0backend && npm install && npx prisma generate && npx prisma db push && npm run seed && npm run dev"
+start "Backend Service" cmd /k "cd /d %~dp0backend && node scripts/sync-schema.js && npm install && npx prisma generate && npx prisma db push && npm run seed && npm run dev"
 
 REM Run frontend in a new window
 echo Starting Frontend (Next.js) in a new window...

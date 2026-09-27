@@ -4,14 +4,15 @@
   "description": "NexusForge AI Agent Marketplace - Backend API",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
-    "build": "npx --package=prisma@6.9.0 prisma generate --schema=prisma/schema.prisma && tsc",
+    "sync-schema": "node scripts/sync-schema.js",
+    "dev": "node scripts/sync-schema.js && tsx watch src/index.ts",
+    "start": "node scripts/sync-schema.js && tsx src/index.ts",
+    "build": "node scripts/sync-schema.js && npx --package=prisma@6.9.0 prisma generate --schema=prisma/schema.prisma && tsc",
     "seed": "tsx prisma/seed.ts",
-    "db:push": "npx prisma db push",
-    "db:generate": "npx prisma generate",
+    "db:push": "node scripts/sync-schema.js && npx prisma db push",
+    "db:generate": "node scripts/sync-schema.js && npx prisma generate",
     "db:studio": "npx prisma studio",
-    "db:reset": "npx prisma db push --force-reset && tsx prisma/seed.ts"
+    "db:reset": "node scripts/sync-schema.js && npx prisma db push --force-reset && tsx prisma/seed.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

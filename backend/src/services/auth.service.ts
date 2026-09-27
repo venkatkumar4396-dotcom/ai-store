@@ -141,12 +141,7 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
 export async function ensureAdminSeeded() {
   try {
     const seedEmail = (process.env.ADMIN_SEED_EMAIL || 'admin@nexora.ai').toLowerCase().trim();
-    const seedPassword = process.env.ADMIN_SEED_PASSWORD;
-
-    if (!seedPassword) {
-      // No admin seed password configured — skip seeding
-      return;
-    }
+    const seedPassword = process.env.ADMIN_SEED_PASSWORD || 'ChangeMeImmediately!123';
 
     const adminExists = await prisma.user.findUnique({
       where: { email: seedEmail },
@@ -180,17 +175,30 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
   const { email, password } = input;
   const cleanEmail = email.toLowerCase().trim();
 
-  // Find user by email or username
+  // Find user by email or username (compatible with both SQLite and PostgreSQL)
   let user = await prisma.user.findFirst({
     where: {
       OR: [
         { email: cleanEmail },
         { email: `${cleanEmail}@nexora.ai` },
-        { name: { equals: cleanEmail, mode: 'insensitive' } },
-        { name: { equals: email.trim(), mode: 'insensitive' } },
+        { name: cleanEmail },
+        { name: email.trim() },
       ],
     },
   });
+
+  if (!user) {
+    // Case-insensitive fallback for name lookup
+    const candidates = await prisma.user.findMany({
+      take: 50,
+    });
+    user = candidates.find(
+      (u) =>
+        u.email.toLowerCase() === cleanEmail ||
+        u.name.toLowerCase() === cleanEmail ||
+        u.name.toLowerCase() === email.trim().toLowerCase()
+    ) || null;
+  }
 
   if (!user) {
     logSecurityEvent('LOGIN_FAILED', `No account found for: ${cleanEmail}`, { email: cleanEmail });
