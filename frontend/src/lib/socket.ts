@@ -11,23 +11,11 @@ const getSocketURL = () => {
   if (typeof window !== "undefined") {
     const { hostname, protocol } = window.location;
 
-    // ── VS Code Dev Tunnels ─────────────────────────────────────────
-    if (hostname.endsWith(".devtunnels.ms")) {
-      const backendHost = hostname.replace(/-(\d+)(\.devtunnels\.ms)$/, "-5000$2");
-      return `https://${backendHost}`;
-    }
-
-    // ── GitHub Codespaces ───────────────────────────────────────────
-    if (hostname.endsWith(".app.github.dev")) {
-      const backendHost = hostname.replace(/-(\d+)(\.app\.github\.dev)$/, "-5000$2");
-      return `https://${backendHost}`;
-    }
-
-    // ── Generic tunnel (ngrok, etc.) ────────────────────────────────
-    const portInHostMatch = hostname.match(/-(\d{4,5})(?=[.\-]|$)/);
-    if (portInHostMatch) {
-      const backendHost = hostname.replace(`-${portInHostMatch[1]}`, "-5000");
-      return `https://${backendHost}`;
+    // ── Dev Tunnels / Codespaces / Ngrok / Cloudflare Tunnel / Port Forwarding ──
+    const tunnelPortMatch = hostname.match(/-(\d{4,5})(?=[.\-]|$)/);
+    if (tunnelPortMatch) {
+      const backendHost = hostname.replace(`-${tunnelPortMatch[1]}`, "-5000");
+      return `${protocol}//${backendHost}`;
     }
 
     if (hostname.includes("onrender.com")) {

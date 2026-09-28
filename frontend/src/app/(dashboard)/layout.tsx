@@ -41,7 +41,16 @@ export default function DashboardLayout({
       }
       const res = await fetch(healthUrl, { method: "GET" });
       if (res.ok) {
-        setIsBackendConnected(true);
+        try {
+          const data = await res.json();
+          if (data.status === "degraded" || data.database?.status === "error") {
+            setIsBackendConnected(false);
+          } else {
+            setIsBackendConnected(true);
+          }
+        } catch {
+          setIsBackendConnected(true);
+        }
       } else {
         setIsBackendConnected(false);
       }

@@ -9,30 +9,11 @@ const getBaseURL = () => {
   if (typeof window !== "undefined") {
     const { hostname, protocol } = window.location;
 
-    // ── VS Code Dev Tunnels ─────────────────────────────────────────
-    if (hostname.endsWith(".devtunnels.ms")) {
-      const backendHost = hostname.replace(/-(\d+)(\.devtunnels\.ms)$/, "-5000$2");
-      return `https://${backendHost}/api`;
-    }
-
-    // ── GitHub Codespaces ───────────────────────────────────────────
-    if (hostname.endsWith(".app.github.dev")) {
-      const backendHost = hostname.replace(/-(\d+)(\.app\.github\.dev)$/, "-5000$2");
-      return `https://${backendHost}/api`;
-    }
-
-    // ── Ngrok / Localtunnel / Cloudflare Tunnels ───────────────────
-    if (
-      hostname.endsWith(".ngrok-free.app") ||
-      hostname.endsWith(".ngrok.io") ||
-      hostname.endsWith(".loca.lt") ||
-      hostname.endsWith(".trycloudflare.com")
-    ) {
-      const match = hostname.match(/-(\d{4,5})(?=\.)/);
-      if (match) {
-        const backendHost = hostname.replace(`-${match[1]}`, "-5000");
-        return `https://${backendHost}/api`;
-      }
+    // ── Dev Tunnels / Codespaces / Ngrok / Cloudflare Tunnel / Port Forwarding ──
+    const tunnelPortMatch = hostname.match(/-(\d{4,5})(?=[.\-]|$)/);
+    if (tunnelPortMatch) {
+      const backendHost = hostname.replace(`-${tunnelPortMatch[1]}`, "-5000");
+      return `${protocol}//${backendHost}/api`;
     }
     
     // If we are on production frontend (onrender.com), point directly to the backend

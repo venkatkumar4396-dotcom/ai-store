@@ -62,9 +62,18 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
     const payload = verifyToken(token);
 
     // Validate that the user exists in database to prevent orphaned sessions (e.g., after a DB reset)
-    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
-    if (!user) {
-      res.status(401).json({ error: 'User account no longer exists. Please sign up or log in again.' });
+    try {
+      const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+      if (!user) {
+        res.status(401).json({ error: 'User account no longer exists. Please sign up or log in again.' });
+        return;
+      }
+    } catch (dbErr: any) {
+      logger.error(`Database query failed in auth middleware: ${dbErr.message}`);
+      res.status(503).json({
+        error: 'Database Unavailable',
+        message: 'The database is currently unreachable. Please verify database connectivity.',
+      });
       return;
     }
 
