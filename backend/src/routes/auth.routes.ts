@@ -42,8 +42,7 @@ router.post('/register', authLimiter, async (req: Request, res: Response, next: 
     }
     const result = await register({ email, name, password });
     setAuthCookie(req, res, result.token);
-    // Token is only in httpOnly cookie — not in response body
-    res.status(201).json({ user: result.user });
+    res.status(201).json({ user: result.user, token: result.token });
   } catch (error) {
     next(error);
   }
@@ -63,8 +62,7 @@ router.post('/login', authLimiter, async (req: Request, res: Response, next: Nex
     }
     const result = await login({ email, password });
     setAuthCookie(req, res, result.token);
-    // Token is only in httpOnly cookie — not in response body
-    res.status(200).json({ user: result.user });
+    res.status(200).json({ user: result.user, token: result.token });
   } catch (error) {
     next(error);
   }
@@ -84,7 +82,7 @@ router.post('/google', authLimiter, async (req: Request, res: Response, next: Ne
     }
     const result = await loginWithOAuth('google', providerId, email, name, avatar);
     setAuthCookie(req, res, result.token);
-    res.status(200).json({ user: result.user });
+    res.status(200).json({ user: result.user, token: result.token });
   } catch (error) {
     next(error);
   }
@@ -104,7 +102,7 @@ router.post('/github', authLimiter, async (req: Request, res: Response, next: Ne
     }
     const result = await loginWithOAuth('github', providerId, email, name, avatar);
     setAuthCookie(req, res, result.token);
-    res.status(200).json({ user: result.user });
+    res.status(200).json({ user: result.user, token: result.token });
   } catch (error) {
     next(error);
   }
