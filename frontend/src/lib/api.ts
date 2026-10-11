@@ -68,15 +68,19 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("nexora_logged_in");
-      localStorage.removeItem("nexora_auth_token");
-
       const currentPath = window.location.pathname;
-      const isAuthPage = currentPath === "/login" || currentPath === "/register" || currentPath === "/";
-      const isAuthEndpoint = error.config?.url?.includes("/auth/");
+      const isAdminCheck = currentPath.startsWith("/admin") || error.config?.url?.includes("/admin");
 
-      if (!isAuthPage && !isAuthEndpoint) {
-        window.location.href = "/login";
+      if (!isAdminCheck) {
+        localStorage.removeItem("nexora_logged_in");
+        localStorage.removeItem("nexora_auth_token");
+
+        const isAuthPage = currentPath === "/login" || currentPath === "/register" || currentPath === "/";
+        const isAuthEndpoint = error.config?.url?.includes("/auth/");
+
+        if (!isAuthPage && !isAuthEndpoint) {
+          window.location.href = "/login";
+        }
       }
     }
     return Promise.reject(error);

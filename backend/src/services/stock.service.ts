@@ -613,7 +613,7 @@ export class StockService {
   /**
    * Perform full AI-powered Stock Analysis with real data
    */
-  async analyzeStock(userId: string, symbol: string, isIntraday: boolean = false): Promise<any> {
+  async analyzeStock(userId: string | null | undefined, symbol: string, isIntraday: boolean = false): Promise<any> {
     const cleanSym = await this.resolveSymbol(symbol);
 
     // Fetch real data
@@ -696,9 +696,6 @@ Stop Loss: $${tradingSignals.stopLoss} | Profit Target: $${tradingSignals.profit
           const userExists = await prisma.user.findUnique({ where: { id: userId } });
           if (userExists) {
             validUserId = userExists.id;
-          } else {
-            const fallback = await prisma.user.findFirst();
-            if (fallback) validUserId = fallback.id;
           }
         } catch {
           validUserId = null;
@@ -722,16 +719,20 @@ Stop Loss: $${tradingSignals.stopLoss} | Profit Target: $${tradingSignals.profit
       savedId = saved.id;
       analyzedAt = saved.createdAt;
 
-      // Log Agent Activity
-      await prisma.agentActivityLog.create({
-        data: {
-          userId: validUserId,
-          agentId: 'stock',
-          action: 'stock_analysis',
-          description: `Analyzed ${cleanSym} ($${quote.price}) — ${tradingSignals.recommendation} signal`,
-          reasoning: `RSI=${indicators.rsi}, MACD=${indicators.macd.histogram > 0 ? 'Bullish' : 'Bearish'}, Stop=$${tradingSignals.stopLoss}, Target=$${tradingSignals.profitTarget}`,
-        }
-      });
+      // Log Agent Activity only for authenticated registered user
+      if (validUserId) {
+        try {
+          await prisma.agentActivityLog.create({
+            data: {
+              userId: validUserId,
+              agentId: 'stock',
+              action: 'stock_analysis',
+              description: `Analyzed ${cleanSym} ($${quote.price}) — ${tradingSignals.recommendation} signal`,
+              reasoning: `RSI=${indicators.rsi}, MACD=${indicators.macd.histogram > 0 ? 'Bullish' : 'Bearish'}, Stop=$${tradingSignals.stopLoss}, Target=$${tradingSignals.profitTarget}`,
+            }
+          });
+        } catch {}
+      }
     } catch (dbErr: any) {
       logger.warn(`Failed to persist stock analysis to database (${dbErr.message}). Returning analysis directly.`);
     }
@@ -866,7 +867,7 @@ Stop Loss: $${tradingSignals.stopLoss} | Profit Target: $${tradingSignals.profit
   /**
    * Get comprehensive market situation analysis for the side panel
    */
-  async getMarketSituation(userId: string, symbol: string): Promise<any> {
+  async getMarketSituation(userId: string | null | undefined, symbol: string): Promise<any> {
     const cleanSym = await this.resolveSymbol(symbol);
 
     let quote: Awaited<ReturnType<typeof fetchRealQuote>>;

@@ -262,7 +262,7 @@ export default function OverviewDashboardPage() {
                 {greeting.text}{userName ? `, ${userName}` : ""}
               </h1>
             </div>
-            <p className="text-slate-600 dark:text-zinc-400 text-sm max-w-lg font-medium">
+            <p className="text-slate-800 dark:text-zinc-300 text-sm max-w-lg font-medium">
               Monitor your AI agents, track performance, and manage your automated workflows from one unified control center.
             </p>
           </div>

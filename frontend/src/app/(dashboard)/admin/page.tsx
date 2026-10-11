@@ -176,7 +176,7 @@ export default function AdminPage() {
         addToast({
           type: "warning",
           title: "Admin Privileges Required",
-          description: "Administrator permissions are required to access the Admin Console.",
+          description: "Admin privileges required to access this area",
         });
       }
     } catch {
@@ -188,7 +188,7 @@ export default function AdminPage() {
         addToast({
           type: "warning",
           title: "Admin Privileges Required",
-          description: "Administrator permissions are required to access the Admin Console.",
+          description: "Admin privileges required to access this area",
         });
       }
     }

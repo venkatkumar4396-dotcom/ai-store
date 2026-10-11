@@ -618,10 +618,10 @@ export default function StockIntelligencePage() {
               <TrendingUp className="h-6 w-6 text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Stock Intelligence
               </h1>
-              <p className="text-zinc-500 text-sm mt-0.5">
+              <p className="text-slate-800 dark:text-zinc-300 font-medium text-sm mt-0.5">
                 AI-powered quantitative analysis for Stocks, Crypto & Forex
               </p>
             </div>
