@@ -11,15 +11,15 @@ const getSocketURL = () => {
   if (typeof window !== "undefined") {
     const { hostname, protocol } = window.location;
 
+    if (hostname.includes("onrender.com")) {
+      return "https://ai-store-87n2.onrender.com";
+    }
+
     // ── Dev Tunnels / Codespaces / Ngrok / Cloudflare Tunnel / Port Forwarding ──
     const tunnelPortMatch = hostname.match(/-(\d{4,5})(?=[.\-]|$)/);
     if (tunnelPortMatch) {
       const backendHost = hostname.replace(`-${tunnelPortMatch[1]}`, "-5000");
       return `${protocol}//${backendHost}`;
-    }
-
-    if (hostname.includes("onrender.com")) {
-      return "https://ai-store-87n2.onrender.com";
     }
 
     // ── Plain local fallback ────────────────────────────────────────

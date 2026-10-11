@@ -18,43 +18,49 @@ export default function DashboardLayout({
   const [isBackendConnected, setIsBackendConnected] = React.useState<boolean>(true);
   const [isChecking, setIsChecking] = React.useState<boolean>(false);
 
+  const [backendTargetUrl, setBackendTargetUrl] = React.useState<string>("https://ai-store-87n2.onrender.com");
+
   const checkConnection = React.useCallback(async () => {
     setIsChecking(true);
     try {
       let healthUrl = "";
+      let targetDisplay = "";
+
       if (process.env.NEXT_PUBLIC_API_URL) {
         healthUrl = process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, "/health");
+        targetDisplay = process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, "");
       } else if (typeof window !== "undefined") {
         const hostname = window.location.hostname;
-        const match = hostname.match(/-(\d+)(?=\.|$)/);
-        if (match) {
-          const currentPort = match[1];
-          const backendHostname = hostname.replace(`-${currentPort}`, "-5000");
-          healthUrl = `https://${backendHostname}/health`;
-        } else if (hostname.includes("onrender.com")) {
+        if (hostname.includes("onrender.com")) {
           healthUrl = "https://ai-store-87n2.onrender.com/health";
+          targetDisplay = "https://ai-store-87n2.onrender.com";
         } else {
-          healthUrl = `${window.location.protocol}//${window.location.hostname}:5000/health`;
+          // Dev tunnel check: matches 4 or 5 digits port e.g. -3000
+          const tunnelMatch = hostname.match(/-(\d{4,5})(?=[.\-]|$)/);
+          if (tunnelMatch) {
+            const currentPort = tunnelMatch[1];
+            const backendHostname = hostname.replace(`-${currentPort}`, "-5000");
+            healthUrl = `https://${backendHostname}/health`;
+            targetDisplay = `https://${backendHostname}`;
+          } else {
+            healthUrl = `${window.location.protocol}//${hostname}:5000/health`;
+            targetDisplay = `${hostname}:5000`;
+          }
         }
       } else {
         healthUrl = "https://ai-store-87n2.onrender.com/health";
+        targetDisplay = "https://ai-store-87n2.onrender.com";
       }
+
+      setBackendTargetUrl(targetDisplay);
+
       const res = await fetch(healthUrl, { method: "GET" });
       if (res.ok) {
-        try {
-          const data = await res.json();
-          if (data.status === "degraded" || data.database?.status === "error") {
-            setIsBackendConnected(false);
-          } else {
-            setIsBackendConnected(true);
-          }
-        } catch {
-          setIsBackendConnected(true);
-        }
+        setIsBackendConnected(true);
       } else {
         setIsBackendConnected(false);
       }
-    } catch (err) {
+    } catch {
       setIsBackendConnected(false);
     } finally {
       setIsChecking(false);
@@ -123,7 +129,7 @@ export default function DashboardLayout({
                     <div>
                       <h4 className="font-semibold text-rose-200 text-sm">Backend API Server Unreachable</h4>
                       <p className="text-zinc-400 text-xs mt-0.5">
-                        The frontend cannot connect to the backend server at <code className="text-rose-300 bg-rose-950/40 px-1 py-0.5 rounded font-mono text-[11px]">{typeof window !== "undefined" ? (window.location.hostname.match(/-(\d+)(?=\.|$)/) ? window.location.hostname.replace(/-(\d+)(?=\.|$)/, "-5000") : `${window.location.hostname}:5000`) : "localhost:5000"}</code>. Please ensure it is running (<code className="text-zinc-300 bg-zinc-900 px-1 py-0.5 rounded font-mono text-[11px]">npm run dev</code> in the backend folder).
+                        The frontend cannot connect to the backend server at <code className="text-rose-300 bg-rose-950/40 px-1 py-0.5 rounded font-mono text-[11px]">{backendTargetUrl}</code>. Please ensure the backend service is running.
                       </p>
                     </div>
                   </div>
