@@ -249,7 +249,7 @@ export default function OverviewDashboardPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-indigo-600/[0.08] via-violet-600/[0.04] to-transparent p-6 md:p-8"
+        className="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-gradient-to-br from-indigo-500/[0.08] via-violet-500/[0.04] to-slate-100/50 dark:to-transparent p-6 md:p-8"
       >
         <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-violet-500/8 rounded-full blur-2xl pointer-events-none" />
@@ -258,11 +258,11 @@ export default function OverviewDashboardPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               {greeting.icon}
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                 {greeting.text}{userName ? `, ${userName}` : ""}
               </h1>
             </div>
-            <p className="text-zinc-400 text-sm max-w-lg">
+            <p className="text-slate-600 dark:text-zinc-400 text-sm max-w-lg font-medium">
               Monitor your AI agents, track performance, and manage your automated workflows from one unified control center.
             </p>
           </div>
@@ -271,7 +271,7 @@ export default function OverviewDashboardPage() {
               onClick={() => fetchDashboardData(true)}
               disabled={isRefreshing}
               variant="outline"
-              className="border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white gap-1.5"
+              className="border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white gap-1.5"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
               Sync

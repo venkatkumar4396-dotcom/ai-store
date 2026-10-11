@@ -36,9 +36,22 @@ import api from "@/lib/api";
 import { useDeployedBots } from "@/lib/DeployedBotsContext";
 import { ROUTE_TO_BOT_ID } from "@/lib/nav-bot-map";
 
-interface NavGroup {
-  items: { label: string; href: string; icon: string; badge?: string }[];
+interface NavItem {
   label: string;
+  href: string;
+  icon: string;
+  badge?: string;
+}
+
+interface NavCategory {
+  name: string;
+  items: NavItem[];
+}
+
+interface NavGroup {
+  label: string;
+  items?: NavItem[];
+  categories?: NavCategory[];
 }
 
 const NAV_GROUPS: NavGroup[] = [
@@ -50,18 +63,33 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "AI Agents",
-    items: [
-      { label: "Booking Hub", href: "/booking-hub", icon: "Brain" },
-      { label: "Travel Booking", href: "/travel-booking", icon: "Plane" },
-      { label: "Compass Travel Advisor", href: "/compass", icon: "Compass" },
-      { label: "Stock Intelligence", href: "/stock-intelligence", icon: "TrendingUp", badge: "New" },
-      { label: "Career Accelerator", href: "/career-accelerator", icon: "GraduationCap" },
-      { label: "Productivity", href: "/productivity", icon: "CheckSquare" },
-      { label: "Document Agent", href: "/document-agent", icon: "FileText" },
-      { label: "Startup Co-Founder", href: "/startup-cofounder", icon: "Rocket" },
-      { label: "Research Scientist", href: "/research-scientist", icon: "FlaskConical" },
-      { label: "Business Automator", href: "/business-automator", icon: "Workflow" },
-      { label: "Sales Agent", href: "/sales-agent", icon: "Target", badge: "New" },
+    categories: [
+      {
+        name: "Finance",
+        items: [
+          { label: "Stock Intelligence", href: "/stock-intelligence", icon: "TrendingUp", badge: "New" },
+          { label: "Startup Co-Founder", href: "/startup-cofounder", icon: "Rocket" },
+          { label: "Sales Agent", href: "/sales-agent", icon: "Target", badge: "New" },
+        ],
+      },
+      {
+        name: "Travel",
+        items: [
+          { label: "Booking Hub", href: "/booking-hub", icon: "Brain" },
+          { label: "Travel Booking", href: "/travel-booking", icon: "Plane" },
+          { label: "Compass Travel Advisor", href: "/compass", icon: "Compass" },
+        ],
+      },
+      {
+        name: "Productivity",
+        items: [
+          { label: "Productivity", href: "/productivity", icon: "CheckSquare" },
+          { label: "Document Agent", href: "/document-agent", icon: "FileText" },
+          { label: "Career Accelerator", href: "/career-accelerator", icon: "GraduationCap" },
+          { label: "Business Automator", href: "/business-automator", icon: "Workflow" },
+          { label: "Research Scientist", href: "/research-scientist", icon: "FlaskConical" },
+        ],
+      },
     ],
   },
   {
@@ -112,8 +140,29 @@ export function Sidebar() {
     Tools: true,
     System: true,
   });
+  const [expandedCategories, setExpandedCategories] = React.useState<Record<string, boolean>>({
+    Finance: false,
+    Travel: false,
+    Productivity: false,
+  });
   const { isBotDeployed, isLoading: isBotsLoading } = useDeployedBots();
   const [profile, setProfile] = React.useState({ name: "User", email: "" });
+
+  // Auto-expand category if active route is inside it
+  React.useEffect(() => {
+    NAV_GROUPS.forEach((group) => {
+      if (group.categories) {
+        group.categories.forEach((cat) => {
+          const hasActive = cat.items.some(
+            (item) => pathname === item.href || pathname.startsWith(item.href + "/")
+          );
+          if (hasActive) {
+            setExpandedCategories((prev) => ({ ...prev, [cat.name]: true }));
+          }
+        });
+      }
+    });
+  }, [pathname]);
 
   React.useEffect(() => {
     const fetchProfile = async () => {
@@ -140,6 +189,11 @@ export function Sidebar() {
     setExpandedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
+  const toggleCategory = (name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedCategories((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
+
   /** Check if a nav item should be visible based on deployment status */
   /** All nav items always visible for immediate workspace access */
   const isNavItemVisible = (_href: string): boolean => {
@@ -157,6 +211,67 @@ export function Sidebar() {
       localStorage.removeItem("nexora_auth_token");
       window.location.href = "/login";
     }
+  };
+
+  const renderNavItem = (item: NavItem) => {
+    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+    const Icon = ICON_MAP[item.icon] || Sparkles;
+
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        title={isCollapsed ? item.label : undefined}
+        className={cn(
+          "relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
+          isCollapsed && "justify-center px-0 mx-1",
+          isActive
+            ? "text-indigo-400 bg-indigo-600/10"
+            : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/10"
+        )}
+      >
+        {/* Active indicator pill */}
+        {isActive && (
+          <motion.div
+            layoutId="sidebar-active"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-500 rounded-full shadow-md shadow-indigo-500/50"
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+          />
+        )}
+
+        <span
+          className={cn(
+            "transition-colors shrink-0",
+            isActive ? "text-indigo-400" : "text-zinc-500 group-hover:text-zinc-300"
+          )}
+        >
+          <Icon className="h-[18px] w-[18px]" />
+        </span>
+
+        {!isCollapsed && (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, delay: 0.05 }}
+            className="flex-1 truncate"
+          >
+            {item.label}
+          </motion.span>
+        )}
+
+        {/* Badge */}
+        {!isCollapsed && item.badge && (
+          <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 rounded-full">
+            {item.badge}
+          </span>
+        )}
+
+        {/* Active glow dot (collapsed) */}
+        {isActive && isCollapsed && (
+          <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-md shadow-indigo-400/50" />
+        )}
+      </Link>
+    );
   };
 
   return (
@@ -207,12 +322,6 @@ export function Sidebar() {
       {/* Navigation Groups */}
       <nav className="flex-1 py-3 px-2 overflow-y-auto scrollbar-none space-y-1">
         {NAV_GROUPS.map((group) => {
-          // Filter visible items within this group
-          const visibleItems = group.items.filter((item) => isNavItemVisible(item.href));
-
-          // Hide entire group if no visible items
-          if (visibleItems.length === 0) return null;
-
           return (
             <div key={group.label} className="mb-1">
               {/* Group Header */}
@@ -236,7 +345,7 @@ export function Sidebar() {
                 <div className="mx-3 my-2 h-px bg-white/5" />
               )}
 
-              {/* Group Items */}
+              {/* Group Content */}
               <AnimatePresence initial={false}>
                 {(isCollapsed || expandedGroups[group.label]) && (
                   <motion.div
@@ -246,64 +355,83 @@ export function Sidebar() {
                     transition={{ duration: 0.2, ease: "easeInOut" }}
                     className="overflow-hidden space-y-0.5"
                   >
-                    {visibleItems.map((item) => {
-                      const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                      const Icon = ICON_MAP[item.icon] || Sparkles;
+                    {/* Render Category-based groups (e.g. AI Agents) */}
+                    {group.categories ? (
+                      isCollapsed ? (
+                        <div className="space-y-0.5">
+                          {group.categories
+                            .flatMap((c) => c.items)
+                            .filter((item) => isNavItemVisible(item.href))
+                            .map(renderNavItem)}
+                        </div>
+                      ) : (
+                        <div className="space-y-1 py-0.5">
+                          {group.categories.map((cat) => {
+                            const isCategoryOpen = !!expandedCategories[cat.name];
+                            const catHasActive = cat.items.some(
+                              (item) => pathname === item.href || pathname.startsWith(item.href + "/")
+                            );
+                            const visibleCategoryItems = cat.items.filter((item) => isNavItemVisible(item.href));
+                            if (visibleCategoryItems.length === 0) return null;
 
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          title={isCollapsed ? item.label : undefined}
-                          className={cn(
-                            "relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
-                            isCollapsed && "justify-center px-0 mx-1",
-                            isActive
-                              ? "text-indigo-400 bg-indigo-600/10"
-                              : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/10"
-                          )}
-                        >
-                          {/* Active indicator pill */}
-                          {isActive && (
-                            <motion.div
-                              layoutId="sidebar-active"
-                              className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-500 rounded-full shadow-md shadow-indigo-500/50"
-                              transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                            />
-                          )}
+                            return (
+                              <div key={cat.name} className="space-y-0.5">
+                                <button
+                                  type="button"
+                                  onClick={(e) => toggleCategory(cat.name, e)}
+                                  className={cn(
+                                    "w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all group",
+                                    catHasActive
+                                      ? "text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/15"
+                                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                                  )}
+                                >
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span
+                                      className={cn(
+                                        "w-1.5 h-1.5 rounded-full shrink-0 transition-colors",
+                                        catHasActive ? "bg-indigo-400" : "bg-zinc-600 group-hover:bg-zinc-400"
+                                      )}
+                                    />
+                                    <span className="truncate">{cat.name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800/80 text-zinc-400 group-hover:text-zinc-300 border border-white/[0.04]">
+                                      {visibleCategoryItems.length}
+                                    </span>
+                                    <ChevronDown
+                                      className={cn(
+                                        "h-3 w-3 text-zinc-500 group-hover:text-zinc-300 transition-transform duration-200",
+                                        !isCategoryOpen && "-rotate-90"
+                                      )}
+                                    />
+                                  </div>
+                                </button>
 
-                          <span className={cn(
-                            "transition-colors shrink-0",
-                            isActive ? "text-indigo-400" : "text-zinc-500 group-hover:text-zinc-300"
-                          )}>
-                            <Icon className="h-[18px] w-[18px]" />
-                          </span>
-
-                          {!isCollapsed && (
-                            <motion.span
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ duration: 0.2, delay: 0.05 }}
-                              className="flex-1 truncate"
-                            >
-                              {item.label}
-                            </motion.span>
-                          )}
-
-                          {/* Badge */}
-                          {!isCollapsed && item.badge && (
-                            <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 rounded-full">
-                              {item.badge}
-                            </span>
-                          )}
-
-                          {/* Active glow dot (collapsed) */}
-                          {isActive && isCollapsed && (
-                            <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-md shadow-indigo-400/50" />
-                          )}
-                        </Link>
-                      );
-                    })}
+                                <AnimatePresence initial={false}>
+                                  {isCategoryOpen && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                                      className="overflow-hidden space-y-0.5 pl-2 ml-2 border-l border-zinc-800/60"
+                                    >
+                                      {visibleCategoryItems.map(renderNavItem)}
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )
+                    ) : (
+                      /* Render standard flat group items */
+                      group.items
+                        ?.filter((item) => isNavItemVisible(item.href))
+                        .map(renderNavItem)
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>

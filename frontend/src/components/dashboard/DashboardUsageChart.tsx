@@ -42,6 +42,10 @@ export function DashboardUsageChart({ data }: DashboardUsageChartProps) {
     );
   }
 
+  // Detect empty activity state across all days
+  const totalActivity = data.reduce((acc, d) => acc + (d.total || (d.inbound + d.outbound)), 0);
+  const isAllZero = totalActivity === 0;
+
   // Find max value for scaling
   const maxVal = Math.max(
     ...data.map((d) => Math.max(d.inbound, d.outbound, 10)),
@@ -118,10 +122,15 @@ export function DashboardUsageChart({ data }: DashboardUsageChartProps) {
   return (
     <div ref={containerRef} className="w-full space-y-4">
       {/* Header Info */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-indigo-400" />
           <span className="text-sm font-semibold text-zinc-100">AI Usage Frequency</span>
+          {isAllZero && (
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 border border-amber-500/25 text-amber-400">
+              No requests recorded this week
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-4 text-xs font-semibold">
           <span className="flex items-center gap-1.5 text-zinc-400">
@@ -136,6 +145,17 @@ export function DashboardUsageChart({ data }: DashboardUsageChartProps) {
       {/* SVG Chart */}
       <div className="relative bg-zinc-950/40 border border-white/5 rounded-xl p-4 overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/0 via-violet-500/0 to-cyan-500/0 group-hover:from-indigo-500/2 group-hover:to-cyan-500/2 transition-all duration-500" />
+
+        {isAllZero && (
+          <div className="absolute inset-0 flex items-center justify-center z-15 pointer-events-none">
+            <div className="px-4 py-2 rounded-xl bg-zinc-950/85 border border-zinc-800 backdrop-blur-md shadow-xl flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="text-xs font-medium text-zinc-300">
+                No requests recorded this week
+              </span>
+            </div>
+          </div>
+        )}
         
         <svg
           width="100%"

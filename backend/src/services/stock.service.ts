@@ -689,24 +689,19 @@ Stop Loss: $${tradingSignals.stopLoss} | Profit Target: $${tradingSignals.profit
     let savedId = `analysis_${Date.now()}`;
     let analyzedAt = new Date();
     try {
-      // Ensure user exists before inserting
-      let validUserId = userId;
-      const userExists = await prisma.user.findUnique({ where: { id: userId } });
-      if (!userExists) {
+      // Verify if user exists; if not or if guest, pass null so no foreign key constraint is enforced
+      let validUserId: string | null = null;
+      if (userId) {
         try {
-          const newUser = await prisma.user.create({
-            data: {
-              id: userId,
-              email: `${userId}@nexora.ai`,
-              name: 'Nexora User',
-              passwordHash: '$FALLBACK_GUEST$',
-              role: 'user',
-            }
-          });
-          validUserId = newUser.id;
+          const userExists = await prisma.user.findUnique({ where: { id: userId } });
+          if (userExists) {
+            validUserId = userExists.id;
+          } else {
+            const fallback = await prisma.user.findFirst();
+            if (fallback) validUserId = fallback.id;
+          }
         } catch {
-          const fallbackUser = await prisma.user.findFirst();
-          if (fallbackUser) validUserId = fallbackUser.id;
+          validUserId = null;
         }
       }
 
