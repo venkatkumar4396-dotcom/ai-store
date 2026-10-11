@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import QRCode from "qrcode";
 import {
   CheckCircle2,
   AlertCircle,
@@ -53,7 +54,8 @@ export function QRScanner({
   const [currentPairCode, setCurrentPairCode] = React.useState(pairingCode);
   const [isCopied, setIsCopied] = React.useState(false);
   const [isRequestingCode, setIsRequestingCode] = React.useState(false);
-  const [cdnIndex, setCdnIndex] = React.useState(0);
+  const [qrDataUrl, setQrDataUrl] = React.useState<string>("");
+  const [isGeneratingQr, setIsGeneratingQr] = React.useState(false);
 
   // Sync pair code when prop changes
   React.useEffect(() => {
@@ -62,29 +64,44 @@ export function QRScanner({
     }
   }, [pairingCode]);
 
-  // Reset CDN index on QR change
+  // Generate crisp standard QR code whenever raw qrCode or fallback changes
   React.useEffect(() => {
-    setCdnIndex(0);
-  }, [qrCode]);
-
-  // Compute QR image URL across multiple reliable fallback CDNs
-  const rawData = qrCode || waMeUrl || "https://wa.me/?text=Hi%20Nexora%20AI";
-  const qrImageUrls = React.useMemo(() => {
-    const encoded = encodeURIComponent(rawData);
-    return [
-      `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encoded}`,
-      `https://quickchart.io/qr?size=260&text=${encoded}`,
-      `https://chart.googleapis.com/chart?chs=260x260&cht=qr&chl=${encoded}`,
-    ];
-  }, [rawData]);
-
-  const currentImgSrc = qrImageUrls[cdnIndex] || qrImageUrls[0];
-
-  const handleImageError = () => {
-    if (cdnIndex < qrImageUrls.length - 1) {
-      setCdnIndex((prev) => prev + 1);
+    const rawToEncode = qrCode || waMeUrl || "";
+    if (!rawToEncode) {
+      setQrDataUrl("");
+      return;
     }
-  };
+
+    // Unpack if previously encoded inside a 3rd party URL
+    let cleanRaw = rawToEncode;
+    if (cleanRaw.includes("api.qrserver.com") && cleanRaw.includes("data=")) {
+      try {
+        const u = new URL(cleanRaw);
+        cleanRaw = decodeURIComponent(u.searchParams.get("data") || cleanRaw);
+      } catch {}
+    }
+
+    setIsGeneratingQr(true);
+    // WhatsApp Web uses Low error correction for maximum cell density
+    QRCode.toDataURL(cleanRaw, {
+      width: 320,
+      margin: 2,
+      color: {
+        dark: "#000000",
+        light: "#FFFFFF",
+      },
+      errorCorrectionLevel: "L",
+    })
+      .then((dataUrl) => {
+        setQrDataUrl(dataUrl);
+        setIsGeneratingQr(false);
+      })
+      .catch((err) => {
+        console.warn("Local QR render fallback:", err);
+        setQrDataUrl(`https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=${encodeURIComponent(cleanRaw)}`);
+        setIsGeneratingQr(false);
+      });
+  }, [qrCode, waMeUrl]);
 
   const handleCopyCode = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -113,6 +130,7 @@ export function QRScanner({
   };
 
   const targetWaLink = waMeUrl || (qrCode?.startsWith("http") ? qrCode : `https://wa.me/?text=${encodeURIComponent("Hi Nexora AI Assistant!")}`);
+  const isRealPairingCode = Boolean(qrCode && (qrCode.startsWith("2@") || qrCode.startsWith("1@")));
 
   return (
     <Card className="border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-950/40 relative overflow-hidden shadow-sm">
@@ -126,7 +144,7 @@ export function QRScanner({
               WhatsApp Integration <MessageCircle className="h-5 w-5 text-emerald-500" />
             </CardTitle>
             <CardDescription className="text-slate-500 dark:text-zinc-400 text-sm mt-1">
-              Link your WhatsApp Business device or scan the QR code to connect with your AI Assistant.
+              Link your WhatsApp device with the AI Assistant or use interactive test sandbox.
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -142,7 +160,7 @@ export function QRScanner({
             )}
             {status === "connecting" && (
               <Badge variant="outline" className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 px-2.5 py-1 font-semibold">
-                ● Initializing
+                ● Connecting to WhatsApp...
               </Badge>
             )}
             {status === "disconnected" && (
@@ -165,7 +183,7 @@ export function QRScanner({
               }`}
             >
               <QrIcon className="h-3.5 w-3.5" />
-              <span>Camera & App QR</span>
+              <span>WhatsApp Web QR</span>
             </button>
             <button
               onClick={() => setActiveTab("phone")}
@@ -202,7 +220,7 @@ export function QRScanner({
             <div className="space-y-1">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">WhatsApp Assistant is Offline</h3>
               <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
-                Start the engine to generate your live QR code, pair a WhatsApp Business number, or launch the interactive simulator.
+                Launch the engine to generate your official WhatsApp Web pairing QR code or test with the sandbox simulator.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
@@ -211,7 +229,7 @@ export function QRScanner({
                 className="w-full sm:flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center justify-center gap-2"
               >
                 <RefreshCw className="h-4 w-4" />
-                <span>Launch QR Code</span>
+                <span>Launch WhatsApp QR</span>
               </Button>
               {onSimulateConnect && (
                 <Button
@@ -231,9 +249,9 @@ export function QRScanner({
               <CheckCircle2 className="h-8 w-8" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">WhatsApp Agent Linked!</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">WhatsApp Device Linked!</h3>
               <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
-                Connected device: <strong className="text-slate-900 dark:text-white font-bold">{phoneNumber || "+1 (415) 523-8886"}</strong>. The Nexora AI Agent is actively listening and managing conversations.
+                Connected session: <strong className="text-slate-900 dark:text-white font-bold">{phoneNumber || "+1 (415) 523-8886"}</strong>. The Nexora AI Agent is actively listening and managing conversations.
               </p>
             </div>
             <div className="p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-lg flex items-center gap-3 justify-center text-xs text-slate-600 dark:text-zinc-400 font-medium">
@@ -265,7 +283,7 @@ export function QRScanner({
                 <KeyRound className="h-5 w-5 text-indigo-500" /> Link with Phone Code
               </h3>
               <p className="text-xs text-slate-600 dark:text-zinc-400">
-                Type your phone number to pair via 8-character pairing code without scanning.
+                Type your phone number to pair via 8-character pairing code without camera scanning.
               </p>
             </div>
 
@@ -337,16 +355,19 @@ export function QRScanner({
             {/* Instructions */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-base font-semibold text-slate-900 dark:text-white">How to connect:</h3>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Smartphone className="h-4 w-4 text-emerald-500" /> WhatsApp Link Instructions
+                </h3>
                 <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                  Works with any camera or WhatsApp scanner
+                  Follow these steps to link your official WhatsApp account:
                 </p>
               </div>
 
               <ol className="list-decimal pl-4 text-slate-600 dark:text-zinc-400 text-sm space-y-2.5 leading-relaxed">
-                <li>Point your <strong>phone camera</strong> or <strong>WhatsApp scanner</strong> at the QR code.</li>
-                <li>Tap <strong>Link a Device</strong> or open the WhatsApp link.</li>
-                <li>The AI Agent will automatically pair with your workspace.</li>
+                <li>Open <strong>WhatsApp</strong> on your mobile phone.</li>
+                <li>Tap <strong>Settings (⚙️)</strong> on iOS or <strong>Menu (⋮)</strong> on Android.</li>
+                <li>Tap <strong>Linked Devices</strong> &gt; <strong>Link a Device</strong>.</li>
+                <li>Point your camera at the QR code on the right.</li>
               </ol>
 
               <div className="space-y-2 pt-1">
@@ -356,7 +377,7 @@ export function QRScanner({
                 >
                   <a href={targetWaLink} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-3.5 w-3.5" />
-                    <span>Open in WhatsApp Web / App</span>
+                    <span>Open Direct WhatsApp Chat (wa.me)</span>
                   </a>
                 </Button>
 
@@ -387,33 +408,48 @@ export function QRScanner({
 
             {/* QR Code Container */}
             <div className="flex flex-col items-center justify-center">
-              <div className="relative w-56 h-56 bg-white rounded-2xl p-3 shadow-xl flex items-center justify-center border-4 border-indigo-500/20">
-                {status === "connecting" && (
-                  <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-2 text-white z-10">
+              <div className="relative w-64 h-64 bg-white rounded-2xl p-4 shadow-xl flex items-center justify-center border-4 border-indigo-500/20 overflow-hidden">
+                {(status === "connecting" || isGeneratingQr || (!qrDataUrl && !qrCode)) ? (
+                  <div className="absolute inset-0 bg-slate-900/85 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-3 text-white z-10 p-4 text-center">
                     <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
-                    <span className="text-xs font-medium text-zinc-300">Generating live QR...</span>
+                    <div className="space-y-1">
+                      <span className="text-xs font-semibold text-white">Connecting WhatsApp Web...</span>
+                      <p className="text-[10px] text-zinc-400 leading-tight">Establishing handshake and generating official pairing code</p>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Standard pixel-perfect QR Code */}
+                {qrDataUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={qrDataUrl}
+                    alt="WhatsApp Web Pairing QR Code"
+                    className="w-full h-full object-contain rounded-lg"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-slate-400 text-xs">
+                    <QrIcon className="h-12 w-12 stroke-[1.5] mb-2 text-slate-300" />
+                    <span>Waiting for pairing code...</span>
                   </div>
                 )}
 
-                {/* QR Code Graphic with resilient error fallback */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={currentImgSrc}
-                  alt="WhatsApp Pairing QR Code"
-                  onError={handleImageError}
-                  className="w-full h-full object-contain rounded-lg"
-                />
-
                 {/* Glowing border corners for camera scan frame feel */}
-                <div className="absolute -top-1.5 -left-1.5 w-6 h-6 border-t-4 border-l-4 border-emerald-500 pointer-events-none rounded-tl-md" />
-                <div className="absolute -top-1.5 -right-1.5 w-6 h-6 border-t-4 border-r-4 border-emerald-500 pointer-events-none rounded-tr-md" />
-                <div className="absolute -bottom-1.5 -left-1.5 w-6 h-6 border-b-4 border-l-4 border-emerald-500 pointer-events-none rounded-bl-md" />
-                <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 border-b-4 border-r-4 border-emerald-500 pointer-events-none rounded-br-md" />
+                <div className="absolute top-1 left-1 w-6 h-6 border-t-4 border-l-4 border-emerald-500 pointer-events-none rounded-tl-md" />
+                <div className="absolute top-1 right-1 w-6 h-6 border-t-4 border-r-4 border-emerald-500 pointer-events-none rounded-tr-md" />
+                <div className="absolute bottom-1 left-1 w-6 h-6 border-b-4 border-l-4 border-emerald-500 pointer-events-none rounded-bl-md" />
+                <div className="absolute bottom-1 right-1 w-6 h-6 border-b-4 border-r-4 border-emerald-500 pointer-events-none rounded-br-md" />
               </div>
 
-              <span className="text-[11px] text-slate-500 dark:text-zinc-500 mt-3 flex items-center gap-1 font-medium">
-                <AlertCircle className="h-3.5 w-3.5 text-emerald-500" /> Scan with Phone Camera or WhatsApp
-              </span>
+              {isRealPairingCode ? (
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-3 flex items-center gap-1 font-semibold">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Genuine WhatsApp Web pairing token ready
+                </span>
+              ) : (
+                <span className="text-[11px] text-slate-500 dark:text-zinc-500 mt-3 flex items-center gap-1 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 text-indigo-500" /> Scan with WhatsApp &gt; Linked Devices
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -421,4 +457,3 @@ export function QRScanner({
     </Card>
   );
 }
-

@@ -54,11 +54,7 @@ export default function WhatsAppControlCenterPage() {
       if (data.waMeUrl) setWaMeUrl(data.waMeUrl);
       if (data.pairingCode) setPairingCode(data.pairingCode);
       if (data.qrCode) {
-        const qrUrl = data.qrCode.startsWith('http') ? data.qrCode : `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(data.qrCode)}`;
-        setQrCode(qrUrl);
-      } else if (data.status === 'qr_pending') {
-        const targetUrl = data.waMeUrl || 'https://wa.me/?text=Hello%20AI%20Assistant';
-        setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(targetUrl)}`);
+        setQrCode(data.qrCode);
       } else {
         setQrCode("");
       }
@@ -140,7 +136,7 @@ export default function WhatsAppControlCenterPage() {
 
     socket.on("whatsapp:qr", ({ qr }: { qr: string }) => {
       setSessionStatus("qr_pending");
-      setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qr)}`);
+      setQrCode(qr);
     });
 
     socket.on("whatsapp:ready", () => {
@@ -249,25 +245,25 @@ export default function WhatsAppControlCenterPage() {
 
   const handleStartBot = async () => {
     setSessionStatus("connecting");
+    setQrCode("");
     try {
       const res = await api.post("/whatsapp/session/initialize");
       if (res.data?.waMeUrl) setWaMeUrl(res.data.waMeUrl);
       if (res.data?.pairingCode) setPairingCode(res.data.pairingCode);
       if (res.data?.qrCode) {
-        const qrUrl = res.data.qrCode.startsWith('http') ? res.data.qrCode : `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(res.data.qrCode)}`;
-        setQrCode(qrUrl);
+        setQrCode(res.data.qrCode);
         setSessionStatus("qr_pending");
       } else if (res.data?.status === 'connected') {
         setSessionStatus("connected");
         setQrCode("");
       } else {
-        setSessionStatus("qr_pending");
+        setSessionStatus("connecting");
       }
-      addToast({ type: "success", title: "WhatsApp QR Ready", description: "Scan with any phone camera or WhatsApp, or use the 1-click test sandbox." });
+      addToast({ type: "info", title: "Connecting WhatsApp", description: "Launching WhatsApp Web. Your live device pairing code is preparing..." });
     } catch (err: any) {
       console.warn("Session init note:", err);
-      setSessionStatus("qr_pending");
-      addToast({ type: "info", title: "WhatsApp QR Ready", description: "Scan the displayed QR code or use the Sandbox." });
+      setSessionStatus("disconnected");
+      addToast({ type: "error", title: "Connection Failed", description: err.response?.data?.error || err.message });
     }
   };
 

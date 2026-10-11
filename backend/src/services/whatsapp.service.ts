@@ -90,6 +90,14 @@ class WhatsAppService {
     if (existing?.isReady) {
       return { status: 'connected' };
     }
+    if (existing?.qrCode) {
+      return {
+        status: 'qr_pending',
+        qrCode: existing.qrCode,
+        waMeUrl,
+        pairingCode,
+      };
+    }
 
     // Update session status
     await prisma.whatsAppSession.update({
@@ -98,6 +106,17 @@ class WhatsAppService {
     }).catch(() => {});
 
     try {
+      const puppeteerArgs = [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu',
+      ];
+
       const client = new Client({
         authStrategy: new LocalAuth({
           clientId: sessionId,
@@ -105,15 +124,12 @@ class WhatsAppService {
         }),
         puppeteer: {
           headless: true,
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--disable-gpu',
-          ],
+          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+          args: puppeteerArgs,
+        },
+        webVersionCache: {
+          type: 'remote',
+          remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1018919692-alpha.html',
         },
       });
 
@@ -122,15 +138,10 @@ class WhatsAppService {
         sessionId,
         userId,
         isReady: false,
-        qrCode: generatedQr,
+        qrCode: null,
       };
 
       this.clients.set(sessionId, wrapper);
-
-      // Immediately provide initial QR
-      setTimeout(() => {
-        this.emitToUser(userId, 'whatsapp:qr', { sessionId, qr: generatedQr });
-      }, 800);
 
       // QR Code event from real client
       client.on('qr', async (qr: string) => {
@@ -139,8 +150,8 @@ class WhatsAppService {
           where: { id: sessionId },
           data: { status: 'qr_pending' },
         }).catch(() => {});
-        this.emitToUser(userId, 'whatsapp:qr', { sessionId, qr });
-        logger.info(`Live QR code generated for WhatsApp session ${sessionId}`);
+        this.emitToUser(userId, 'whatsapp:qr', { sessionId, qr, waMeUrl, pairingCode });
+        logger.info(`Live QR code generated for WhatsApp session ${sessionId}: ${qr.substring(0, 20)}...`);
       });
 
       // Ready event
@@ -192,7 +203,12 @@ class WhatsAppService {
         logger.warn(`WhatsApp native puppeteer start failed, keeping Web QR link mode: ${err.message}`);
       });
 
-      return { status: 'qr_pending', qrCode: generatedQr, waMeUrl, pairingCode };
+      return {
+        status: 'connecting',
+        message: 'Launching WhatsApp Web session...',
+        waMeUrl,
+        pairingCode,
+      };
     } catch (err: any) {
       logger.warn(`WhatsApp initialization fallback to Web QR mode: ${err.message}`);
       const wrapper: WhatsAppClientWrapper = {
@@ -447,7 +463,7 @@ class WhatsAppService {
       ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent('Hi Nexora AI Assistant!')}`
       : `https://wa.me/?text=${encodeURIComponent('Hi Nexora AI Assistant! Connect to my session ' + sessionId.substring(0, 8))}`;
     const pairingCode = `NX${Math.floor(10 + Math.random() * 90)}-${sessionId.substring(0, 4).toUpperCase()}`;
-    const qrCode = wrapper?.qrCode || (status === 'qr_pending' ? waMeUrl : null);
+    const qrCode = wrapper?.qrCode || null;
 
     return {
       status,
