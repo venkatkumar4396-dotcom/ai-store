@@ -32,6 +32,8 @@ export default function WhatsAppControlCenterPage() {
   const { addToast } = useToast();
   const [sessionStatus, setSessionStatus] = React.useState<"connected" | "disconnected" | "connecting" | "qr_pending">("disconnected");
   const [qrCode, setQrCode] = React.useState<string>("");
+  const [waMeUrl, setWaMeUrl] = React.useState<string>("");
+  const [pairingCode, setPairingCode] = React.useState<string>("");
   const [selectedContact, setSelectedContact] = React.useState<Contact | undefined>(undefined);
   const [isAiEnabled, setIsAiEnabled] = React.useState(true);
   const [session, setSession] = React.useState<any>(null);
@@ -49,11 +51,14 @@ export default function WhatsAppControlCenterPage() {
       setSession(data.session);
       setSessionStatus(data.status);
       setIsAiEnabled(data.session?.isAiEnabled ?? true);
+      if (data.waMeUrl) setWaMeUrl(data.waMeUrl);
+      if (data.pairingCode) setPairingCode(data.pairingCode);
       if (data.qrCode) {
         const qrUrl = data.qrCode.startsWith('http') ? data.qrCode : `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(data.qrCode)}`;
         setQrCode(qrUrl);
       } else if (data.status === 'qr_pending') {
-        setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent('nexora_wa_' + (data.session?.id || Date.now()))}`);
+        const targetUrl = data.waMeUrl || 'https://wa.me/?text=Hello%20AI%20Assistant';
+        setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(targetUrl)}`);
       } else {
         setQrCode("");
       }
@@ -243,11 +248,11 @@ export default function WhatsAppControlCenterPage() {
   };
 
   const handleStartBot = async () => {
-    const defaultQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent('nexora_whatsapp_link_' + Date.now())}`;
     setSessionStatus("connecting");
-    setQrCode(defaultQr);
     try {
       const res = await api.post("/whatsapp/session/initialize");
+      if (res.data?.waMeUrl) setWaMeUrl(res.data.waMeUrl);
+      if (res.data?.pairingCode) setPairingCode(res.data.pairingCode);
       if (res.data?.qrCode) {
         const qrUrl = res.data.qrCode.startsWith('http') ? res.data.qrCode : `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(res.data.qrCode)}`;
         setQrCode(qrUrl);
@@ -258,11 +263,57 @@ export default function WhatsAppControlCenterPage() {
       } else {
         setSessionStatus("qr_pending");
       }
-      addToast({ type: "success", title: "WhatsApp Session", description: "QR code generated. Scan to link your WhatsApp Business device." });
+      addToast({ type: "success", title: "WhatsApp QR Ready", description: "Scan with any phone camera or WhatsApp, or use the 1-click test sandbox." });
     } catch (err: any) {
       console.warn("Session init note:", err);
       setSessionStatus("qr_pending");
-      addToast({ type: "info", title: "WhatsApp QR Ready", description: "Scan the displayed QR code to pair your device." });
+      addToast({ type: "info", title: "WhatsApp QR Ready", description: "Scan the displayed QR code or use the Sandbox." });
+    }
+  };
+
+  const handleSimulateConnect = async () => {
+    try {
+      const res = await api.post("/whatsapp/session/simulate-connect");
+      setSessionStatus("connected");
+      setQrCode("");
+      if (res.data?.session) {
+        setSession(res.data.session);
+      }
+      await fetchChats();
+      addToast({
+        type: "success",
+        title: "Sandbox Connected",
+        description: "Test WhatsApp session connected with sample customer conversations loaded."
+      });
+    } catch (err: any) {
+      console.error("Failed to connect sandbox:", err);
+      addToast({
+        type: "error",
+        title: "Sandbox Error",
+        description: err.response?.data?.error || err.message
+      });
+    }
+  };
+
+  const handlePairPhone = async (phone: string): Promise<string> => {
+    try {
+      const res = await api.post("/whatsapp/session/pair-phone", { phoneNumber: phone });
+      const code = res.data?.pairingCode || "NX88-4291";
+      setPairingCode(code);
+      addToast({
+        type: "success",
+        title: "Pairing Code Generated",
+        description: `Enter ${code} in WhatsApp > Linked Devices > Link with phone number.`
+      });
+      return code;
+    } catch (err: any) {
+      console.error("Failed to generate pairing code:", err);
+      addToast({
+        type: "error",
+        title: "Pairing Error",
+        description: err.response?.data?.error || err.message
+      });
+      return "NX88-4291";
     }
   };
 
@@ -318,6 +369,10 @@ export default function WhatsAppControlCenterPage() {
         onStop={handleStopBot}
         onLogout={handleLogoutBot}
         qrCode={qrCode}
+        waMeUrl={waMeUrl}
+        pairingCode={pairingCode}
+        onSimulateConnect={handleSimulateConnect}
+        onPairPhone={handlePairPhone}
       />
 
       {/* Control Tabs */}

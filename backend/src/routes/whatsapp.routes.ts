@@ -46,6 +46,8 @@ router.get('/session', authenticate, getSession, async (req: Request, res: Respo
       },
       status: statusInfo.status,
       qrCode: statusInfo.qrCode,
+      waMeUrl: statusInfo.waMeUrl,
+      pairingCode: statusInfo.pairingCode,
       isReady: statusInfo.isReady,
     });
   } catch (error) {
@@ -64,6 +66,45 @@ router.post('/session/initialize', authenticate, getSession, async (req: Request
     const session = (req as any).whatsappSession;
     const result = await whatsappService.initialize(userId, session.id);
     await logActivity(userId, 'whatsapp_initialized', 'whatsapp', session.id);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route   POST /api/whatsapp/session/simulate-connect
+ * @desc    Instantly connect WhatsApp in interactive sandbox mode
+ * @access  Private
+ */
+router.post('/session/simulate-connect', authenticate, getSession, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const session = (req as any).whatsappSession;
+    const result = await whatsappService.simulateConnect(session.id, userId);
+    await logActivity(userId, 'whatsapp_simulated_connect', 'whatsapp', session.id);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route   POST /api/whatsapp/session/pair-phone
+ * @desc    Pair with phone number and generate pairing code
+ * @access  Private
+ */
+router.post('/session/pair-phone', authenticate, getSession, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const session = (req as any).whatsappSession;
+    const { phoneNumber } = req.body;
+    if (!phoneNumber) {
+      res.status(400).json({ error: 'Phone number is required' });
+      return;
+    }
+    const result = await whatsappService.pairWithPhone(session.id, userId, phoneNumber);
+    await logActivity(userId, 'whatsapp_paired_phone', 'whatsapp', session.id, { phoneNumber });
     res.status(200).json(result);
   } catch (error) {
     next(error);
