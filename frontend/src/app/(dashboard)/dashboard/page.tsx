@@ -393,10 +393,10 @@ export default function OverviewDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Usage Chart */}
-          <Card className="border border-white/[0.06] bg-zinc-950/40 relative overflow-hidden">
+          <Card className="border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 relative overflow-hidden shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-white">System Usage Analytics</CardTitle>
-              <CardDescription className="text-zinc-500 text-xs">
+              <CardTitle className="text-base font-semibold text-slate-800 dark:text-slate-100">System Usage Analytics</CardTitle>
+              <CardDescription className="text-slate-500 dark:text-zinc-400 text-xs">
                 Real-time monitor of LLM-generated message payloads and responses.
               </CardDescription>
             </CardHeader>
@@ -410,14 +410,14 @@ export default function OverviewDashboardPage() {
         </div>
 
         {/* System Integration Status */}
-        <Card className="border border-white/[0.06] bg-zinc-950/40 relative overflow-hidden h-full flex flex-col justify-between">
+        <Card className="border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 relative overflow-hidden h-full flex flex-col justify-between shadow-sm">
           <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl pointer-events-none" />
           
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-indigo-400" /> Integration Status
             </CardTitle>
-            <CardDescription className="text-zinc-500 text-sm mt-1.5">
+            <CardDescription className="text-slate-500 dark:text-zinc-400 text-sm mt-1.5">
               Platform health and service connectivity.
             </CardDescription>
           </CardHeader>
@@ -428,18 +428,18 @@ export default function OverviewDashboardPage() {
               { label: "Model Pipeline", desc: "Tokens pipeline fully active.", status: "online" },
               { label: "WhatsApp Bridge", desc: "Core connection channel online.", status: "online" },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/[0.04] rounded-lg">
+              <div key={item.label} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.04] rounded-lg">
                 <div className={`status-dot ${item.status === "online" ? "status-dot-online" : "status-dot-offline"}`} />
                 <div className="flex flex-col min-w-0">
-                  <span className="font-semibold text-sm text-white">{item.label}</span>
-                  <span className="text-[11px] text-zinc-500 truncate">{item.desc}</span>
+                  <span className="font-semibold text-sm text-slate-900 dark:text-white">{item.label}</span>
+                  <span className="text-[11px] text-slate-500 dark:text-zinc-500 truncate">{item.desc}</span>
                 </div>
               </div>
             ))}
           </CardContent>
 
-          <div className="p-6 border-t border-white/5">
-            <Button variant="outline" className="w-full border-white/10 hover:bg-white/5 text-zinc-300" asChild>
+          <div className="p-6 border-t border-slate-100 dark:border-white/5">
+            <Button variant="outline" className="w-full border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-zinc-300" asChild>
               <Link href="/settings">
                 Configure Keys & Webhooks
               </Link>
@@ -449,12 +449,12 @@ export default function OverviewDashboardPage() {
       </div>
 
       {/* ═══════════ BOTS GRID ═══════════ */}
-      <div className="space-y-4 border-t border-white/5 pt-6">
+      <div className="space-y-4 border-t border-slate-200 dark:border-white/5 pt-6 pb-8">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <BotIcon className="h-5 w-5 text-indigo-400" /> Featured Agents
           </h2>
-          <Button variant="ghost" className="text-zinc-400 hover:text-white text-sm" asChild>
+          <Button variant="ghost" className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white text-sm" asChild>
             <Link href="/bots">
               View Marketplace <ArrowRight className="h-4 w-4 ml-1.5" />
             </Link>

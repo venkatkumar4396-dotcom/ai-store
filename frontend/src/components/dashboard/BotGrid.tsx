@@ -112,7 +112,7 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
     >
       {bots.map((bot) => (
         <motion.div key={bot.id} variants={item}>
-          <Card className="h-full flex flex-col justify-between overflow-hidden group border border-white/[0.06] bg-zinc-950/40 relative hover:border-indigo-500/20 transition-all duration-300 card-3d">
+          <Card className="h-full flex flex-col justify-between overflow-hidden group border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 relative hover:border-indigo-500/20 transition-all duration-300 card-3d shadow-sm">
             {/* Installed badge */}
             {installedBotIds?.has(bot.id) && (
               <div className="absolute top-3 right-3 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[10px] font-bold">
@@ -138,45 +138,45 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
               </div>
 
               <div className="mt-3.5">
-                <CardTitle className="text-[15px] font-semibold text-white group-hover:text-indigo-300 transition-colors flex items-center gap-1.5 leading-tight">
+                <CardTitle className="text-[15px] font-semibold text-slate-900 dark:text-white group-hover:text-indigo-500 dark:group-hover:text-indigo-300 transition-colors flex items-center gap-1.5 leading-tight">
                   {bot.name}
                   {bot.status === "beta" && (
-                    <Badge variant="outline" className="text-[9px] py-0 px-1 border-amber-500/30 bg-amber-500/5 text-amber-400 font-bold">
+                    <Badge variant="outline" className="text-[9px] py-0 px-1 border-amber-500/30 bg-amber-500/5 text-amber-500 dark:text-amber-400 font-bold">
                       BETA
                     </Badge>
                   )}
                 </CardTitle>
-                <CardDescription className="text-zinc-500 text-[13px] mt-1.5 leading-relaxed line-clamp-2">
+                <CardDescription className="text-slate-600 dark:text-zinc-400 text-[13px] mt-1.5 leading-relaxed line-clamp-3">
                   {bot.description}
                 </CardDescription>
               </div>
             </CardHeader>
 
-            <CardContent className="px-5 pb-2 flex items-center justify-between text-xs text-zinc-500 border-t border-white/[0.04] pt-3">
+            <CardContent className="px-5 pb-2 flex items-center justify-between text-xs text-slate-500 dark:text-zinc-500 border-t border-slate-100 dark:border-white/[0.04] pt-3">
               <div className="flex items-center gap-1">
                 <Star className="h-3.5 w-3.5 fill-amber-400/30 text-amber-400" />
-                <span className="text-zinc-300 font-semibold">{bot.rating.toFixed(1)}</span>
+                <span className="text-slate-700 dark:text-zinc-300 font-semibold">{bot.rating.toFixed(1)}</span>
               </div>
               <div className="flex items-center gap-1">
-                <Users className="h-3.5 w-3.5 text-zinc-600" />
+                <Users className="h-3.5 w-3.5 text-slate-400 dark:text-zinc-600" />
                 <span>{bot.usageCount.toLocaleString()}</span>
               </div>
               <div className="font-semibold">
                 {bot.price === "free" ? (
-                  <span className="text-emerald-400">Free</span>
+                  <span className="text-emerald-500 dark:text-emerald-400">Free</span>
                 ) : (
-                  <span className="text-white">${bot.price}/mo</span>
+                  <span className="text-slate-900 dark:text-white">${bot.price}/mo</span>
                 )}
               </div>
             </CardContent>
 
-            <CardFooter className="p-4 pt-2 border-t border-white/[0.04] mt-1 flex flex-wrap gap-2">
+            <CardFooter className="p-4 pt-2 border-t border-slate-100 dark:border-white/[0.04] mt-1 flex flex-wrap gap-2">
               {bot.standaloneUrl ? (
                 <>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 h-9"
+                    className="flex-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 h-9"
                     onClick={() => window.open(bot.standaloneUrl, "_blank")}
                   >
                     <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
@@ -196,7 +196,7 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-white/[0.08] hover:bg-white/5 text-zinc-400 hover:text-white h-9"
+                    className="flex-1 border-slate-200 dark:border-white/[0.08] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white h-9"
                     onClick={() => onConfigure?.(bot.id)}
                   >
                     <Settings2 className="h-3.5 w-3.5 mr-1.5" />

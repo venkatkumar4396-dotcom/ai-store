@@ -74,21 +74,21 @@ export function StatsCard({
   }, [sparklineData]);
 
   return (
-    <Card className="relative overflow-hidden group border border-white/[0.06] bg-zinc-950/40">
+    <Card className="relative overflow-hidden group border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 shadow-sm">
       {/* Glow effect on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-violet-500/0 to-cyan-500/0 group-hover:from-indigo-500/5 group-hover:to-cyan-500/5 transition-all duration-500" />
       
       <CardContent className="p-5 flex flex-col justify-between h-full relative z-10">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-zinc-400 font-medium tracking-wide uppercase">{label}</span>
-          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+          <span className="text-xs text-slate-600 dark:text-zinc-400 font-semibold tracking-wide uppercase">{label}</span>
+          <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-zinc-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
             <IconComponent className="h-4.5 w-4.5" />
           </div>
         </div>
 
         <div className="flex items-end justify-between gap-4">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight text-white">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               <AnimatedCounter value={value} prefix={prefix} suffix={suffix} />
             </h2>
             {change !== undefined && (
@@ -111,7 +111,7 @@ export function StatsCard({
                     {change}%
                   </span>
                 )}
-                <span className="text-[10px] text-zinc-500 font-medium">vs last month</span>
+                <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-medium">vs last month</span>
               </div>
             )}
           </div>

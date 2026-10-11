@@ -125,25 +125,25 @@ export function DashboardUsageChart({ data }: DashboardUsageChartProps) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-indigo-400" />
-          <span className="text-sm font-semibold text-zinc-100">AI Usage Frequency</span>
+          <span className="text-sm font-semibold text-slate-800 dark:text-zinc-100">AI Usage Frequency</span>
           {isAllZero && (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 border border-amber-500/25 text-amber-400">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 border border-amber-500/25 text-amber-500 dark:text-amber-400">
               No requests recorded this week
             </span>
           )}
         </div>
         <div className="flex items-center gap-4 text-xs font-semibold">
-          <span className="flex items-center gap-1.5 text-zinc-400">
+          <span className="flex items-center gap-1.5 text-slate-600 dark:text-zinc-400">
             <span className="w-2.5 h-2.5 rounded bg-[#6366f1]" /> Inbound
           </span>
-          <span className="flex items-center gap-1.5 text-zinc-400">
+          <span className="flex items-center gap-1.5 text-slate-600 dark:text-zinc-400">
             <span className="w-2.5 h-2.5 rounded bg-[#06b6d4]" /> Outbound
           </span>
         </div>
       </div>
 
       {/* SVG Chart */}
-      <div className="relative bg-zinc-950/40 border border-white/5 rounded-xl p-4 overflow-hidden group">
+      <div className="relative bg-slate-50/50 dark:bg-zinc-950/40 border border-slate-200 dark:border-white/5 rounded-xl p-4 overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/0 via-violet-500/0 to-cyan-500/0 group-hover:from-indigo-500/2 group-hover:to-cyan-500/2 transition-all duration-500" />
 
         {isAllZero && (

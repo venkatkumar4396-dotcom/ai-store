@@ -117,9 +117,9 @@ export default function DashboardLayout({
           <Header />
 
           {/* Dynamic Route Content */}
-          <main className="flex-1 overflow-y-auto p-4 pb-28 md:p-8 md:pb-8 mesh-bg relative">
+          <main className="flex-1 overflow-y-auto p-4 pb-32 md:p-8 md:pb-12 mesh-bg relative">
             <ParticleBackground />
-            <div className="max-w-7xl mx-auto space-y-6 relative z-10">
+            <div className="max-w-7xl mx-auto space-y-6 pb-8 relative z-10">
               {!isBackendConnected && (
                 <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-950/20 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg shadow-rose-950/10 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center gap-3">
