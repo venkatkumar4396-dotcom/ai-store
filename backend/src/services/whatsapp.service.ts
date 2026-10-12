@@ -3,27 +3,34 @@ import logger from '../utils/logger';
 import env from '../config/env';
 import { aiRouter } from './ai/provider';
 import { Server as SocketIOServer } from 'socket.io';
+import path from 'path';
+import fs from 'fs';
+import pino from 'pino';
 
 const prisma = new PrismaClient();
 
-// WhatsApp client types (whatsapp-web.js)
-let Client: any;
-let LocalAuth: any;
+// WhatsApp client types (Baileys pure WebSocket engine)
+let makeWASocket: any;
+let useMultiFileAuthState: any;
+let DisconnectReason: any;
 
 try {
-  const ww = require('whatsapp-web.js');
-  Client = ww.Client;
-  LocalAuth = ww.LocalAuth;
+  const baileys = require('@whiskeysockets/baileys');
+  makeWASocket = baileys.default || baileys;
+  useMultiFileAuthState = baileys.useMultiFileAuthState;
+  DisconnectReason = baileys.DisconnectReason;
 } catch (error) {
-  logger.warn('whatsapp-web.js not available - WhatsApp features will be disabled');
+  logger.warn('Baileys not available - WhatsApp features will be simulated');
 }
 
 interface WhatsAppClientWrapper {
-  client: any;
+  sock: any;
   sessionId: string;
   userId: string;
   isReady: boolean;
   qrCode: string | null;
+  pairingCode?: string;
+  phoneNumber?: string;
 }
 
 class WhatsAppService {
@@ -53,37 +60,6 @@ class WhatsAppService {
       ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent('Hi Nexora AI Assistant!')}`
       : `https://wa.me/?text=${encodeURIComponent('Hi Nexora AI Assistant! Connect to my session ' + sessionId.substring(0, 8))}`;
     const pairingCode = `NX${Math.floor(10 + Math.random() * 90)}-${sessionId.substring(0, 4).toUpperCase()}`;
-    const generatedQr = waMeUrl;
-
-    if (!Client || !LocalAuth) {
-      logger.info(`WhatsApp initializing in Web QR Link mode for session ${sessionId}`);
-      
-      const wrapper: WhatsAppClientWrapper = {
-        client: null,
-        sessionId,
-        userId,
-        isReady: false,
-        qrCode: generatedQr,
-      };
-      this.clients.set(sessionId, wrapper);
-
-      await prisma.whatsAppSession.update({
-        where: { id: sessionId },
-        data: { status: 'qr_pending' },
-      }).catch(() => {});
-
-      // Emit QR event to frontend
-      setTimeout(() => {
-        this.emitToUser(userId, 'whatsapp:qr', { sessionId, qr: generatedQr, waMeUrl, pairingCode });
-      }, 500);
-
-      return {
-        status: 'qr_pending',
-        qrCode: generatedQr,
-        waMeUrl,
-        pairingCode,
-      };
-    }
 
     // Check if client already exists and is ready
     const existing = this.clients.get(sessionId);
@@ -95,8 +71,13 @@ class WhatsAppService {
         status: 'qr_pending',
         qrCode: existing.qrCode,
         waMeUrl,
-        pairingCode,
+        pairingCode: existing.pairingCode || pairingCode,
       };
+    }
+
+    if (!makeWASocket || !useMultiFileAuthState) {
+      logger.warn(`Baileys not available for session ${sessionId}`);
+      return { status: 'disconnected', message: 'Baileys not installed', waMeUrl, pairingCode };
     }
 
     // Update session status
@@ -106,38 +87,24 @@ class WhatsAppService {
     }).catch(() => {});
 
     try {
-      const puppeteerArgs = [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu',
-        '--disable-blink-features=AutomationControlled',
-      ];
+      const sessionPath = env.WHATSAPP_SESSION_PATH || './data/whatsapp-sessions';
+      const sessionDir = path.join(sessionPath, sessionId);
+      fs.mkdirSync(sessionDir, { recursive: true });
 
-      const client = new Client({
-        authStrategy: new LocalAuth({
-          clientId: sessionId,
-          dataPath: env.WHATSAPP_SESSION_PATH,
-        }),
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-        puppeteer: {
-          headless: true,
-          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-          args: puppeteerArgs,
-          ignoreDefaultArgs: ['--enable-automation'],
-        },
-        webVersionCache: {
-          type: 'remotePath',
-          remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html',
-        },
+      const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
+
+      const sock = makeWASocket({
+        auth: state,
+        logger: pino({ level: 'silent' }),
+        printQRInTerminal: false,
+        browser: ['Nexora AI', 'Desktop', '1.0.0'],
+        syncFullHistory: false,
+        connectTimeoutMs: 30000,
+        defaultQueryTimeoutMs: 30000,
       });
 
       const wrapper: WhatsAppClientWrapper = {
-        client,
+        sock,
         sessionId,
         userId,
         isReady: false,
@@ -146,87 +113,91 @@ class WhatsAppService {
 
       this.clients.set(sessionId, wrapper);
 
-      // QR Code event from real client
-      client.on('qr', async (qr: string) => {
-        wrapper.qrCode = qr;
-        await prisma.whatsAppSession.update({
-          where: { id: sessionId },
-          data: { status: 'qr_pending' },
-        }).catch(() => {});
-        this.emitToUser(userId, 'whatsapp:qr', { sessionId, qr, waMeUrl, pairingCode });
-        logger.info(`Live QR code generated for WhatsApp session ${sessionId}: ${qr.substring(0, 20)}...`);
-      });
+      sock.ev.on('creds.update', saveCreds);
 
-      // Ready event
-      client.on('ready', async () => {
-        wrapper.isReady = true;
-        wrapper.qrCode = null;
-        await prisma.whatsAppSession.update({
-          where: { id: sessionId },
-          data: { status: 'connected' },
-        }).catch(() => {});
-        this.emitToUser(userId, 'whatsapp:ready', { sessionId });
-        logger.info(`WhatsApp client ready for session ${sessionId}`);
-      });
+      sock.ev.on('connection.update', async (update: any) => {
+        const { connection, lastDisconnect, qr } = update;
 
-      // Message received event
-      client.on('message', async (msg: any) => {
-        try {
-          await this.handleIncomingMessage(sessionId, userId, msg);
-        } catch (error: any) {
-          logger.error(`Error handling incoming message: ${error.message}`);
+        if (qr) {
+          wrapper.qrCode = qr;
+          await prisma.whatsAppSession.update({
+            where: { id: sessionId },
+            data: { status: 'qr_pending' },
+          }).catch(() => {});
+          this.emitToUser(userId, 'whatsapp:qr', { sessionId, qr, waMeUrl, pairingCode });
+          logger.info(`Live Baileys QR code generated for WhatsApp session ${sessionId}`);
+        }
+
+        if (connection === 'open') {
+          wrapper.isReady = true;
+          wrapper.qrCode = null;
+          await prisma.whatsAppSession.update({
+            where: { id: sessionId },
+            data: { status: 'connected' },
+          }).catch(() => {});
+          this.emitToUser(userId, 'whatsapp:ready', { sessionId });
+          logger.info(`WhatsApp Baileys client connected for session ${sessionId}`);
+        }
+
+        if (connection === 'close') {
+          const statusCode = lastDisconnect?.error?.output?.statusCode;
+          const shouldReconnect = statusCode !== DisconnectReason?.loggedOut;
+          wrapper.isReady = false;
+          wrapper.qrCode = null;
+
+          if (!shouldReconnect) {
+            await prisma.whatsAppSession.update({
+              where: { id: sessionId },
+              data: { status: 'disconnected' },
+            }).catch(() => {});
+            this.emitToUser(userId, 'whatsapp:disconnected', { sessionId, reason: 'logged_out' });
+            this.clients.delete(sessionId);
+          } else {
+            logger.info(`WhatsApp session ${sessionId} closed, reconnecting...`);
+            this.clients.delete(sessionId);
+            this.initialize(userId, sessionId).catch(() => {});
+          }
         }
       });
 
-      // Disconnected event
-      client.on('disconnected', async (reason: string) => {
-        wrapper.isReady = false;
-        wrapper.qrCode = null;
-        await prisma.whatsAppSession.update({
-          where: { id: sessionId },
-          data: { status: 'disconnected' },
-        }).catch(() => {});
-        this.emitToUser(userId, 'whatsapp:disconnected', { sessionId, reason });
-        this.clients.delete(sessionId);
-      });
+      sock.ev.on('messages.upsert', async ({ messages }: any) => {
+        if (!messages || !messages.length) return;
+        for (const msg of messages) {
+          if (msg.key?.fromMe || !msg.message) continue;
+          const body =
+            msg.message?.conversation ||
+            msg.message?.extendedTextMessage?.text ||
+            msg.message?.imageMessage?.caption ||
+            '';
+          const from = msg.key?.remoteJid || '';
+          if (!from || from.includes('@broadcast') || from.includes('@newsletter')) continue;
 
-      // Auth failure event
-      client.on('auth_failure', async (error: any) => {
-        wrapper.isReady = false;
-        await prisma.whatsAppSession.update({
-          where: { id: sessionId },
-          data: { status: 'disconnected' },
-        }).catch(() => {});
-        this.emitToUser(userId, 'whatsapp:auth_failure', { sessionId, error: error.toString() });
-        this.clients.delete(sessionId);
-      });
-
-      // Initialize real client in background
-      client.initialize().catch((err: any) => {
-        logger.warn(`WhatsApp native puppeteer start failed, keeping Web QR link mode: ${err.message}`);
+          try {
+            await this.handleIncomingMessage(sessionId, userId, {
+              from,
+              body,
+              type: 'text',
+              pushName: msg.pushName || null,
+            });
+          } catch (err: any) {
+            logger.error(`Error handling incoming WhatsApp message: ${err.message}`);
+          }
+        }
       });
 
       return {
         status: 'connecting',
-        message: 'Launching WhatsApp Web session...',
+        message: 'Establishing WhatsApp multi-device connection...',
         waMeUrl,
         pairingCode,
       };
     } catch (err: any) {
-      logger.warn(`WhatsApp initialization fallback to Web QR mode: ${err.message}`);
-      const wrapper: WhatsAppClientWrapper = {
-        client: null,
-        sessionId,
-        userId,
-        isReady: false,
-        qrCode: generatedQr,
-      };
-      this.clients.set(sessionId, wrapper);
+      logger.error(`Baileys initialization failed: ${err.message}`);
       await prisma.whatsAppSession.update({
         where: { id: sessionId },
-        data: { status: 'qr_pending' },
+        data: { status: 'disconnected' },
       }).catch(() => {});
-      return { status: 'qr_pending', qrCode: generatedQr, waMeUrl, pairingCode };
+      return { status: 'disconnected', message: err.message, waMeUrl, pairingCode };
     }
   }
 
@@ -398,14 +369,16 @@ class WhatsAppService {
     }
 
     // Ensure the number has the correct format
+    const cleanPhone = to.replace(/[^0-9]/g, '');
+    const jid = to.includes('@') ? to.replace('@c.us', '@s.whatsapp.net') : `${cleanPhone}@s.whatsapp.net`;
     const chatId = to.includes('@') ? to : `${to}@c.us`;
 
     try {
-      if (wrapper?.client) {
+      if (wrapper?.sock && wrapper.isReady) {
         try {
-          await wrapper.client.sendMessage(chatId, body);
+          await wrapper.sock.sendMessage(jid, { text: body });
         } catch (clientErr: any) {
-          logger.warn(`Could not dispatch through puppeteer client (${clientErr.message}). Recording message in database.`);
+          logger.warn(`Could not dispatch through Baileys socket (${clientErr.message}). Recording message in database.`);
         }
       }
 
@@ -484,7 +457,7 @@ class WhatsAppService {
     let wrapper = this.clients.get(sessionId);
     if (!wrapper) {
       wrapper = {
-        client: null,
+        sock: null,
         sessionId,
         userId,
         isReady: true,
@@ -579,25 +552,26 @@ class WhatsAppService {
     let wrapper = this.clients.get(sessionId);
 
     // If client does not exist or not initialized, spin it up
-    if (!wrapper?.client) {
+    if (!wrapper?.sock) {
       await this.initialize(userId, sessionId);
       wrapper = this.clients.get(sessionId);
     }
 
     let pairingCode = '';
 
-    // If client is available, request official pairing code from WhatsApp Web
-    if (wrapper?.client) {
+    // If Baileys socket is available, request official pairing code from WhatsApp servers
+    if (wrapper?.sock) {
       try {
         let attempts = 0;
-        while (!wrapper.client.pupPage && attempts < 16) {
-          await new Promise((r) => setTimeout(r, 500));
+        while (!wrapper.sock.ws?.isOpen && attempts < 20) {
+          await new Promise((r) => setTimeout(r, 300));
           attempts++;
         }
 
-        if (wrapper.client.pupPage && typeof wrapper.client.requestPairingCode === 'function') {
-          pairingCode = await wrapper.client.requestPairingCode(cleanPhone);
+        if (typeof wrapper.sock.requestPairingCode === 'function') {
+          pairingCode = await wrapper.sock.requestPairingCode(cleanPhone);
           logger.info(`Official WhatsApp pairing code for ${cleanPhone}: ${pairingCode}`);
+          wrapper.pairingCode = pairingCode;
         }
       } catch (err: any) {
         logger.warn(`WhatsApp requestPairingCode attempt: ${err.message}`);
@@ -701,11 +675,11 @@ class WhatsAppService {
    */
   async disconnect(sessionId: string): Promise<void> {
     const wrapper = this.clients.get(sessionId);
-    if (wrapper?.client) {
+    if (wrapper?.sock) {
       try {
-        await wrapper.client.destroy();
+        wrapper.sock.end(undefined);
       } catch (error: any) {
-        logger.warn(`Error destroying WhatsApp client: ${error.message}`);
+        logger.warn(`Error closing Baileys socket: ${error.message}`);
       }
     }
     this.clients.delete(sessionId);
@@ -720,16 +694,14 @@ class WhatsAppService {
    */
   async logout(sessionId: string): Promise<void> {
     const wrapper = this.clients.get(sessionId);
-    if (wrapper?.client) {
+    if (wrapper?.sock) {
       try {
-        await wrapper.client.logout();
+        await wrapper.sock.logout();
       } catch (error: any) {
-        logger.warn(`Error logging out WhatsApp client: ${error.message}`);
+        logger.warn(`Error logging out Baileys socket: ${error.message}`);
         try {
-          await wrapper.client.destroy();
-        } catch (destroyError: any) {
-          logger.warn(`Error destroying client after failed logout: ${destroyError.message}`);
-        }
+          wrapper.sock.end(undefined);
+        } catch {}
       }
     }
     this.clients.delete(sessionId);
@@ -738,11 +710,11 @@ class WhatsAppService {
       data: { status: 'disconnected' },
     });
 
-    // Delete session files on disk as backup
+    // Delete session files on disk
     const fs = require('fs');
     const path = require('path');
-    const sessionPath = env.WHATSAPP_SESSION_PATH || '.wwebjs_auth';
-    const sessionDir = path.join(sessionPath, `session-${sessionId}`);
+    const sessionPath = env.WHATSAPP_SESSION_PATH || './data/whatsapp-sessions';
+    const sessionDir = path.join(sessionPath, sessionId);
     if (fs.existsSync(sessionDir)) {
       try {
         fs.rmSync(sessionDir, { recursive: true, force: true });
