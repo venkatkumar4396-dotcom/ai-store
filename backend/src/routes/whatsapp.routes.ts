@@ -207,6 +207,23 @@ router.get('/chats', authenticate, getSession, async (req: Request, res: Respons
 });
 
 /**
+ * @route   POST /api/whatsapp/chats/clear
+ * @desc    Clear all conversations and messages in WhatsApp inbox
+ * @access  Private
+ */
+router.post('/chats/clear', authenticate, getSession, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const session = (req as any).whatsappSession;
+    const result = await whatsappService.clearConversations(session.id);
+    await logActivity(userId, 'whatsapp_chats_cleared', 'whatsapp', session.id, result);
+    res.status(200).json({ message: 'All conversations cleared successfully', ...result });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * @route   GET /api/whatsapp/chats/:phone/messages
  * @desc    Get messages in a specific chat
  * @access  Private

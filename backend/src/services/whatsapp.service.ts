@@ -99,8 +99,10 @@ class WhatsAppService {
         printQRInTerminal: false,
         browser: ['Nexora AI', 'Desktop', '1.0.0'],
         syncFullHistory: false,
-        connectTimeoutMs: 30000,
-        defaultQueryTimeoutMs: 30000,
+        markOnlineOnConnect: false,
+        connectTimeoutMs: 25000,
+        defaultQueryTimeoutMs: 25000,
+        keepAliveIntervalMs: 30000,
       });
 
       const wrapper: WhatsAppClientWrapper = {
@@ -247,19 +249,20 @@ class WhatsAppService {
     });
 
     // Update or create contact
+    const contactName = msg.pushName || msg._data?.notifyName || null;
     await prisma.whatsAppContact.upsert({
       where: { sessionId_phone: { sessionId, phone } },
       create: {
         sessionId,
         phone,
-        name: msg._data?.notifyName || null,
+        name: contactName,
         lastMessageAt: new Date(),
       },
       update: {
-        name: msg._data?.notifyName || undefined,
+        ...(contactName ? { name: contactName } : {}),
         lastMessageAt: new Date(),
       },
-    });
+    }).catch(() => {});
 
     // Emit to frontend
     this.emitToUser(userId, 'whatsapp:message', {
@@ -478,70 +481,41 @@ class WhatsAppService {
       },
     }).catch(() => {});
 
-    // Seed sample conversations if inbox is empty
-    const count = await prisma.whatsAppMessage.count({ where: { sessionId } });
-    if (count === 0) {
-      const demoContacts = [
-        {
-          phone: '+14155552671',
-          name: 'Sarah Jenkins',
-          tags: JSON.stringify(['VIP', 'Customer']),
-          inboundMsg: 'Hi there! What are your pricing plans for enterprise AI agents?',
-          aiReply: 'Hello Sarah! Thank you for reaching out to Nexora. Our Enterprise tier includes custom LLM pipelines, dedicated model fine-tuning, and 24/7 SLA support. Would you like me to schedule a briefing with our team?',
-        },
-        {
-          phone: '+14155559812',
-          name: 'Michael Chen',
-          tags: JSON.stringify(['Support', 'Lead']),
-          inboundMsg: 'Can I integrate Nexora bots with our existing PostgreSQL warehouse?',
-          aiReply: 'Yes, absolutely Michael! Nexora provides native Prisma ORM connectors, webhook listeners, and encrypted data pipeline streaming for PostgreSQL, BigQuery, and Snowflake.',
-        },
-      ];
-
-      for (const demo of demoContacts) {
-        await prisma.whatsAppContact.upsert({
-          where: { sessionId_phone: { sessionId, phone: demo.phone } },
-          create: {
-            sessionId,
-            phone: demo.phone,
-            name: demo.name,
-            tags: demo.tags,
-            lastMessageAt: new Date(),
-          },
-          update: {
-            name: demo.name,
-            lastMessageAt: new Date(),
-          },
-        }).catch(() => {});
-
-        await prisma.whatsAppMessage.create({
-          data: {
-            sessionId,
-            from: `${demo.phone}@c.us`,
-            to: 'me@c.us',
-            body: demo.inboundMsg,
-            direction: 'inbound',
-            messageType: 'text',
-            timestamp: new Date(Date.now() - 1000 * 60 * 15),
-          },
-        }).catch(() => {});
-
-        await prisma.whatsAppMessage.create({
-          data: {
-            sessionId,
-            from: 'me@c.us',
-            to: `${demo.phone}@c.us`,
-            body: demo.aiReply,
-            direction: 'outbound',
-            messageType: 'text',
-            timestamp: new Date(Date.now() - 1000 * 60 * 14),
-          },
-        }).catch(() => {});
-      }
-    }
+    // Clean up any lingering mock demo conversations if present
+    await prisma.whatsAppMessage.deleteMany({
+      where: {
+        sessionId,
+        OR: [
+          { from: { contains: '14155552671' } },
+          { to: { contains: '14155552671' } },
+          { from: { contains: '14155559812' } },
+          { to: { contains: '14155559812' } },
+        ],
+      },
+    }).catch(() => {});
+    await prisma.whatsAppContact.deleteMany({
+      where: {
+        sessionId,
+        phone: { in: ['+14155552671', '+14155559812', '14155552671', '14155559812'] },
+      },
+    }).catch(() => {});
 
     this.emitToUser(userId, 'whatsapp:ready', { sessionId });
     return { status: 'connected', businessPhone };
+  }
+
+  /**
+   * Clear all conversations, messages, and contacts in WhatsApp inbox
+   */
+  async clearConversations(sessionId: string): Promise<{ deletedMessages: number; deletedContacts: number }> {
+    const [deletedMessages, deletedContacts] = await Promise.all([
+      prisma.whatsAppMessage.deleteMany({ where: { sessionId } }),
+      prisma.whatsAppContact.deleteMany({ where: { sessionId } }),
+    ]);
+    return {
+      deletedMessages: deletedMessages.count,
+      deletedContacts: deletedContacts.count,
+    };
   }
 
   /**
@@ -622,6 +596,11 @@ class WhatsAppService {
       const partner = msg.direction === 'inbound' ? msg.from : msg.to;
       const phone = partner.replace('@c.us', '').replace('@g.us', '');
 
+      // Exclude test sandbox numbers if any linger in database
+      if (phone === '14155552671' || phone === '+14155552671' || phone === '14155559812' || phone === '+14155559812') {
+        continue;
+      }
+
       if (!chatMap.has(phone)) {
         chatMap.set(phone, {
           phone,
@@ -638,16 +617,31 @@ class WhatsAppService {
       }
     }
 
-    // Enrich with contact info
+    // High performance batch query - eliminates N+1 database queries
+    const contacts = await prisma.whatsAppContact.findMany({
+      where: { sessionId },
+    });
+    const contactMap = new Map<string, any>();
+    for (const c of contacts) {
+      contactMap.set(c.phone, c);
+      contactMap.set(c.phone.replace(/[^0-9]/g, ''), c);
+    }
+
     const chats = [];
     for (const [phone, chat] of chatMap) {
-      const contact = await prisma.whatsAppContact.findUnique({
-        where: { sessionId_phone: { sessionId, phone } },
-      });
+      const contact = contactMap.get(phone) || contactMap.get(phone.replace(/[^0-9]/g, ''));
+      let parsedTags: string[] = [];
+      if (contact?.tags) {
+        try {
+          parsedTags = JSON.parse(contact.tags);
+        } catch {
+          parsedTags = [];
+        }
+      }
       chats.push({
         ...chat,
         contactName: contact?.name || null,
-        tags: contact?.tags ? JSON.parse(contact.tags) : [],
+        tags: parsedTags,
       });
     }
 

@@ -31,7 +31,6 @@ interface QRScannerProps {
   onStart?: () => void;
   onStop?: () => void;
   onLogout?: () => void;
-  onSimulateConnect?: () => void;
   onPairPhone?: (phone: string) => Promise<string | void>;
   phoneNumber?: string;
 }
@@ -45,11 +44,10 @@ export function QRScanner({
   onStart,
   onStop,
   onLogout,
-  onSimulateConnect,
   onPairPhone,
   phoneNumber,
 }: QRScannerProps) {
-  const [activeTab, setActiveTab] = React.useState<"qr" | "phone" | "sandbox">("qr");
+  const [activeTab, setActiveTab] = React.useState<"qr" | "phone">("qr");
   const [inputPhone, setInputPhone] = React.useState("");
   const [currentPairCode, setCurrentPairCode] = React.useState(pairingCode);
   const [isCopied, setIsCopied] = React.useState(false);
@@ -196,17 +194,6 @@ export function QRScanner({
               <KeyRound className="h-3.5 w-3.5" />
               <span>Link with Phone Code</span>
             </button>
-            <button
-              onClick={() => setActiveTab("sandbox")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === "sandbox"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-              <span>1-Click Test Sandbox</span>
-            </button>
           </div>
         )}
       </CardHeader>
@@ -231,16 +218,6 @@ export function QRScanner({
                 <RefreshCw className="h-4 w-4" />
                 <span>Launch WhatsApp QR</span>
               </Button>
-              {onSimulateConnect && (
-                <Button
-                  onClick={onSimulateConnect}
-                  variant="outline"
-                  className="w-full sm:flex-1 border-indigo-500/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 font-semibold"
-                >
-                  <Sparkles className="h-4 w-4 mr-1.5 text-amber-500" />
-                  <span>Test Sandbox</span>
-                </Button>
-              )}
             </div>
           </div>
         ) : status === "connected" ? (
@@ -329,26 +306,6 @@ export function QRScanner({
               <li>Type the 8-character code shown above.</li>
             </ol>
           </div>
-        ) : activeTab === "sandbox" ? (
-          /* Instant 1-Click Sandbox Mode */
-          <div className="text-center space-y-4 max-w-md py-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-indigo-500/20 border border-amber-500/30 flex items-center justify-center text-amber-500 mx-auto">
-              <Sparkles className="h-7 w-7" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white">Instant Sandbox Mode</h3>
-              <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
-                Test the WhatsApp AI Assistant immediately without needing an extra phone or browser plugin. Seeds real customer inquiries and exercises the AI Auto-Reply engine live!
-              </p>
-            </div>
-            <Button
-              onClick={onSimulateConnect}
-              className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm shadow-md h-10"
-            >
-              <Sparkles className="h-4 w-4 mr-2 text-amber-300" />
-              <span>Connect Test Sandbox Device</span>
-            </Button>
-          </div>
         ) : (
           /* QR Code Scanner Mode */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full max-w-2xl">
@@ -386,20 +343,10 @@ export function QRScanner({
                     <Button
                       onClick={onRefresh}
                       variant="outline"
-                      className="flex-1 flex items-center justify-center gap-1.5 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-zinc-300 text-xs font-semibold h-9"
+                      className="w-full flex items-center justify-center gap-1.5 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-zinc-300 text-xs font-semibold h-9"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                       <span>Refresh QR</span>
-                    </Button>
-                  )}
-                  {onSimulateConnect && (
-                    <Button
-                      onClick={onSimulateConnect}
-                      variant="outline"
-                      className="flex-1 border-indigo-500/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 text-xs font-semibold h-9"
-                    >
-                      <Sparkles className="h-3.5 w-3.5 mr-1 text-amber-500" />
-                      <span>Sandbox Demo</span>
                     </Button>
                   )}
                 </div>
@@ -464,13 +411,7 @@ export function QRScanner({
                   >
                     Link with Phone Code
                   </button>{" "}
-                  tab to get an official 8-digit code, or test via{" "}
-                  <button
-                    onClick={() => setActiveTab("sandbox")}
-                    className="text-amber-500 dark:text-amber-400 font-semibold underline underline-offset-2 hover:text-amber-600"
-                  >
-                    1-Click Sandbox
-                  </button>.
+                  tab to get an official 8-digit pairing code directly on your phone.
                 </p>
               </div>
             </div>

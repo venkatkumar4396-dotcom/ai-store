@@ -41,6 +41,7 @@ export default function WhatsAppControlCenterPage() {
   const [contacts, setContacts] = React.useState<Contact[]>([]);
   const [messages, setMessages] = React.useState<Record<string, Message[]>>({});
   const [templates, setTemplates] = React.useState<WhatsAppTemplate[]>([]);
+  const [isClearingChats, setIsClearingChats] = React.useState(false);
 
   // Track seen message IDs to prevent duplicates from multiple socket events
   const seenMessageIds = React.useRef<Set<string>>(new Set());
@@ -127,9 +128,8 @@ export default function WhatsAppControlCenterPage() {
   };
 
   React.useEffect(() => {
-    fetchSession();
-    fetchChats();
-    fetchTemplates();
+    // Fast parallel fetch for all initial dashboard data
+    Promise.all([fetchSession(), fetchChats(), fetchTemplates()]);
 
     // Socket authenticates via httpOnly cookies (withCredentials: true)
     const socket = connectSocket();
@@ -267,27 +267,30 @@ export default function WhatsAppControlCenterPage() {
     }
   };
 
-  const handleSimulateConnect = async () => {
+  const handleClearChats = async () => {
+    if (!window.confirm("Are you sure you want to clear all conversations? This will remove all test and active messages from your inbox.")) {
+      return;
+    }
+    setIsClearingChats(true);
     try {
-      const res = await api.post("/whatsapp/session/simulate-connect");
-      setSessionStatus("connected");
-      setQrCode("");
-      if (res.data?.session) {
-        setSession(res.data.session);
-      }
-      await fetchChats();
+      await api.post("/whatsapp/chats/clear");
+      setContacts([]);
+      setSelectedContact(undefined);
+      setMessages({});
       addToast({
         type: "success",
-        title: "Sandbox Connected",
-        description: "Test WhatsApp session connected with sample customer conversations loaded."
+        title: "Inbox Cleared",
+        description: "All conversations and test messages have been removed successfully."
       });
     } catch (err: any) {
-      console.error("Failed to connect sandbox:", err);
+      console.error("Failed to clear conversations:", err);
       addToast({
         type: "error",
-        title: "Sandbox Error",
+        title: "Clear Failed",
         description: err.response?.data?.error || err.message
       });
+    } finally {
+      setIsClearingChats(false);
     }
   };
 
@@ -367,7 +370,6 @@ export default function WhatsAppControlCenterPage() {
         qrCode={qrCode}
         waMeUrl={waMeUrl}
         pairingCode={pairingCode}
-        onSimulateConnect={handleSimulateConnect}
         onPairPhone={handlePairPhone}
       />
 
@@ -396,6 +398,8 @@ export default function WhatsAppControlCenterPage() {
                 contacts={contacts}
                 selectedContactId={selectedContact?.id}
                 onSelectContact={handleSelectContact}
+                onClearChats={handleClearChats}
+                isClearing={isClearingChats}
               />
             </div>
             <div className="md:col-span-2">

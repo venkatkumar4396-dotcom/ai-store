@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, User2, MessageSquare } from "lucide-react";
+import { Search, User2, MessageSquare, Trash2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +13,11 @@ interface ChatListProps {
   contacts: Contact[];
   selectedContactId?: string;
   onSelectContact: (contact: Contact) => void;
+  onClearChats?: () => void;
+  isClearing?: boolean;
 }
 
-export function ChatList({ contacts, selectedContactId, onSelectContact }: ChatListProps) {
+export function ChatList({ contacts, selectedContactId, onSelectContact, onClearChats, isClearing }: ChatListProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const filteredContacts = contacts.filter((contact) =>
@@ -40,10 +42,23 @@ export function ChatList({ contacts, selectedContactId, onSelectContact }: ChatL
     <div className="flex flex-col h-full border border-white/10 bg-zinc-950/20 rounded-xl overflow-hidden text-white">
       {/* Search Header */}
       <div className="p-4 border-b border-white/10 space-y-3 shrink-0">
-        <h3 className="text-sm font-semibold flex items-center gap-2 text-indigo-400">
-          <MessageSquare className="h-4.5 w-4.5" />
-          Active Conversations
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold flex items-center gap-2 text-indigo-400">
+            <MessageSquare className="h-4.5 w-4.5" />
+            Active Conversations
+          </h3>
+          {onClearChats && contacts.length > 0 && (
+            <button
+              onClick={onClearChats}
+              disabled={isClearing}
+              title="Clear all conversations"
+              className="text-[11px] text-zinc-400 hover:text-rose-400 transition-colors flex items-center gap-1 px-2 py-0.5 rounded border border-white/10 hover:border-rose-500/30 bg-white/5 hover:bg-rose-500/10 disabled:opacity-50"
+            >
+              {isClearing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3 text-rose-400" />}
+              <span>Clear Inbox</span>
+            </button>
+          )}
+        </div>
         <div className="relative">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
           <Input
