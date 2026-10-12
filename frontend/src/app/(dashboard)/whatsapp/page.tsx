@@ -341,14 +341,14 @@ export default function WhatsAppControlCenterPage() {
   };
 
   return (
-    <div className="space-y-6 text-white">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex items-center gap-2">
-            WhatsApp Control Center <MessageCircle className="h-6 w-6 text-indigo-400" />
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
+            WhatsApp Control Center <MessageCircle className="h-6 w-6 text-indigo-500" />
           </h1>
-          <p className="text-zinc-400 text-sm mt-1">
+          <p className="text-sm mt-1">
             Link WhatsApp account, monitor automated chats, launch broadcasts, and examine messaging analytics.
           </p>
         </div>

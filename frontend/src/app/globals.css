@@ -22,30 +22,45 @@
 }
 
 .light {
-  /* High-Contrast Interactive Glassmorphic Light Theme */
-  --background: #f1f3f9;
-  --foreground: #0f172a;
-  --glass-bg: rgba(255, 255, 255, 0.88);
-  --glass-border: rgba(99, 102, 241, 0.12);
-  --glow-indigo: rgba(99, 102, 241, 0.08);
-  --glow-violet: rgba(139, 92, 246, 0.06);
-  --glow-cyan: rgba(6, 182, 212, 0.06);
-
-  /* Curated light palette mapping */
-  --color-zinc-950: rgba(255, 255, 255, 0.82);
-  --color-zinc-900: rgba(255, 255, 255, 0.9);
-  --color-zinc-800: #f1f5f9;
-  --color-zinc-700: #e2e8f0;
-  --color-zinc-600: #cbd5e1;
-  --color-zinc-500: #94a3b8;
-  --color-zinc-400: #475569; /* Slate-600 */
-  --color-zinc-300: #334155;
-  --color-zinc-200: #1e293b; /* Slate-800 for body */
-  --color-zinc-100: #0f172a; /* Slate-900 for headings */
-  --color-zinc-55: #ffffff;
+  --background: #f8fafc;
+  --foreground: #000000;
+  --glass-bg: #ffffff;
+  --glass-border: #cbd5e1;
+  --glow-indigo: rgba(99, 102, 241, 0.05);
+  --glow-violet: rgba(139, 92, 246, 0.04);
+  --glow-cyan: rgba(6, 182, 212, 0.04);
+  color: #000000 !important;
 }
 
-/* ═══════════ LIGHT MODE HIGH-CONTRAST CARD & LAYOUT OVERRIDES ═══════════ */
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* 1. BRIGHT THEME (.light): MAKE EVERY WORD SOLID READABLE BLACK         */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+.light body,
+.light #__next,
+.light main,
+.light div,
+.light section,
+.light article,
+.light aside,
+.light header,
+.light nav,
+.light form {
+  color: #000000;
+}
+
+/* All headings, paragraphs, spans, labels, and text elements in bright theme */
+.light h1, .light h2, .light h3, .light h4, .light h5, .light h6,
+.light p, .light span, .light label, .light td, .light th, .light li,
+.light strong, .light b, .light em, .light small,
+.light [class*="text-zinc-"],
+.light [class*="text-slate-"],
+.light .text-muted-foreground,
+.light .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-blue"]):not([class*="bg-gradient"]):not(.badge):not([data-badge]) {
+  color: #000000 !important;
+}
+
+/* Bright Theme card backgrounds and borders */
 .light .rounded-xl.border.bg-zinc-950\/40,
 .light .rounded-xl.border.bg-zinc-950\/60,
 .light .rounded-xl.border.bg-zinc-950\/20,
@@ -55,91 +70,125 @@
 .light .bg-zinc-900,
 .light [class*="bg-zinc-900/"] {
   background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
-  color: #1e293b !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08) !important;
+  color: #000000 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-/* Hover effect for interactive cards in light mode */
-.light .rounded-xl.border.bg-zinc-950\/40:hover,
-.light .rounded-xl.border.bg-zinc-950\/60:hover,
-.light .glass-card:hover {
-  transform: translateY(-2px);
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
+/* Sidebar texts, links, categories, and icons in Bright Theme */
+.light aside,
+.light aside * {
+  color: #000000 !important;
 }
 
-.light header {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  color: #0f172a !important;
-}
-
-/* Premium Light Sidebar in Light Mode */
 .light aside {
   background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 2px 0 8px 0 rgba(0, 0, 0, 0.03) !important;
-  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 2px 0 8px 0 rgba(0, 0, 0, 0.04) !important;
+}
+
+.light aside svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
 }
 
 .light aside a {
-  color: #475569 !important;
+  color: #000000 !important;
+  font-weight: 500;
 }
 
 .light aside a:hover {
-  color: #0f172a !important;
-  background-color: #f8fafc !important;
+  background-color: #f1f5f9 !important;
+  color: #000000 !important;
 }
 
-.light aside a[class*="text-indigo-400"],
-.light aside a.bg-indigo-600\/10 {
-  color: #4f46e5 !important;
-  background-color: rgba(99, 102, 241, 0.08) !important;
+.light aside a.bg-indigo-600\/10,
+.light aside a[class*="text-indigo-400"] {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  color: #4338ca !important;
+  font-weight: 700 !important;
 }
 
-/* Light mode typography guarantees — deep contrast, no invisible or washed-out letters */
-.light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
-  color: #0f172a !important;
+.light aside a.bg-indigo-600\/10 *,
+.light aside a[class*="text-indigo-400"] * {
+  color: #4338ca !important;
+  stroke: #4338ca !important;
 }
 
+/* Sidebar group headers (OVERVIEW, AI AGENTS, TOOLS, SYSTEM) */
+.light aside button {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* Sidebar category count chips (3, 2, 5) */
+.light aside span[class*="font-mono"] {
+  background-color: #e2e8f0 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Header in Bright Theme */
+.light header {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06) !important;
+  color: #000000 !important;
+}
+
+.light header * {
+  color: #000000 !important;
+}
+
+/* Tabs in Bright Theme */
+.light [role="tab"],
+.light [class*="TabsTrigger"],
+.light button[role="tab"] {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+.light [data-state=active],
+.light [class*="data-[state=active]"] {
+  background-color: #ffffff !important;
+  color: #4338ca !important;
+  font-weight: 700 !important;
+  border: 1px solid #94a3b8 !important;
+}
+
+/* Inputs, textareas, search fields in Bright Theme */
+.light input,
+.light textarea,
+.light select {
+  background-color: #ffffff !important;
+  border-color: #94a3b8 !important;
+  color: #000000 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #475569 !important;
+}
+
+.light input:focus,
+.light textarea:focus,
+.light select:focus {
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Gradient titles in Bright Theme */
 .light .gradient-text-white {
-  background: linear-gradient(135deg, #0f172a, #475569) !important;
+  background: linear-gradient(135deg, #000000, #334155) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
 
-/* Map white and light-zinc text to dark high-contrast slate in light mode */
-.light .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-blue"]):not([class*="bg-gradient"]):not(.badge):not([data-badge]) {
-  color: #0f172a !important;
-}
-
-.light .text-zinc-100 {
-  color: #0f172a !important;
-}
-
-.light .text-zinc-200 {
-  color: #1e293b !important;
-}
-
-.light .text-zinc-300 {
-  color: #334155 !important;
-}
-
-.light .text-zinc-400 {
-  color: #64748b !important;
-}
-
-.light .text-zinc-500 {
-  color: #64748b !important;
-}
-
-/* Ensure colored action buttons and badges always keep their crisp white text */
+/* Solid action buttons always keep their crisp white text */
 .light button[class*="bg-indigo"],
 .light button[class*="bg-emerald"],
 .light button[class*="bg-rose"],
@@ -158,45 +207,94 @@
 .light button[class*="bg-emerald"] *,
 .light button[class*="bg-rose"] *,
 .light button[class*="bg-violet"] *,
-.light button[class*="bg-blue"] * {
+.light button[class*="bg-blue"] *,
+.light .bg-indigo-600 *,
+.light .bg-emerald-600 *,
+.light .bg-rose-600 * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Hide background snow canvas in light mode to prevent blurry white specks over words */
+.light canvas.pointer-events-none {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* 2. BLACK THEME (:root:not(.light), .dark): MAKE EVERY WORD CRISP WHITE */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+:root:not(.light),
+.dark {
+  --background: #09090b;
+  --foreground: #ffffff;
+  color: #ffffff;
+}
+
+:root:not(.light) h1, :root:not(.light) h2, :root:not(.light) h3,
+:root:not(.light) h4, :root:not(.light) h5, :root:not(.light) h6,
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
   color: #ffffff !important;
 }
 
-/* Light Mode general tab list overrides */
-.light .bg-zinc-900\/40,
-.light .bg-zinc-900\/50,
-.light [class*="bg-zinc-900/"] {
-  background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
+:root:not(.light) p,
+:root:not(.light) label,
+:root:not(.light) .text-zinc-100,
+:root:not(.light) .text-zinc-200,
+:root:not(.light) .text-zinc-300,
+:root:not(.light) .text-zinc-400,
+:root:not(.light) .text-zinc-500,
+:root:not(.light) .text-slate-100,
+:root:not(.light) .text-slate-200,
+:root:not(.light) .text-slate-300,
+:root:not(.light) .text-slate-400,
+:root:not(.light) .text-slate-500,
+:root:not(.light) .text-muted-foreground,
+.dark p,
+.dark label,
+.dark .text-zinc-100,
+.dark .text-zinc-200,
+.dark .text-zinc-300,
+.dark .text-zinc-400,
+.dark .text-zinc-500,
+.dark .text-muted-foreground {
+  color: #ffffff !important;
 }
 
-.light [data-state=active],
-.light [class*="data-[state=active]"] {
-  background-color: #ffffff !important;
-  color: #4f46e5 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+:root:not(.light) aside a,
+:root:not(.light) aside span,
+:root:not(.light) aside p,
+:root:not(.light) aside button,
+.dark aside a,
+.dark aside span,
+.dark aside p,
+.dark aside button {
+  color: #ffffff !important;
 }
 
-.light input:not([data-auth-input]),
-.light textarea,
-.light select {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+:root:not(.light) aside svg,
+.dark aside svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
-.light input:not([data-auth-input]):focus,
-.light textarea:focus,
-.light select:focus {
-  background-color: #ffffff !important;
-  border-color: #6366f1 !important;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+:root:not(.light) [role="tab"],
+.dark [role="tab"] {
+  color: #ffffff !important;
 }
 
-/* Hide background particles in light mode to prevent white flecks blurring text */
-.light canvas.pointer-events-none {
-  display: none !important;
+:root:not(.light) input,
+:root:not(.light) textarea,
+.dark input,
+.dark textarea {
+  color: #ffffff !important;
+}
+
+:root:not(.light) input::placeholder,
+:root:not(.light) textarea::placeholder,
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8 !important;
 }
 
 /* Auth inputs allow natural text styling */

@@ -142,7 +142,7 @@ export function QRScanner({
               WhatsApp Integration <MessageCircle className="h-5 w-5 text-emerald-500" />
             </CardTitle>
             <CardDescription className="text-slate-500 dark:text-zinc-400 text-sm mt-1">
-              Link your WhatsApp device with the AI Assistant or use interactive test sandbox.
+              Link your WhatsApp device with the Nexora AI Assistant to manage automated chats.
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -207,7 +207,7 @@ export function QRScanner({
             <div className="space-y-1">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">WhatsApp Assistant is Offline</h3>
               <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
-                Launch the engine to generate your official WhatsApp Web pairing QR code or test with the sandbox simulator.
+                Launch the engine to generate your official WhatsApp Web pairing QR code or link via phone code.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">

@@ -39,7 +39,7 @@ export function ChatList({ contacts, selectedContactId, onSelectContact, onClear
   };
 
   return (
-    <div className="flex flex-col h-full border border-white/10 bg-zinc-950/20 rounded-xl overflow-hidden text-white">
+    <div className="flex flex-col h-full border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-950/20 rounded-xl overflow-hidden">
       {/* Search Header */}
       <div className="p-4 border-b border-white/10 space-y-3 shrink-0">
         <div className="flex items-center justify-between">
