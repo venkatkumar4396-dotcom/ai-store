@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 
 const getBaseURL = () => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
@@ -86,5 +86,71 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// In-memory cache for high-frequency GET routes to eliminate backend lag during agent switching
+const memoryCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL_MS = 30_000; // 30s cache
+
+const CACHEABLE_PREFIXES = [
+  "/user/me",
+  "/bots/instances/user",
+  "/bots",
+  "/analytics/dashboard",
+];
+
+const originalGet = api.get.bind(api);
+api.get = function <T = any, R = AxiosResponse<T>, D = any>(
+  url: string,
+  config?: AxiosRequestConfig<D> & { skipCache?: boolean }
+): Promise<R> {
+  const isCacheable =
+    !config?.skipCache &&
+    CACHEABLE_PREFIXES.some((prefix) => url === prefix || url.startsWith(prefix + "?"));
+
+  if (isCacheable) {
+    const cached = memoryCache.get(url);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      return Promise.resolve({
+        data: cached.data,
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: config || {},
+      } as unknown as R);
+    }
+  }
+
+  return originalGet(url, config).then((response: any) => {
+    if (isCacheable && response.status === 200) {
+      memoryCache.set(url, { data: response.data, timestamp: Date.now() });
+    }
+    return response;
+  });
+} as any;
+
+// Automatically clear cache on mutations to keep UI in sync
+const originalPost = api.post.bind(api);
+api.post = function (...args: any[]) {
+  memoryCache.clear();
+  return (originalPost as any)(...args);
+} as any;
+
+const originalPut = api.put.bind(api);
+api.put = function (...args: any[]) {
+  memoryCache.clear();
+  return (originalPut as any)(...args);
+} as any;
+
+const originalDelete = api.delete.bind(api);
+api.delete = function (...args: any[]) {
+  memoryCache.clear();
+  return (originalDelete as any)(...args);
+} as any;
+
+const originalPatch = api.patch.bind(api);
+api.patch = function (...args: any[]) {
+  memoryCache.clear();
+  return (originalPatch as any)(...args);
+} as any;
 
 export default api;

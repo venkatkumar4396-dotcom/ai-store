@@ -52,110 +52,154 @@
 .light .glass-card,
 .light [class*="bg-zinc-950/"],
 .light .bg-zinc-950,
-.light .bg-zinc-900 {
-  background-color: rgba(255, 255, 255, 0.82) !important;
-  border-color: rgba(99, 102, 241, 0.12) !important;
-  box-shadow: 
-    0 8px 30px rgba(0, 0, 0, 0.03),
-    0 1px 3px rgba(99, 102, 241, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+.light .bg-zinc-900,
+.light [class*="bg-zinc-900/"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
   color: #1e293b !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-/* Hover glow effect for interactive cards in light mode */
+/* Hover effect for interactive cards in light mode */
 .light .rounded-xl.border.bg-zinc-950\/40:hover,
 .light .rounded-xl.border.bg-zinc-950\/60:hover,
 .light .glass-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(99, 102, 241, 0.25) !important;
-  box-shadow: 
-    0 20px 40px -15px rgba(99, 102, 241, 0.12),
-    0 1px 3px rgba(99, 102, 241, 0.05) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
 }
 
 .light header {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  border-color: rgba(99, 102, 241, 0.08) !important;
-  box-shadow: 0 4px 30px -10px rgba(99, 102, 241, 0.08) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   color: #0f172a !important;
 }
 
 /* Premium Light Sidebar in Light Mode */
 .light aside {
-  background-color: rgba(255, 255, 255, 0.78) !important;
-  border-color: rgba(99, 102, 241, 0.08) !important;
-  box-shadow: 1px 0 15px -5px rgba(99, 102, 241, 0.05) !important;
-  color: #0f172a !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-}
-
-/* Ensure texts and navigation elements inside light sidebar match light typography */
-.light aside span,
-.light aside p,
-.light aside button,
-.light aside svg,
-.light aside div:not([class*="bg-gradient-to-tr"]) {
-  color: #475569 !important; /* slate-600 */
-}
-
-.light aside a:hover *,
-.light aside button:hover * {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 2px 0 8px 0 rgba(0, 0, 0, 0.03) !important;
   color: #0f172a !important;
 }
 
-.light aside [class*="bg-white/10"],
-.light aside [class*="bg-indigo-600/10"],
-.light aside a[href].bg-white\/10 {
+.light aside a {
+  color: #475569 !important;
+}
+
+.light aside a:hover {
+  color: #0f172a !important;
+  background-color: #f8fafc !important;
+}
+
+.light aside a[class*="text-indigo-400"],
+.light aside a.bg-indigo-600\/10 {
+  color: #4f46e5 !important;
   background-color: rgba(99, 102, 241, 0.08) !important;
 }
-.light aside [class*="bg-white/10"] *,
-.light aside [class*="bg-indigo-600/10"] * {
-  color: #4f46e5 !important; /* Brand indigo text for active items */
-  font-weight: 600 !important;
+
+/* Light mode typography guarantees — deep contrast, no invisible or washed-out letters */
+.light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
+  color: #0f172a !important;
+}
+
+.light .gradient-text-white {
+  background: linear-gradient(135deg, #0f172a, #475569) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Map white and light-zinc text to dark high-contrast slate in light mode */
+.light .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-blue"]):not([class*="bg-gradient"]):not(.badge):not([data-badge]) {
+  color: #0f172a !important;
+}
+
+.light .text-zinc-100 {
+  color: #0f172a !important;
+}
+
+.light .text-zinc-200 {
+  color: #1e293b !important;
+}
+
+.light .text-zinc-300 {
+  color: #334155 !important;
+}
+
+.light .text-zinc-400 {
+  color: #64748b !important;
+}
+
+.light .text-zinc-500 {
+  color: #64748b !important;
+}
+
+/* Ensure colored action buttons and badges always keep their crisp white text */
+.light button[class*="bg-indigo"],
+.light button[class*="bg-emerald"],
+.light button[class*="bg-rose"],
+.light button[class*="bg-violet"],
+.light button[class*="bg-blue"],
+.light [class*="bg-gradient-to-"] .text-white,
+.light .bg-indigo-600,
+.light .bg-indigo-500,
+.light .bg-emerald-600,
+.light .bg-rose-600,
+.light .bg-violet-600 {
+  color: #ffffff !important;
+}
+
+.light button[class*="bg-indigo"] *,
+.light button[class*="bg-emerald"] *,
+.light button[class*="bg-rose"] *,
+.light button[class*="bg-violet"] *,
+.light button[class*="bg-blue"] * {
+  color: #ffffff !important;
 }
 
 /* Light Mode general tab list overrides */
 .light .bg-zinc-900\/40,
 .light .bg-zinc-900\/50,
 .light [class*="bg-zinc-900/"] {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-  border-color: rgba(99, 102, 241, 0.1) !important;
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
 }
 
 .light [data-state=active],
 .light [class*="data-[state=active]"] {
   background-color: #ffffff !important;
   color: #4f46e5 !important;
-  box-shadow: 0 2px 8px -2px rgba(99, 102, 241, 0.12) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
-
 
 .light input:not([data-auth-input]),
 .light textarea,
 .light select {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(99, 102, 241, 0.15) !important;
-  color: #1e293b !important;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
 }
 
 .light input:not([data-auth-input]):focus,
 .light textarea:focus,
 .light select:focus {
   background-color: #ffffff !important;
-  border-color: rgba(99, 102, 241, 0.45) !important;
-  box-shadow: 
-    0 0 0 3px rgba(99, 102, 241, 0.12),
-    0 4px 12px rgba(99, 102, 241, 0.05) !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
 }
 
-/* Auth inputs allow natural text styling (dark or light as configured) */
+/* Hide background particles in light mode to prevent white flecks blurring text */
+.light canvas.pointer-events-none {
+  display: none !important;
+}
+
+/* Auth inputs allow natural text styling */
 input[data-text-black] {
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;

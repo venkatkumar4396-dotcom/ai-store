@@ -232,10 +232,8 @@ export function Sidebar() {
       >
         {/* Active indicator pill */}
         {isActive && (
-          <motion.div
-            layoutId="sidebar-active"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-500 rounded-full shadow-md shadow-indigo-500/50"
-            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+          <span
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-500 rounded-full shadow-md shadow-indigo-500/50 transition-all duration-150"
           />
         )}
 
@@ -249,14 +247,9 @@ export function Sidebar() {
         </span>
 
         {!isCollapsed && (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2, delay: 0.05 }}
-            className="flex-1 truncate"
-          >
+          <span className="flex-1 truncate transition-opacity duration-150">
             {item.label}
-          </motion.span>
+          </span>
         )}
 
         {/* Badge */}

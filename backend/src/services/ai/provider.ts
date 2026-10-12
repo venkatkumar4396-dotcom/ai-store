@@ -130,8 +130,8 @@ export class AIProviderRouter {
         logger.info(`AI Router: Using provider ${name}`);
         const startTime = Date.now();
 
-        // Wrap the call in a timeout (60 seconds) to prevent hanging
-        const timeoutMs = 60_000;
+        // Wrap the call in a fast timeout (12 seconds) to prevent backend hangs
+        const timeoutMs = 12_000;
         const response = await Promise.race([
           provider.chat(messages, options),
           new Promise<never>((_, reject) =>
