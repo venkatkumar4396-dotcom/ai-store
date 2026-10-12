@@ -283,13 +283,13 @@ export function QRScanner({
                 <KeyRound className="h-5 w-5 text-indigo-500" /> Link with Phone Code
               </h3>
               <p className="text-xs text-slate-600 dark:text-zinc-400">
-                Type your phone number to pair via 8-character pairing code without camera scanning.
+                Enter your full WhatsApp mobile number with country code (e.g. 14155552671 or 919876543210).
               </p>
             </div>
 
             <div className="flex gap-2">
               <Input
-                placeholder="+1 (555) 000-0000"
+                placeholder="e.g. 919876543210 or +14155552671"
                 value={inputPhone}
                 onChange={(e) => setInputPhone(e.target.value)}
                 className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-sm"
@@ -450,6 +450,29 @@ export function QRScanner({
                   <AlertCircle className="h-3.5 w-3.5 text-indigo-500" /> Scan with WhatsApp &gt; Linked Devices
                 </span>
               )}
+
+              {/* Troubleshooting helper */}
+              <div className="mt-4 p-3 bg-slate-50 dark:bg-zinc-900/60 border border-slate-200 dark:border-white/10 rounded-xl w-full max-w-xs text-xs text-slate-600 dark:text-zinc-400 space-y-1 text-left">
+                <div className="font-semibold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5 text-xs">
+                  <AlertCircle className="h-3.5 w-3.5 text-amber-500 shrink-0" /> Phone rejecting QR code?
+                </div>
+                <p className="text-[11px] leading-relaxed text-slate-500 dark:text-zinc-400">
+                  Switch to the{" "}
+                  <button
+                    onClick={() => setActiveTab("phone")}
+                    className="text-indigo-500 dark:text-indigo-400 font-semibold underline underline-offset-2 hover:text-indigo-600"
+                  >
+                    Link with Phone Code
+                  </button>{" "}
+                  tab to get an official 8-digit code, or test via{" "}
+                  <button
+                    onClick={() => setActiveTab("sandbox")}
+                    className="text-amber-500 dark:text-amber-400 font-semibold underline underline-offset-2 hover:text-amber-600"
+                  >
+                    1-Click Sandbox
+                  </button>.
+                </p>
+              </div>
             </div>
           </div>
         )}

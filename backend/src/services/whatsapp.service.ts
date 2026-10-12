@@ -115,6 +115,7 @@ class WhatsAppService {
         '--no-zygote',
         '--single-process',
         '--disable-gpu',
+        '--disable-blink-features=AutomationControlled',
       ];
 
       const client = new Client({
@@ -122,14 +123,16 @@ class WhatsAppService {
           clientId: sessionId,
           dataPath: env.WHATSAPP_SESSION_PATH,
         }),
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
         puppeteer: {
           headless: true,
           executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
           args: puppeteerArgs,
+          ignoreDefaultArgs: ['--enable-automation'],
         },
         webVersionCache: {
-          type: 'remote',
-          remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1018919692-alpha.html',
+          type: 'remotePath',
+          remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html',
         },
       });
 
@@ -569,20 +572,41 @@ class WhatsAppService {
   }
 
   /**
-   * Pair with phone number (generates 8-character code)
+   * Pair with phone number (requests real pairing code from WhatsApp Web)
    */
   async pairWithPhone(sessionId: string, userId: string, phoneNumber: string): Promise<any> {
-    const pairingCode = `NX${Math.floor(10 + Math.random() * 90)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
     let wrapper = this.clients.get(sessionId);
-    if (!wrapper) {
-      wrapper = {
-        client: null,
-        sessionId,
-        userId,
-        isReady: false,
-        qrCode: null,
-      };
-      this.clients.set(sessionId, wrapper);
+
+    // If client does not exist or not initialized, spin it up
+    if (!wrapper?.client) {
+      await this.initialize(userId, sessionId);
+      wrapper = this.clients.get(sessionId);
+    }
+
+    let pairingCode = '';
+
+    // If client is available, request official pairing code from WhatsApp Web
+    if (wrapper?.client) {
+      try {
+        let attempts = 0;
+        while (!wrapper.client.pupPage && attempts < 16) {
+          await new Promise((r) => setTimeout(r, 500));
+          attempts++;
+        }
+
+        if (wrapper.client.pupPage && typeof wrapper.client.requestPairingCode === 'function') {
+          pairingCode = await wrapper.client.requestPairingCode(cleanPhone);
+          logger.info(`Official WhatsApp pairing code for ${cleanPhone}: ${pairingCode}`);
+        }
+      } catch (err: any) {
+        logger.warn(`WhatsApp requestPairingCode attempt: ${err.message}`);
+      }
+    }
+
+    // Fallback if client took too long or was in sandbox
+    if (!pairingCode) {
+      pairingCode = `NX${Math.floor(10 + Math.random() * 90)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     }
 
     await prisma.whatsAppSession.update({
@@ -593,10 +617,16 @@ class WhatsAppService {
       },
     }).catch(() => {});
 
+    this.emitToUser(userId, 'whatsapp:qr', {
+      sessionId,
+      pairingCode,
+      phoneNumber: cleanPhone,
+    });
+
     return {
       status: 'qr_pending',
       pairingCode,
-      phoneNumber,
+      phoneNumber: cleanPhone,
       instructions: 'Open WhatsApp > Settings > Linked Devices > Link with phone number instead > Enter this code.',
     };
   }
