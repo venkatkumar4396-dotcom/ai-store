@@ -29,8 +29,8 @@ export function ParticleBackground() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const isLightMode = document.documentElement.classList.contains("light");
-    if (!enabled || isLightMode) {
+    const isDarkMode = document.documentElement.classList.contains("dark");
+    if (!enabled || !isDarkMode) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       return;
     }

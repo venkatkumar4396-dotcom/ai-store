@@ -12,14 +12,37 @@
 .light {
   --background: #f8fafc;
   --foreground: #0f172a;
-  --accent-primary: 99, 102, 241;     /* indigo-500 */
+  
+  /* STEP 1 DESIGN TOKENS */
+  --text-strong: #0F172A;
+  --text-body: #334155;
+  --text-muted: #475569;
+  
+  --bg: #FFFFFF;
+  --bg-subtle: #F8FAFC;
+  --card: #FFFFFF;
+  
+  --border: rgba(15, 23, 42, 0.10);
+  --border-strong: rgba(15, 23, 42, 0.16);
+  
+  --primary: #4F46E5;
+  --primary-hover: #4338CA;
+  --primary-active: #3730A3;
+  --primary-soft: #EEF2FF;
+  --primary-border: #C7D2FE;
+  
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 24px rgba(15, 23, 42, 0.08), 0 24px 48px rgba(79, 70, 229, 0.12);
+
+  --accent-primary: 79, 70, 229;      /* indigo-600 */
   --accent-secondary: 139, 92, 246;   /* violet-500 */
-  --accent-tertiary: 6, 182, 212;     /* cyan-500 */
+  --accent-tertiary: 37, 99, 235;     /* blue-600 */
   --glass-bg: #ffffff;
   --glass-border: #cbd5e1;
-  --glow-indigo: rgba(99, 102, 241, 0.05);
+  --glow-indigo: rgba(79, 70, 229, 0.05);
   --glow-violet: rgba(139, 92, 246, 0.04);
-  --glow-cyan: rgba(6, 182, 212, 0.04);
+  --glow-cyan: rgba(37, 99, 235, 0.04);
   color-scheme: light;
 }
 
@@ -272,6 +295,40 @@ button[class*="bg-indigo"] *,
 button[class*="bg-emerald"] *,
 button[class*="bg-rose"] * {
   color: #ffffff;
+}
+
+/* Token Shadow Utilities */
+.shadow-token-sm {
+  box-shadow: var(--shadow-sm) !important;
+}
+.shadow-token-md {
+  box-shadow: var(--shadow-md) !important;
+}
+.shadow-token-lg {
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Accessible focus-visible rings */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #4F46E5 !important;
+  outline-offset: 2px !important;
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Hide background snow canvas in light mode to prevent blurry specks */
