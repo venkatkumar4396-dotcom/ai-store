@@ -8,59 +8,79 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-:root {
-  --background: #05050f;
-  --foreground: #f4f4f5;
+:root,
+.light {
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --accent-primary: 99, 102, 241;     /* indigo-500 */
   --accent-secondary: 139, 92, 246;   /* violet-500 */
   --accent-tertiary: 6, 182, 212;     /* cyan-500 */
-  --glass-bg: rgba(9, 9, 20, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glow-indigo: rgba(99, 102, 241, 0.15);
-  --glow-violet: rgba(139, 92, 246, 0.12);
-  --glow-cyan: rgba(6, 182, 212, 0.10);
-}
-
-.light {
-  --background: #f8fafc;
-  --foreground: #000000;
   --glass-bg: #ffffff;
   --glass-border: #cbd5e1;
   --glow-indigo: rgba(99, 102, 241, 0.05);
   --glow-violet: rgba(139, 92, 246, 0.04);
   --glow-cyan: rgba(6, 182, 212, 0.04);
-  color: #000000 !important;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #09090b;
+  --foreground: #f8fafc;
+  --glass-bg: rgba(9, 9, 20, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glow-indigo: rgba(99, 102, 241, 0.15);
+  --glow-violet: rgba(139, 92, 246, 0.12);
+  --glow-cyan: rgba(6, 182, 212, 0.10);
+  color-scheme: dark;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════ */
-/* 1. BRIGHT THEME (.light): MAKE EVERY WORD SOLID READABLE BLACK         */
+/* 1. BRIGHT THEME (DEFAULT & .light): CRISP, HIGH-CONTRAST READABILITY   */
 /* ═══════════════════════════════════════════════════════════════════════ */
 
-.light body,
-.light #__next,
-.light main,
-.light div,
-.light section,
-.light article,
-.light aside,
-.light header,
-.light nav,
-.light form {
-  color: #000000;
+:root,
+.light {
+  color: #0f172a;
 }
 
-/* All headings, paragraphs, spans, labels, and text elements in bright theme */
-.light h1, .light h2, .light h3, .light h4, .light h5, .light h6,
-.light p, .light span, .light label, .light td, .light th, .light li,
-.light strong, .light b, .light em, .light small,
-.light [class*="text-zinc-"],
-.light [class*="text-slate-"],
-.light .text-muted-foreground,
-.light .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-blue"]):not([class*="bg-gradient"]):not(.badge):not([data-badge]) {
-  color: #000000 !important;
+.light body {
+  background-color: var(--background);
+  color: #0f172a;
 }
 
-/* Bright Theme card backgrounds and borders */
+/* Headings in bright theme always have strong dark slate styling */
+.light h1:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]),
+.light h2:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]),
+.light h3:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]),
+.light h4:not(button):not(button *),
+.light h5:not(button):not(button *),
+.light h6:not(button):not(button *) {
+  color: #0f172a !important;
+}
+
+/* Paragraphs, descriptions and spans in bright theme */
+.light p:not(button *):not([class*="text-emerald"]):not([class*="text-amber"]):not([class*="text-rose"]):not([class*="text-indigo"]):not([class*="text-cyan"]),
+.light label:not(button *) {
+  color: #334155 !important;
+}
+
+/* Adapt zinc/white text classes in bright theme so words never wash out */
+.light .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-blue"]):not([class*="bg-gradient"]):not(.badge):not([data-badge]),
+.light .text-zinc-100:not(button *),
+.light .text-zinc-200:not(button *) {
+  color: #0f172a !important;
+}
+
+.light .text-zinc-300:not(button *),
+.light .text-zinc-400:not(button *) {
+  color: #475569 !important;
+}
+
+.light .text-zinc-500:not(button *) {
+  color: #64748b !important;
+}
+
+/* Card backgrounds and borders in bright theme */
 .light .rounded-xl.border.bg-zinc-950\/40,
 .light .rounded-xl.border.bg-zinc-950\/60,
 .light .rounded-xl.border.bg-zinc-950\/20,
@@ -72,36 +92,26 @@
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08) !important;
-  color: #000000 !important;
+  color: #0f172a !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-/* Sidebar texts, links, categories, and icons in Bright Theme */
-.light aside,
-.light aside * {
-  color: #000000 !important;
-}
-
+/* Sidebar in Bright Theme */
 .light aside {
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
   box-shadow: 2px 0 8px 0 rgba(0, 0, 0, 0.04) !important;
 }
 
-.light aside svg {
-  color: #000000 !important;
-  stroke: #000000 !important;
-}
-
 .light aside a {
-  color: #000000 !important;
+  color: #1e293b !important;
   font-weight: 500;
 }
 
 .light aside a:hover {
   background-color: #f1f5f9 !important;
-  color: #000000 !important;
+  color: #0f172a !important;
 }
 
 .light aside a.bg-indigo-600\/10,
@@ -117,16 +127,14 @@
   stroke: #4338ca !important;
 }
 
-/* Sidebar group headers (OVERVIEW, AI AGENTS, TOOLS, SYSTEM) */
 .light aside button {
-  color: #000000 !important;
+  color: #334155 !important;
   font-weight: 700 !important;
 }
 
-/* Sidebar category count chips (3, 2, 5) */
 .light aside span[class*="font-mono"] {
   background-color: #e2e8f0 !important;
-  color: #000000 !important;
+  color: #1e293b !important;
   font-weight: 700 !important;
   border-color: #cbd5e1 !important;
 }
@@ -136,18 +144,14 @@
   background-color: rgba(255, 255, 255, 0.98) !important;
   border-color: #cbd5e1 !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06) !important;
-  color: #000000 !important;
-}
-
-.light header * {
-  color: #000000 !important;
+  color: #0f172a !important;
 }
 
 /* Tabs in Bright Theme */
 .light [role="tab"],
 .light [class*="TabsTrigger"],
 .light button[role="tab"] {
-  color: #000000 !important;
+  color: #334155 !important;
   font-weight: 600 !important;
 }
 
@@ -159,142 +163,106 @@
   border: 1px solid #94a3b8 !important;
 }
 
-/* Inputs, textareas, search fields in Bright Theme */
-.light input,
+/* Inputs in Bright Theme */
+.light input:not([type="checkbox"]):not([type="radio"]),
 .light textarea,
 .light select {
   background-color: #ffffff !important;
-  border-color: #94a3b8 !important;
-  color: #000000 !important;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
 }
 
 .light input::placeholder,
 .light textarea::placeholder {
-  color: #475569 !important;
+  color: #94a3b8 !important;
 }
 
 .light input:focus,
 .light textarea:focus,
 .light select:focus {
   border-color: #4f46e5 !important;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
 }
 
 /* Gradient titles in Bright Theme */
 .light .gradient-text-white {
-  background: linear-gradient(135deg, #000000, #334155) !important;
+  background: linear-gradient(135deg, #0f172a, #334155) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
 
-/* Solid action buttons always keep their crisp white text */
-.light button[class*="bg-indigo"],
-.light button[class*="bg-emerald"],
-.light button[class*="bg-rose"],
-.light button[class*="bg-violet"],
-.light button[class*="bg-blue"],
-.light [class*="bg-gradient-to-"] .text-white,
-.light .bg-indigo-600,
-.light .bg-indigo-500,
-.light .bg-emerald-600,
-.light .bg-rose-600,
-.light .bg-violet-600 {
+/* Solid action buttons keep white text */
+button[class*="bg-indigo-600"],
+button[class*="bg-indigo-700"],
+button[class*="bg-indigo-500"],
+button[class*="bg-emerald"],
+button[class*="bg-rose"],
+button[class*="bg-violet"],
+.bg-indigo-600,
+.bg-indigo-700 {
   color: #ffffff !important;
 }
 
-.light button[class*="bg-indigo"] *,
-.light button[class*="bg-emerald"] *,
-.light button[class*="bg-rose"] *,
-.light button[class*="bg-violet"] *,
-.light button[class*="bg-blue"] *,
-.light .bg-indigo-600 *,
-.light .bg-emerald-600 *,
-.light .bg-rose-600 * {
-  color: #ffffff !important;
-  stroke: #ffffff !important;
+button[class*="bg-indigo"] *,
+button[class*="bg-emerald"] *,
+button[class*="bg-rose"] * {
+  color: #ffffff;
 }
 
-/* Hide background snow canvas in light mode to prevent blurry white specks over words */
+/* Hide background snow canvas in light mode to prevent blurry specks */
 .light canvas.pointer-events-none {
   display: none !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════ */
-/* 2. BLACK THEME (:root:not(.light), .dark): MAKE EVERY WORD CRISP WHITE */
+/* 2. DARK THEME (.dark ONLY - NO DANGEROUS UNGUARDED OVERRIDES)           */
 /* ═══════════════════════════════════════════════════════════════════════ */
 
-:root:not(.light),
 .dark {
-  --background: #09090b;
-  --foreground: #ffffff;
+  color: #f8fafc;
+}
+
+.dark body {
+  background-color: var(--background);
+  color: #f8fafc;
+}
+
+.dark h1:not([class*="text-slate-900"]):not([class*="text-slate-800"]),
+.dark h2:not([class*="text-slate-900"]):not([class*="text-slate-800"]),
+.dark h3:not([class*="text-slate-900"]):not([class*="text-slate-800"]),
+.dark h4:not([class*="text-slate-900"]):not([class*="text-slate-800"]) {
   color: #ffffff;
 }
 
-:root:not(.light) h1, :root:not(.light) h2, :root:not(.light) h3,
-:root:not(.light) h4, :root:not(.light) h5, :root:not(.light) h6,
-.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-  color: #ffffff !important;
+.dark p:not([class*="text-slate-"]):not([class*="text-zinc-"]),
+.dark label:not([class*="text-slate-"]) {
+  color: #cbd5e1;
 }
 
-:root:not(.light) p,
-:root:not(.light) label,
-:root:not(.light) .text-zinc-100,
-:root:not(.light) .text-zinc-200,
-:root:not(.light) .text-zinc-300,
-:root:not(.light) .text-zinc-400,
-:root:not(.light) .text-zinc-500,
-:root:not(.light) .text-slate-100,
-:root:not(.light) .text-slate-200,
-:root:not(.light) .text-slate-300,
-:root:not(.light) .text-slate-400,
-:root:not(.light) .text-slate-500,
-:root:not(.light) .text-muted-foreground,
-.dark p,
-.dark label,
-.dark .text-zinc-100,
-.dark .text-zinc-200,
-.dark .text-zinc-300,
-.dark .text-zinc-400,
-.dark .text-zinc-500,
-.dark .text-muted-foreground {
-  color: #ffffff !important;
-}
-
-:root:not(.light) aside a,
-:root:not(.light) aside span,
-:root:not(.light) aside p,
-:root:not(.light) aside button,
 .dark aside a,
 .dark aside span,
 .dark aside p,
 .dark aside button {
-  color: #ffffff !important;
+  color: #f8fafc;
 }
 
-:root:not(.light) aside svg,
 .dark aside svg {
-  color: #ffffff !important;
-  stroke: #ffffff !important;
+  color: #f8fafc;
+  stroke: #f8fafc;
 }
 
-:root:not(.light) [role="tab"],
 .dark [role="tab"] {
-  color: #ffffff !important;
+  color: #f8fafc;
 }
 
-:root:not(.light) input,
-:root:not(.light) textarea,
-.dark input,
-.dark textarea {
-  color: #ffffff !important;
+.dark input:not([data-text-black]):not([class*="text-slate-900"]),
+.dark textarea:not([class*="text-slate-900"]) {
+  color: #ffffff;
 }
 
-:root:not(.light) input::placeholder,
-:root:not(.light) textarea::placeholder,
 .dark input::placeholder,
 .dark textarea::placeholder {
-  color: #94a3b8 !important;
+  color: #94a3b8;
 }
 
 /* Auth inputs allow natural text styling */
@@ -302,36 +270,6 @@ input[data-text-black] {
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
   caret-color: #000000 !important;
-}
-
-/* ═══════════ AUTH PAGES & DARK CARDS — GUARANTEED BRIGHT CRISP TEXT ═══════════ */
-.auth-page,
-.auth-root,
-[data-theme="dark"],
-.bg-\[\#050510\],
-.bg-\[\#05050f\] {
-  color: #f8fafc !important;
-}
-
-.auth-page h1,
-.auth-page h2,
-.auth-page h3,
-.auth-page .text-white,
-.bg-\[\#050510\] .text-white,
-.bg-\[\#05050f\] .text-white {
-  color: #ffffff !important;
-}
-
-.auth-page p,
-.auth-page span,
-.bg-\[\#050510\] p,
-.bg-\[\#050510\] span:not([class*="text-indigo"]):not([class*="text-emerald"]):not([class*="text-amber"]):not([class*="text-rose"]):not([class*="text-cyan"]) {
-  color: #cbd5e1;
-}
-
-.auth-page label,
-.bg-\[\#050510\] label {
-  color: #94a3b8 !important;
 }
 
 /* Light mode indicator badge contrast enhancements */
@@ -994,15 +932,9 @@ body {
   }
 }
 
-/* ═══════════ AUTH PAGE — UNIFORM DARK BACKGROUND ═══════════ */
-
-/* Force body to stay dark on auth pages so no bright patches appear */
-body:has(.auth-page-root) {
-  background-color: #05050f !important;
-}
+/* ═══════════ AUTH PAGE ═══════════ */
 
 .auth-page-root {
-  background-color: #05050f;
   min-height: 100dvh;
   width: 100%;
 }

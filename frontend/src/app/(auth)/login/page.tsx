@@ -91,29 +91,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-900 text-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-slate-50 text-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Ambient glowing backdrop */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/20 blur-[120px] rounded-full" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-violet-600/20 blur-[120px] rounded-full" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/10 blur-[120px] rounded-full" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-violet-600/10 blur-[120px] rounded-full" />
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
-        className="w-full max-w-[420px] bg-slate-950/80 backdrop-blur-xl rounded-3xl shadow-2xl p-7 sm:p-9 relative z-10 border border-slate-800"
+        className="w-full max-w-[420px] bg-white rounded-3xl shadow-xl shadow-slate-200/60 p-7 sm:p-9 relative z-10 border border-slate-200"
       >
         {/* Brand Header */}
         <div className="text-center mb-7">
           <Link href="/" className="inline-flex items-center gap-2.5 group mb-4">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+            <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 group-hover:scale-105 transition-transform">
               <Sparkles className="h-5 w-5" />
             </div>
-            <span className="font-extrabold text-2xl text-white tracking-tight">Nexora</span>
+            <div className="text-left">
+              <span className="font-bold text-2xl text-slate-900 tracking-tight">Nexora</span>
+              <p className="text-[11px] text-slate-500 -mt-0.5">Autonomous AI Workspace</p>
+            </div>
           </Link>
-          <h1 className="text-xl font-bold text-white tracking-tight">Welcome back</h1>
-          <p className="text-xs text-slate-400 mt-1">Sign in to your intelligent workspace</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Welcome back</h1>
+          <p className="text-xs text-slate-500 mt-1">Sign in to your intelligent workspace</p>
         </div>
 
         {/* Error notification banner */}
@@ -125,8 +128,8 @@ export default function LoginPage() {
               exit={{ opacity: 0, height: 0 }}
               className="mb-5 overflow-hidden"
             >
-              <div className="p-3 bg-rose-950/60 border border-rose-800 text-rose-300 rounded-xl text-xs flex items-start gap-2.5">
-                <AlertCircle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs flex items-start gap-2.5 font-medium">
+                <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
                 <span className="leading-relaxed">{error}</span>
               </div>
             </motion.div>
@@ -136,7 +139,7 @@ export default function LoginPage() {
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="login-email" className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            <Label htmlFor="login-email" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
               Email Address
             </Label>
             <div className="relative">
@@ -147,7 +150,7 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-11 bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                className="pl-10 h-11 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 text-sm font-medium"
                 required
                 autoComplete="email"
               />
@@ -156,7 +159,7 @@ export default function LoginPage() {
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="login-password" className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              <Label htmlFor="login-password" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Password
               </Label>
             </div>
@@ -168,7 +171,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 h-11 bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                className="pl-10 h-11 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 text-sm font-medium"
                 required
                 autoComplete="current-password"
               />
@@ -179,7 +182,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-sm transition-all shadow-lg shadow-indigo-600/25 active:scale-[0.99] mt-2 cursor-pointer"
+            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition-all shadow-md shadow-indigo-600/20 active:scale-[0.99] mt-2 cursor-pointer"
           >
             {isLoading ? (
               <span className="flex items-center gap-2 justify-center">
@@ -194,18 +197,18 @@ export default function LoginPage() {
         </form>
 
         {/* Demo Credentials Pill */}
-        <div className="mt-6 pt-5 border-t border-slate-800 space-y-3 text-center">
+        <div className="mt-6 pt-5 border-t border-slate-200 space-y-3 text-center">
           <button
             type="button"
             onClick={handleQuickDemo}
-            className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors cursor-pointer"
           >
-            <KeyRound className="h-3.5 w-3.5 text-indigo-400" /> Autofill Demo Credentials
+            <KeyRound className="h-3.5 w-3.5 text-indigo-600" /> Autofill Demo Credentials
           </button>
 
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
+            <Link href="/register" className="font-semibold text-indigo-600 hover:text-indigo-800 transition-colors underline underline-offset-4">
               Sign up
             </Link>
           </p>

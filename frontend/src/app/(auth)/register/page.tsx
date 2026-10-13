@@ -237,10 +237,10 @@ export default function RegisterPage() {
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
                 Free tier included · No credit card required
               </div>
-              <h1 className="text-3xl xl:text-4xl font-extrabold text-slate-900 leading-tight">
+              <h1 className="text-3xl xl:text-4xl font-extrabold text-slate-900 leading-tight" style={{ color: "#0f172a" }}>
                 Create your workspace in seconds.
               </h1>
-              <p className="text-slate-600 text-sm xl:text-base leading-relaxed">
+              <p className="text-slate-600 text-sm xl:text-base leading-relaxed" style={{ color: "#334155" }}>
                 Join thousands using Nexora for smart travel bookings, automated stock analysis, customer support, and document summarization.
               </p>
             </div>
@@ -256,20 +256,20 @@ export default function RegisterPage() {
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-sm">
                 <span className="text-xl leading-none">{item.icon}</span>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">{item.title}</div>
-                  <div className="text-[11px] text-slate-500">{item.desc}</div>
+                  <div className="text-xs font-bold text-slate-900" style={{ color: "#0f172a" }}>{item.title}</div>
+                  <div className="text-[11px] text-slate-500" style={{ color: "#64748b" }}>{item.desc}</div>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Trust marks */}
-          <div className="flex items-center gap-6 pt-2 border-t border-slate-200 text-xs font-medium text-slate-500">
-            <span className="flex items-center gap-1.5">
+          <div className="flex items-center gap-6 pt-2 border-t border-slate-200 text-xs font-medium text-slate-600">
+            <span className="flex items-center gap-1.5" style={{ color: "#475569" }}>
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
               Secure Data Encryption
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5" style={{ color: "#475569" }}>
               <Zap className="h-4 w-4 text-amber-600" />
               Fast 1-click Setup
             </span>

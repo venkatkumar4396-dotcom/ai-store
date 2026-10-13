@@ -15,9 +15,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<Theme>("light");
 
   React.useEffect(() => {
-    // Check local storage or system preferences on mount, defaulting to light (bright) theme
+    // Check local storage on mount, strictly defaulting to light (bright) theme
     const savedTheme = localStorage.getItem("nexusforge_theme") as Theme | null;
-    const initialTheme = savedTheme || "light";
+    const initialTheme = savedTheme === "dark" ? "dark" : "light";
     
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(initialTheme);

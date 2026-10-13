@@ -112,8 +112,8 @@ function SectionHeading({ badge, title, subtitle }: { badge?: string; title: str
           {badge}
         </Badge>
       )}
-      <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">{title}</h2>
-      <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
+      <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">{title}</h2>
+      <p className="text-slate-600 dark:text-zinc-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
     </motion.div>
   );
 }
@@ -128,30 +128,30 @@ export default function LandingPage() {
       <ParticleBackground />
 
       {/* ═══════════════ HEADER ═══════════════ */}
-      <header className="border-b border-white/5 bg-zinc-950/60 backdrop-blur-xl sticky top-0 z-50 px-4 md:px-8 h-16 flex items-center justify-between">
+      <header className="border-b border-slate-200 dark:border-white/5 bg-white/90 dark:bg-zinc-950/60 backdrop-blur-xl sticky top-0 z-50 px-4 md:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 via-violet-500 to-cyan-500 flex items-center justify-center font-bold shadow-lg shadow-indigo-600/20">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 via-violet-500 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/20">
             N
           </div>
-          <span className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-white via-zinc-200 to-zinc-400">
+          <span className="font-bold text-lg text-slate-900 dark:text-white">
             Nexora
           </span>
         </div>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8 text-sm text-zinc-400 font-medium">
-          <a href="#agents" className="hover:text-white transition-colors">Agents</a>
-          <a href="#features" className="hover:text-white transition-colors">Features</a>
-          <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
-          <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-          <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+        <nav className="hidden md:flex items-center gap-8 text-sm text-slate-600 dark:text-zinc-400 font-medium">
+          <a href="#agents" className="hover:text-slate-900 dark:hover:text-white transition-colors">Agents</a>
+          <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">Features</a>
+          <a href="#how-it-works" className="hover:text-slate-900 dark:hover:text-white transition-colors">How It Works</a>
+          <a href="#pricing" className="hover:text-slate-900 dark:hover:text-white transition-colors">Pricing</a>
+          <a href="#faq" className="hover:text-slate-900 dark:hover:text-white transition-colors">FAQ</a>
         </nav>
 
         <div className="flex items-center gap-2.5">
-          <Button variant="ghost" className="text-zinc-400 hover:text-white text-sm font-medium hidden sm:inline-flex" asChild>
+          <Button variant="ghost" className="text-slate-700 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white text-sm font-medium hidden sm:inline-flex" asChild>
             <Link href="/login">Log In</Link>
           </Button>
-          <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm shadow-md shadow-indigo-500/10 hidden sm:inline-flex" asChild>
+          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm shadow-md shadow-indigo-500/10 hidden sm:inline-flex" asChild>
             <Link href="/register">Get Started Free</Link>
           </Button>
 
@@ -160,7 +160,7 @@ export default function LandingPage() {
             variant="ghost"
             size="icon"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-zinc-400 hover:text-white h-9 w-9"
+            className="md:hidden text-slate-700 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white h-9 w-9"
           >
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -212,24 +212,24 @@ export default function LandingPage() {
             <Sparkles className="h-3 w-3 mr-1.5 animate-pulse" /> Premium AI Agent Platform
           </Badge>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.05]">
             Intelligence,{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-600 dark:from-indigo-400 dark:via-violet-400 dark:to-cyan-400">
               Automated.
             </span>
           </h1>
 
-          <p className="text-zinc-400 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
+          <p className="text-slate-600 dark:text-zinc-400 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
             Deploy powerful AI agents that book travel, analyze stocks, accelerate careers, boost productivity, and process documents — all from one platform.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 pt-4">
-            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 gap-2 font-semibold h-12 px-8 btn-premium" asChild>
+            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 gap-2 font-semibold h-12 px-8 btn-premium" asChild>
               <Link href="/register">
                 Start Free <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-white/10 hover:bg-white/5 text-zinc-300 h-12 px-8" asChild>
+            <Button size="lg" variant="outline" className="border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-zinc-300 h-12 px-8" asChild>
               <Link href="#agents">
                 Explore Agents
               </Link>
@@ -237,7 +237,7 @@ export default function LandingPage() {
           </div>
 
           {/* Trust badges */}
-          <div className="flex flex-wrap justify-center gap-6 pt-6 text-xs text-zinc-500">
+          <div className="flex flex-wrap justify-center gap-6 pt-6 text-xs text-slate-500 dark:text-zinc-500">
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> No credit card required</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> 9+ AI agents included</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Self-hostable</span>
@@ -246,14 +246,14 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ STATS RIBBON ═══════════════ */}
-      <section className="border-y border-white/5 bg-zinc-950/40 backdrop-blur-sm py-10 px-4 z-10">
+      <section className="border-y border-slate-200 dark:border-white/5 bg-slate-50/80 dark:bg-zinc-950/40 backdrop-blur-sm py-10 px-4 z-10">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {STATS.map((stat, idx) => (
             <div key={idx} className="space-y-1">
-              <span className="text-3xl md:text-4xl font-extrabold text-white">
+              <span className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} />
               </span>
-              <p className="text-zinc-500 text-xs md:text-sm font-medium">{stat.label}</p>
+              <p className="text-slate-500 dark:text-zinc-500 text-xs md:text-sm font-medium">{stat.label}</p>
             </div>
           ))}
         </div>
