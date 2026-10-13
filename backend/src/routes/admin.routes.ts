@@ -4,8 +4,28 @@ import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
-// Secure all admin endpoints - requires active login AND admin role
-router.use(authenticate, authorize('admin'));
+const AUTHORIZED_ADMIN_EMAIL = 'kumar@nexora.ai';
+
+// Middleware: Strictly enforce that only kumar@nexora.ai can access the admin panel and monitor databases
+const requireKumarAdmin = (req: Request, res: Response, next: NextFunction): void => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+
+  const userEmail = req.user.email?.toLowerCase().trim();
+  if (req.user.role !== 'admin' || userEmail !== AUTHORIZED_ADMIN_EMAIL) {
+    res.status(403).json({
+      error: 'Access denied. Only the authorized administrator (kumar@nexora.ai) can access the admin console and monitor databases.',
+    });
+    return;
+  }
+
+  next();
+};
+
+// Secure all admin endpoints - requires active login AND strictly kumar@nexora.ai with admin role
+router.use(authenticate, requireKumarAdmin);
 
 /**
  * @route   GET /api/admin/stats

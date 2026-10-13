@@ -145,8 +145,18 @@ export function Sidebar() {
     Travel: false,
     Productivity: false,
   });
-  const { isBotDeployed, isLoading: isBotsLoading } = useDeployedBots();
-  const [profile, setProfile] = React.useState({ name: "User", email: "" });
+  const [profile, setProfile] = React.useState<{ name: string; email: string }>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("nexora_user");
+        if (stored) {
+          const u = JSON.parse(stored);
+          return { name: u.name || "User", email: u.email || "" };
+        }
+      } catch {}
+    }
+    return { name: "User", email: "" };
+  });
 
   // Auto-expand category if active route is inside it
   React.useEffect(() => {
@@ -173,7 +183,15 @@ export function Sidebar() {
           setProfile({ name: res.data.name || "User", email: res.data.email || "" });
         }
       } catch {
-        // silently fail — keep default
+        if (typeof window !== "undefined") {
+          try {
+            const stored = localStorage.getItem("nexora_user");
+            if (stored) {
+              const u = JSON.parse(stored);
+              setProfile({ name: u.name || "User", email: u.email || "" });
+            }
+          } catch {}
+        }
       }
     };
     fetchProfile();
@@ -194,9 +212,11 @@ export function Sidebar() {
     setExpandedCategories((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
-  /** Check if a nav item should be visible based on deployment status */
-  /** All nav items always visible for immediate workspace access */
-  const isNavItemVisible = (_href: string): boolean => {
+  /** Only kumar@nexora.ai can see and access the Admin Console */
+  const isNavItemVisible = (href: string): boolean => {
+    if (href === "/admin") {
+      return profile.email?.toLowerCase().trim() === "kumar@nexora.ai";
+    }
     return true;
   };
 

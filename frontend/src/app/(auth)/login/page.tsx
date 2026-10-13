@@ -18,8 +18,8 @@ export default function LoginPage() {
   const [error, setError] = React.useState("");
 
   const handleQuickDemo = () => {
-    setEmail("admin@nexora.ai");
-    setPassword("ChangeMeImmediately!123");
+    setEmail("kumar@nexora.ai");
+    setPassword("kumar@4396");
     setError("");
   };
 
@@ -68,7 +68,7 @@ export default function LoginPage() {
         console.warn("Backend database offline or sleeping. Activating client fallback session.");
         if (typeof window !== "undefined") {
           localStorage.setItem("nexora_logged_in", "true");
-          const role = cleanEmail.includes("admin") || cleanEmail.includes("kumar") ? "admin" : "user";
+          const role = cleanEmail === "kumar@nexora.ai" ? "admin" : "user";
           localStorage.setItem("nexora_user_type", role);
           localStorage.setItem(
             "nexora_user",
@@ -203,7 +203,7 @@ export default function LoginPage() {
             onClick={handleQuickDemo}
             className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors cursor-pointer"
           >
-            <KeyRound className="h-3.5 w-3.5 text-indigo-600" /> Autofill Demo Credentials
+            <KeyRound className="h-3.5 w-3.5 text-indigo-600" /> Autofill Admin Credentials (kumar@nexora.ai)
           </button>
 
           <p className="text-xs text-slate-500">

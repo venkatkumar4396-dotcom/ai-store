@@ -71,8 +71,18 @@ const NAV_GROUPS = [
 
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const pathname = usePathname();
-  const { isBotDeployed, isLoading: isBotsLoading } = useDeployedBots();
-  const [profile, setProfile] = React.useState({ name: "User", email: "" });
+  const [profile, setProfile] = React.useState<{ name: string; email: string }>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("nexora_user");
+        if (stored) {
+          const u = JSON.parse(stored);
+          return { name: u.name || "User", email: u.email || "" };
+        }
+      } catch {}
+    }
+    return { name: "User", email: "" };
+  });
 
   React.useEffect(() => {
     const fetchProfile = async () => {
@@ -80,7 +90,17 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
       try {
         const res = await api.get("/user/me");
         if (res.data) setProfile({ name: res.data.name || "User", email: res.data.email || "" });
-      } catch { /* keep default */ }
+      } catch {
+        if (typeof window !== "undefined") {
+          try {
+            const stored = localStorage.getItem("nexora_user");
+            if (stored) {
+              const u = JSON.parse(stored);
+              setProfile({ name: u.name || "User", email: u.email || "" });
+            }
+          } catch {}
+        }
+      }
     };
     if (isOpen) fetchProfile();
   }, [isOpen]);
@@ -164,7 +184,8 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
             {/* ── Navigation ── */}
             <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5 scrollbar-none">
               {NAV_GROUPS.map((group) => {
-                const items = group.items;
+                const isKumar = profile.email?.toLowerCase().trim() === "kumar@nexora.ai";
+                const items = group.items.filter((item) => item.href !== "/admin" || isKumar);
                 if (items.length === 0) return null;
 
                 return (

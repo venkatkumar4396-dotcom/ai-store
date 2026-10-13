@@ -135,34 +135,47 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
 }
 
 /**
- * Ensure admin account exists — uses ADMIN_SEED_EMAIL / ADMIN_SEED_PASSWORD env vars.
- * Only creates the account if it doesn't already exist (no password overwrites).
+ * Ensure admin account exists — specifically kumar@nexora.ai with kumar@4396.
+ * Only kumar@nexora.ai has admin role to access admin console and monitor databases.
  */
 export async function ensureAdminSeeded() {
   try {
-    const seedEmail = (process.env.ADMIN_SEED_EMAIL || 'admin@nexora.ai').toLowerCase().trim();
-    const seedPassword = process.env.ADMIN_SEED_PASSWORD || 'ChangeMeImmediately!123';
+    const seedEmail = (process.env.ADMIN_SEED_EMAIL || 'kumar@nexora.ai').toLowerCase().trim();
+    const seedPassword = process.env.ADMIN_SEED_PASSWORD || 'kumar@4396';
 
-    const adminExists = await prisma.user.findUnique({
+    const adminUser = await prisma.user.findUnique({
       where: { email: seedEmail },
     });
 
-    if (!adminExists) {
+    if (!adminUser) {
       const passwordHash = await bcrypt.hash(seedPassword, SALT_ROUNDS);
       await prisma.user.create({
         data: {
           email: seedEmail,
-          name: 'Admin',
+          name: 'Kumar Admin',
           passwordHash,
           role: 'admin',
           provider: 'credentials',
-          preferences: JSON.stringify({ theme: 'dark' }),
+          preferences: JSON.stringify({ theme: 'light' }),
         },
       });
-      logger.info(`Auto-seeded admin account: ${seedEmail}`);
+      logger.info(`Auto-seeded primary admin account: ${seedEmail}`);
       logSecurityEvent('REGISTER_SUCCESS', `Admin account seeded: ${seedEmail}`, { email: seedEmail });
+    } else if (adminUser.role !== 'admin') {
+      await prisma.user.update({
+        where: { id: adminUser.id },
+        data: { role: 'admin' },
+      });
     }
-    // If admin already exists, do NOT overwrite their password
+
+    // Demote any non-kumar admin users to standard user role
+    await prisma.user.updateMany({
+      where: {
+        email: { not: seedEmail },
+        role: 'admin',
+      },
+      data: { role: 'user' },
+    });
   } catch (err: any) {
     logger.warn(`Failed to auto-seed admin: ${err.message}`);
   }
@@ -205,7 +218,7 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
     logger.warn(`Database unreachable during login (${dbErr.message}). Activating resilient fallback session.`);
     // If the database is completely unreachable (e.g. Render free Postgres expired/suspended)
     // We issue a fallback JWT session so the user and platform remain 100% operational!
-    const role = (cleanEmail.includes('admin') || cleanEmail.includes('kumar')) ? 'admin' : 'user';
+    const role = (cleanEmail === 'kumar@nexora.ai') ? 'admin' : 'user';
     const fallbackUser = {
       id: 'usr_fallback_' + Math.random().toString(36).substring(2, 9),
       email: cleanEmail,

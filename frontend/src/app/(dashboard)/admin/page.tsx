@@ -156,40 +156,38 @@ export default function AdminPage() {
   }, [isAdmin, isAutoRefresh]);
 
   const verifyRole = async () => {
-    const localRole = typeof window !== "undefined" ? localStorage.getItem("nexora_user_type") : null;
-    const localUserRaw = typeof window !== "undefined" ? localStorage.getItem("nexora_user") : null;
-    let localUser: any = null;
-    try { localUser = localUserRaw ? JSON.parse(localUserRaw) : null; } catch {}
-    const isLocalAdmin = localRole === "admin" || localUser?.role === "admin" || localUser?.email?.includes("admin") || localUser?.email?.includes("kumar");
+    const AUTHORIZED_ADMIN_EMAIL = "kumar@nexora.ai";
 
     try {
       const res = await api.get("/user/me");
-      setProfile(res.data);
-      if (res.data && res.data.role === "admin") {
-        setIsAdmin(true);
-        loadAdminData();
-      } else if (isLocalAdmin) {
+      const user = res.data;
+      setProfile(user);
+
+      const isAuthorized = user && user.role === "admin" && user.email?.toLowerCase().trim() === AUTHORIZED_ADMIN_EMAIL;
+
+      if (isAuthorized) {
         setIsAdmin(true);
         loadAdminData();
       } else {
         setIsAdmin(false);
-        addToast({
-          type: "warning",
-          title: "Admin Privileges Required",
-          description: "Admin privileges required to access this area",
-        });
       }
     } catch {
-      if (isLocalAdmin) {
+      // Offline fallback: strictly check if authenticated user in localStorage is kumar@nexora.ai
+      const localUserRaw = typeof window !== "undefined" ? localStorage.getItem("nexora_user") : null;
+      let localUser: any = null;
+      try { localUser = localUserRaw ? JSON.parse(localUserRaw) : null; } catch {}
+
+      const isAuthorized =
+        localUser &&
+        localUser.email?.toLowerCase().trim() === AUTHORIZED_ADMIN_EMAIL &&
+        localUser.role === "admin";
+
+      if (isAuthorized) {
+        setProfile(localUser);
         setIsAdmin(true);
         loadAdminData();
       } else {
         setIsAdmin(false);
-        addToast({
-          type: "warning",
-          title: "Admin Privileges Required",
-          description: "Admin privileges required to access this area",
-        });
       }
     }
   };
@@ -446,26 +444,38 @@ export default function AdminPage() {
 
   if (isAdmin === false) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] p-4">
+      <div className="flex items-center justify-center min-h-[65vh] p-4">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md"
         >
-          <Card className="border border-rose-500/20 bg-zinc-950/40 backdrop-blur-md text-center py-10 px-6 space-y-6">
-            <div className="h-16 w-16 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+          <Card className="border border-rose-200 dark:border-rose-500/20 bg-white dark:bg-zinc-950/60 shadow-lg text-center py-10 px-6 space-y-6">
+            <div className="h-16 w-16 rounded-full bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-sm">
               <Lock className="h-7 w-7" />
             </div>
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold text-white">Admin Privileges Required</h2>
-              <p className="text-zinc-400 text-xs max-w-sm mx-auto leading-relaxed">
-                The Nexora Administrator Console is restricted to system operators. You are currently signed in as a standard user account.
+            <div className="space-y-2.5">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20">
+                Restricted Access · Authorized Admin Only
+              </span>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white pt-1">
+                Database Monitor & Console Restricted
+              </h2>
+              <p className="text-slate-600 dark:text-zinc-400 text-xs max-w-sm mx-auto leading-relaxed">
+                The Nexora Database Monitoring Panel and Administrator Console is strictly reserved for the designated administrator (<strong className="text-slate-900 dark:text-zinc-200">kumar@nexora.ai</strong>). Other accounts do not have permission to inspect or modify databases.
               </p>
+              {profile?.email && (
+                <div className="mt-3 p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-left">
+                  <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-zinc-500">Signed In As</div>
+                  <div className="text-xs font-semibold text-slate-800 dark:text-zinc-200 truncate">{profile.email}</div>
+                  <div className="text-[10px] text-rose-600 dark:text-rose-400 font-medium mt-0.5">Role: Standard User (Unauthorized for DB Monitor)</div>
+                </div>
+              )}
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Button
                 onClick={() => (window.location.href = "/dashboard")}
-                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl px-5 text-xs h-10"
+                className="w-full sm:w-auto bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-xl px-5 text-xs h-10 shadow-sm"
               >
                 Return to Workspace
               </Button>
@@ -473,13 +483,16 @@ export default function AdminPage() {
                 variant="outline"
                 onClick={() => {
                   if (typeof window !== "undefined") {
-                    localStorage.setItem("nexora_user_type", "admin");
-                    window.location.reload();
+                    localStorage.removeItem("nexora_logged_in");
+                    localStorage.removeItem("nexora_auth_token");
+                    localStorage.removeItem("nexora_user");
+                    localStorage.removeItem("nexora_user_type");
+                    window.location.href = "/login";
                   }
                 }}
-                className="w-full sm:w-auto border-indigo-500/30 hover:bg-indigo-500/10 text-indigo-300 font-semibold rounded-xl px-5 text-xs h-10"
+                className="w-full sm:w-auto bg-white dark:bg-zinc-900 border-slate-300 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 font-semibold rounded-xl px-5 text-xs h-10"
               >
-                Enable Admin Demo
+                Sign In as Administrator
               </Button>
             </div>
           </Card>
