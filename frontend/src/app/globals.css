@@ -4,6 +4,21 @@
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-text-strong: var(--text-strong);
+  --color-text-body: var(--text-body);
+  --color-text-muted: var(--text-muted);
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-border: var(--primary-border);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
   --font-sans: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
@@ -13,7 +28,7 @@
   --background: #f8fafc;
   --foreground: #0f172a;
   
-  /* STEP 1 & 2 SEMANTIC DESIGN TOKENS */
+  /* PHASE 2 SEMANTIC DESIGN TOKENS */
   --text-strong: #0F172A;
   --text-body: #334155;
   --text-muted: #475569;
@@ -34,6 +49,13 @@
   --primary-active: #3730A3;
   --primary-soft: #EEF2FF;
   --primary-border: #C7D2FE;
+
+  --success: #166534;
+  --success-bg: #DCFCE7;
+  --danger: #B91C1C;
+  --danger-bg: #FEE2E2;
+  --warning: #92400E;
+  --warning-bg: #FEF3C7;
   
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
   --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 10px 30px rgba(15, 23, 42, 0.08);
@@ -100,26 +122,46 @@
   color: #334155 !important;
 }
 
-/* Adapt zinc/white text classes in bright theme so words never wash out */
-:root:not(.dark) .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-blue"]):not([class*="bg-gradient"]):not(.badge):not([data-badge]),
-.light .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-blue"]):not([class*="bg-gradient"]):not(.badge):not([data-badge]),
-:root:not(.dark) .text-zinc-100:not(button *),
-.light .text-zinc-100:not(button *),
-:root:not(.dark) .text-zinc-200:not(button *),
-.light .text-zinc-200:not(button *) {
+/* Adapt zinc/white text classes in bright theme so words never wash out on light surfaces */
+:root:not(.dark) .text-white:not(button):not(button *):not(a):not(a *):not([class*="bg-"]):not([class*="bg-[\#"]):not(.badge):not([data-badge]):not([data-state="active"]):not([data-state="active"] *),
+.light .text-white:not(button):not(button *):not(a):not(a *):not([class*="bg-"]):not([class*="bg-[\#"]):not(.badge):not([data-badge]):not([data-state="active"]):not([data-state="active"] *),
+:root:not(.dark) .text-zinc-100:not(button *):not(a *):not([class*="bg-"]):not([data-state="active"]),
+.light .text-zinc-100:not(button *):not(a *):not([class*="bg-"]):not([data-state="active"]),
+:root:not(.dark) .text-zinc-200:not(button *):not(a *):not([class*="bg-"]):not([data-state="active"]),
+.light .text-zinc-200:not(button *):not(a *):not([class*="bg-"]):not([data-state="active"]) {
   color: #0f172a !important;
 }
 
-:root:not(.dark) .text-zinc-300:not(button *),
-.light .text-zinc-300:not(button *),
-:root:not(.dark) .text-zinc-400:not(button *),
-.light .text-zinc-400:not(button *) {
+:root:not(.dark) .text-zinc-300:not(button *):not(a *):not([class*="bg-"]),
+.light .text-zinc-300:not(button *):not(a *):not([class*="bg-"]),
+:root:not(.dark) .text-zinc-400:not(button *):not(a *):not([class*="bg-"]),
+.light .text-zinc-400:not(button *):not(a *):not([class*="bg-"]) {
   color: #334155 !important;
 }
 
-:root:not(.dark) .text-zinc-500:not(button *),
-.light .text-zinc-500:not(button *) {
+:root:not(.dark) .text-zinc-500:not(button *):not(a *):not([class*="bg-"]),
+.light .text-zinc-500:not(button *):not(a *):not([class*="bg-"]) {
   color: #64748b !important;
+}
+
+/* Primary Buttons & Solid Badges/Pills in bright theme always have crisp white text */
+:root:not(.dark) button[class*="bg-[#4F46E5]"],
+:root:not(.dark) a[class*="bg-[#4F46E5]"],
+:root:not(.dark) button[class*="bg-indigo-600"],
+:root:not(.dark) a[class*="bg-indigo-600"],
+:root:not(.dark) button.bg-indigo-600,
+:root:not(.dark) a.bg-indigo-600,
+:root:not(.dark) [data-state="active"][class*="bg-[#4F46E5]"],
+:root:not(.dark) [data-state="active"][class*="bg-[#4F46E5]"] *,
+.light button[class*="bg-[#4F46E5]"],
+.light a[class*="bg-[#4F46E5]"],
+.light button[class*="bg-indigo-600"],
+.light a[class*="bg-indigo-600"],
+.light button.bg-indigo-600,
+.light a.bg-indigo-600,
+.light [data-state="active"][class*="bg-[#4F46E5]"],
+.light [data-state="active"][class*="bg-[#4F46E5]"] * {
+  color: #FFFFFF !important;
 }
 
 /* Card backgrounds and borders in bright theme */
@@ -523,41 +565,45 @@ body {
 /* ═══════════ GRADIENT TEXT ═══════════ */
 
 .gradient-text {
-  color: #1E1B4B;
-  background-image: linear-gradient(135deg, #3730A3, #4F46E5, #2563EB);
-  background-clip: text;
+  color: #3730A3;
+  display: inline-block;
+  padding-bottom: 0.08em;
 }
 
-@supports (-webkit-background-clip: text) or (background-clip: text) {
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
   .gradient-text {
+    background-image: linear-gradient(90deg, #3730A3, #4F46E5, #2563EB);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    color: transparent;
   }
 }
 
 .dark .gradient-text {
   color: #FFFFFF;
-  background-image: linear-gradient(135deg, rgb(var(--accent-primary)), rgb(var(--accent-secondary)), rgb(var(--accent-tertiary)));
+  background-image: linear-gradient(90deg, #818CF8, #A78BFA, #38BDF8);
 }
 
 .gradient-text-white {
   color: #0F172A;
-  background-image: linear-gradient(135deg, #0F172A, #334155);
-  background-clip: text;
+  display: inline-block;
+  padding-bottom: 0.08em;
 }
 
-@supports (-webkit-background-clip: text) or (background-clip: text) {
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
   .gradient-text-white {
+    background-image: linear-gradient(90deg, #0F172A, #334155, #1E293B);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    color: transparent;
   }
 }
 
 .dark .gradient-text-white {
   color: #FFFFFF;
-  background-image: linear-gradient(135deg, #fff, #a1a1aa);
+  background-image: linear-gradient(90deg, #FFFFFF, #E2E8F0, #CBD5E1);
 }
 
 /* ═══════════ NEON BORDERS ═══════════ */
@@ -1177,5 +1223,70 @@ body {
     position: sticky;
     top: 0;
     z-index: 30;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* PHASE 2 SAFETY NET: SCOPED TO LIGHT THEME (html:not(.dark))            */
+/* ═══════════════════════════════════════════════════════════════════════ */
+html:not(.dark) {
+  /* 1. Primary buttons & links: crisp white text */
+  a[class*="bg-[#4F46E5]"],
+  button[class*="bg-[#4F46E5]"],
+  a[class*="bg-indigo-600"],
+  button[class*="bg-indigo-600"],
+  [data-variant="default"],
+  [data-state="active"][class*="bg-[#4F46E5]"] {
+    color: #FFFFFF !important;
+  }
+
+  /* 2. Secondary & Outline buttons (Explore Agents, Sync, Log In): strong dark navy text */
+  a[class*="border-[#CBD5E1]"],
+  button[class*="border-[#CBD5E1]"] {
+    color: #1E1B4B !important;
+  }
+  a[class*="border-[#CBD5E1]"]:hover,
+  button[class*="border-[#CBD5E1]"]:hover {
+    color: #4338CA !important;
+    background-color: #EEF2FF !important;
+    border-color: #4F46E5 !important;
+  }
+
+  /* 3. Stat Cards & Counters: always solid #0F172A */
+  .tabular-nums,
+  [aria-label*="%"],
+  h2.text-\[34px\] {
+    color: #0F172A !important;
+    opacity: 1 !important;
+  }
+
+  /* 4. Stock Intelligence Autocomplete dropdown */
+  .stock-intelligence-page [class*="top-\[52px\]"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid rgba(15, 23, 42, 0.12) !important;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08), 0 24px 48px rgba(79, 70, 229, 0.12) !important;
+  }
+  .stock-intelligence-page [class*="top-\[52px\]"] button {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+  }
+  .stock-intelligence-page [class*="top-\[52px\]"] button:hover {
+    background-color: #EEF2FF !important;
+  }
+
+  /* 5. WhatsApp tabs & Phone code buttons */
+  [role="tablist"] [role="tab"] {
+    color: #475569;
+    font-weight: 600;
+  }
+  [role="tablist"] [role="tab"][data-state="active"] {
+    background-color: #4F46E5 !important;
+    color: #FFFFFF !important;
+  }
+
+  /* 6. Global focus-visible: 2px #4F46E5 outline, 2px offset */
+  :focus-visible {
+    outline: 2px solid #4F46E5 !important;
+    outline-offset: 2px !important;
   }
 }

@@ -271,7 +271,7 @@ export default function OverviewDashboardPage() {
               onClick={() => fetchDashboardData(true)}
               disabled={isRefreshing}
               variant="outline"
-              className="bg-white border-[1.5px] border-[#CBD5E1] text-[#1E1B4B] hover:bg-[#F8FAFC] dark:bg-transparent dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/5 gap-1.5 rounded-xl shadow-xs font-semibold"
+              className="bg-white border-[1.5px] border-[#CBD5E1] text-[#1E1B4B] hover:border-[#4F46E5] hover:bg-[#EEF2FF] hover:text-[#4338CA] dark:bg-transparent dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/5 gap-1.5 rounded-xl shadow-xs font-semibold"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
               Sync

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:contrast": "node scripts/run-contrast-test.mjs"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.2.0",
@@ -40,12 +41,14 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "playwright": "^1.64.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

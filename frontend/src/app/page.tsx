@@ -103,7 +103,7 @@ function SectionHeading({ badge, title, subtitle }: { badge?: string; title: str
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 20 }}
+      initial={false}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5 }}
       className="text-center space-y-3 mb-14"
@@ -233,7 +233,7 @@ export default function LandingPage() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           className="space-y-6 max-w-4xl relative"
@@ -247,9 +247,8 @@ export default function LandingPage() {
 
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-[#0F172A] dark:text-white leading-[1.05]">
             Intelligence,{" "}
-            <span className="gradient-text">
-              Automated.
-            </span>
+            <span className="gradient-text">Automated</span>
+            <span className="text-[#2563EB]">.</span>
           </h1>
 
           <p className="text-[#334155] dark:text-zinc-300 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto font-normal">
@@ -318,7 +317,7 @@ export default function LandingPage() {
             return (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "0px" }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
@@ -354,7 +353,7 @@ export default function LandingPage() {
 
           {/* Additional agents teaser */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "0px" }}
             transition={{ duration: 0.5, delay: 0.5 }}
@@ -392,7 +391,7 @@ export default function LandingPage() {
             return (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "0px" }}
                 transition={{ duration: 0.5, delay: idx * 0.08 }}
@@ -428,7 +427,7 @@ export default function LandingPage() {
             {HOW_IT_WORKS.map((item, idx) => (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "0px" }}
                 transition={{ duration: 0.5, delay: idx * 0.15 }}
@@ -457,7 +456,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {/* Free */}
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+          <motion.div initial={false} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
             <div className="bg-white dark:bg-zinc-950/40 border border-[#CBD5E1]/80 dark:border-white/10 rounded-2xl shadow-xs hover:shadow-lg hover:border-[#C7D2FE] hover:-translate-y-1 transition-all duration-200 ease-out h-full p-8 space-y-6 flex flex-col justify-between">
               <div className="space-y-6">
                 <div>
@@ -486,7 +485,7 @@ export default function LandingPage() {
           </motion.div>
 
           {/* Pro - Highlighted Tier */}
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
+          <motion.div initial={false} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
             <div className="bg-white dark:bg-zinc-950/60 border-2 border-[#4F46E5] rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 ease-out h-full p-8 space-y-6 relative overflow-hidden flex flex-col justify-between">
               <div className="absolute top-0 left-0 right-0 h-1 bg-[#4F46E5]" />
               <div className="space-y-6">
@@ -521,7 +520,7 @@ export default function LandingPage() {
           </motion.div>
 
           {/* Premium */}
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}>
+          <motion.div initial={false} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}>
             <div className="bg-white dark:bg-zinc-950/40 border border-[#CBD5E1]/80 dark:border-white/10 rounded-2xl shadow-xs hover:shadow-lg hover:border-[#C7D2FE] hover:-translate-y-1 transition-all duration-200 ease-out h-full p-8 space-y-6 flex flex-col justify-between">
               <div className="space-y-6">
                 <div>
@@ -567,7 +566,7 @@ export default function LandingPage() {
           ].map((t, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "0px" }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
@@ -582,7 +581,7 @@ export default function LandingPage() {
                   <p className="text-[#334155] dark:text-zinc-300 text-sm leading-relaxed italic">&ldquo;{t.text}&rdquo;</p>
                 </div>
                 <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-white/5">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#4F46E5] to-[#4338CA] flex items-center justify-center font-bold text-white text-xs shadow-xs">
+                  <div className="w-9 h-9 rounded-full bg-[#4F46E5] bg-gradient-to-br from-[#4F46E5] to-[#4338CA] flex items-center justify-center font-bold text-white text-xs shadow-xs">
                     {t.name.split(" ").map(w => w[0]).join("")}
                   </div>
                   <div>
@@ -614,7 +613,7 @@ export default function LandingPage() {
       {/* ═══════════════ CTA BANNER ═══════════════ */}
       <section className="py-24 px-4 md:px-8 max-w-4xl mx-auto text-center z-10 bg-white dark:bg-transparent">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px" }}
           transition={{ duration: 0.6 }}

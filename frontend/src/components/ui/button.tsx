@@ -5,28 +5,28 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4F46E5] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-70 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98] cursor-pointer",
   {
     variants: {
       variant: {
         default:
-          "bg-indigo-600 text-[#ffffff] shadow-sm shadow-indigo-600/20 hover:bg-indigo-700 active:bg-indigo-800 font-semibold",
+          "bg-[#4F46E5] text-white shadow-md hover:bg-[#4338CA] hover:-translate-y-px active:translate-y-0",
         destructive:
-          "bg-rose-600 text-[#ffffff] shadow-sm hover:bg-rose-700 active:bg-rose-800 font-semibold",
+          "bg-[#B91C1C] text-white shadow-sm hover:bg-[#991B1B] active:bg-[#7F1D1D]",
         outline:
-          "border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white shadow-xs font-semibold",
+          "bg-white border-[1.5px] border-[#CBD5E1] text-[#1E1B4B] hover:border-[#4F46E5] hover:bg-[#EEF2FF] hover:text-[#4338CA] shadow-xs dark:bg-transparent dark:border-white/10 dark:text-zinc-200 dark:hover:bg-white/5",
         secondary:
-          "bg-slate-100 dark:bg-violet-600 text-slate-800 dark:text-[#ffffff] hover:bg-slate-200 dark:hover:bg-violet-500 font-semibold",
+          "bg-[#F1F5F9] text-[#334155] hover:bg-[#E2E8F0] dark:bg-white/10 dark:text-white dark:hover:bg-white/15",
         ghost:
-          "text-slate-600 dark:text-zinc-400 hover:bg-slate-100/80 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white font-medium",
+          "text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A] dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white",
         link:
-          "text-indigo-600 dark:text-indigo-400 underline-offset-4 hover:underline font-semibold",
+          "text-[#4F46E5] underline-offset-4 hover:underline dark:text-indigo-400",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8 text-sm",
-        icon: "h-9 w-9",
+        default: "h-10 px-5 py-2",
+        sm: "h-8 rounded-lg px-3 text-xs",
+        lg: "h-12 rounded-xl px-8 text-base",
+        icon: "h-9 w-9 rounded-lg",
       },
     },
     defaultVariants: {

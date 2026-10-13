@@ -250,7 +250,7 @@ export default function BillingPage() {
                     <p className="text-[10px] text-slate-600 dark:text-zinc-400 leading-normal">Ideal for casual developers auditing agent automations.</p>
                     <div className="flex items-baseline gap-1 mt-2">
                       <span className="text-2xl font-black text-slate-900 dark:text-white">$0</span>
-                      <span className="text-[10px] text-slate-500 dark:text-zinc-500">/ mo</span>
+                      <span className="text-[10px] text-[#475569] dark:text-zinc-400 font-semibold">/ mo</span>
                     </div>
                   </div>
                   <div className="space-y-3 pt-3 border-t border-slate-200/60 dark:border-zinc-900/60 text-[10px] text-slate-600 dark:text-zinc-400 flex-1">
@@ -277,7 +277,7 @@ export default function BillingPage() {
                     <p className="text-[10px] text-slate-600 dark:text-zinc-400 leading-normal">Optimized parameters for small offices and startups.</p>
                     <div className="flex items-baseline gap-1 mt-2">
                       <span className="text-2xl font-black text-slate-900 dark:text-white">$49</span>
-                      <span className="text-[10px] text-slate-500 dark:text-zinc-500">/ mo</span>
+                      <span className="text-[10px] text-[#475569] dark:text-zinc-400 font-semibold">/ mo</span>
                     </div>
                   </div>
                   <div className="space-y-3 pt-3 border-t border-indigo-200/60 dark:border-zinc-900/60 text-[10px] text-slate-700 dark:text-zinc-300 flex-1">
@@ -303,7 +303,7 @@ export default function BillingPage() {
                     <p className="text-[10px] text-slate-600 dark:text-zinc-400 leading-normal">Autonomous clusters for dedicated corporate agencies.</p>
                     <div className="flex items-baseline gap-1 mt-2">
                       <span className="text-2xl font-black text-slate-900 dark:text-white">$99</span>
-                      <span className="text-[10px] text-slate-500 dark:text-zinc-500">/ mo</span>
+                      <span className="text-[10px] text-[#475569] dark:text-zinc-400 font-semibold">/ mo</span>
                     </div>
                   </div>
                   <div className="space-y-3 pt-3 border-t border-slate-200/60 dark:border-zinc-900/60 text-[10px] text-slate-600 dark:text-zinc-400 flex-1">

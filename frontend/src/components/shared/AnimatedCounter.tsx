@@ -10,14 +10,21 @@ interface AnimatedCounterProps {
   duration?: number;
 }
 
-export function AnimatedCounter({ value, prefix = "", suffix = "", duration = 1.5 }: AnimatedCounterProps) {
+export function AnimatedCounter({
+  value = 0,
+  prefix = "",
+  suffix = "",
+  duration = 1.2,
+}: AnimatedCounterProps) {
+  const safeValue = typeof value === "number" && !isNaN(value) ? value : 0;
   const ref = React.useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "0px" });
   const shouldReduceMotion = useReducedMotion();
-  const [display, setDisplay] = React.useState(value);
+  const [display, setDisplay] = React.useState<number>(safeValue);
   const [hasStarted, setHasStarted] = React.useState(false);
 
   const formatNumber = (num: number) => {
+    if (typeof num !== "number" || isNaN(num)) return "0";
     if (num % 1 !== 0) {
       return num.toFixed(1);
     }
@@ -26,19 +33,30 @@ export function AnimatedCounter({ value, prefix = "", suffix = "", duration = 1.
     return num.toLocaleString();
   };
 
+  // Immediate fallback for SSR / reduced-motion / non-view
   React.useEffect(() => {
     if (shouldReduceMotion) {
-      setDisplay(value);
+      setDisplay(safeValue);
       return;
     }
 
-    if (!isInView || hasStarted) return;
-    setHasStarted(true);
-    setDisplay(0);
+    // Safety timeout: if IntersectionObserver hasn't fired in 600ms, ensure final value is rendered
+    const safetyTimer = setTimeout(() => {
+      setDisplay(safeValue);
+    }, 600);
 
-    const isDecimal = value % 1 !== 0;
+    if (!isInView || hasStarted) {
+      return () => clearTimeout(safetyTimer);
+    }
+
+    setHasStarted(true);
+    clearTimeout(safetyTimer);
+
+    const isDecimal = safeValue % 1 !== 0;
     const startTime = Date.now();
     const durationMs = duration * 1000;
+
+    let frameId: number;
 
     const step = () => {
       const elapsed = Date.now() - startTime;
@@ -46,28 +64,35 @@ export function AnimatedCounter({ value, prefix = "", suffix = "", duration = 1.
       const eased = 1 - Math.pow(1 - progress, 3);
 
       if (isDecimal) {
-        setDisplay(parseFloat((eased * value).toFixed(1)));
+        setDisplay(parseFloat((eased * safeValue).toFixed(1)));
       } else {
-        setDisplay(Math.floor(eased * value));
+        setDisplay(Math.floor(eased * safeValue));
       }
 
       if (progress < 1) {
-        requestAnimationFrame(step);
+        frameId = requestAnimationFrame(step);
       } else {
-        setDisplay(value);
+        setDisplay(safeValue);
       }
     };
 
-    requestAnimationFrame(step);
-  }, [isInView, value, duration, shouldReduceMotion, hasStarted]);
+    frameId = requestAnimationFrame(step);
+
+    return () => {
+      clearTimeout(safetyTimer);
+      cancelAnimationFrame(frameId);
+    };
+  }, [isInView, safeValue, duration, shouldReduceMotion, hasStarted]);
 
   return (
     <span
       ref={ref}
       className="tabular-nums inline-block font-extrabold text-[#0F172A] dark:text-white"
-      aria-label={`${prefix}${value}${suffix}`}
+      aria-label={`${prefix}${safeValue}${suffix}`}
     >
-      {prefix}{formatNumber(display)}{suffix}
+      {prefix}
+      {formatNumber(display)}
+      {suffix}
     </span>
   );
 }

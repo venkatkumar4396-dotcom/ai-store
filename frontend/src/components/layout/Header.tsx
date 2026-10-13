@@ -265,18 +265,18 @@ export function Header() {
         {/* User Avatar Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0 border border-white/10 hover:border-indigo-500/30 transition-colors">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white font-semibold text-xs">
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0 border border-slate-200 dark:border-white/10 hover:border-indigo-500/30 transition-colors">
+              <Avatar className="h-8 w-8 bg-[#4F46E5]">
+                <AvatarFallback className="bg-[#4F46E5] bg-gradient-to-br from-indigo-600 to-violet-600 text-white font-semibold text-xs" style={{ backgroundColor: "#4F46E5" }}>
                   {initials}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 right-0 mt-2" align="end">
+          <DropdownMenuContent className="w-56 right-0 mt-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-white/10" align="end">
             <DropdownMenuLabel className="flex flex-col">
-              <span className="font-semibold text-white">{profile.name}</span>
-              <span className="text-xs text-zinc-500">{profile.email}</span>
+              <span className="font-semibold text-slate-900 dark:text-white">{profile.name}</span>
+              <span className="text-xs text-[#475569] dark:text-zinc-500">{profile.email}</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => window.location.href = "/settings"}>

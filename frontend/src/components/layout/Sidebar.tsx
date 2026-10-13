@@ -254,7 +254,7 @@ export function Sidebar() {
 
         {/* Badge */}
         {!isCollapsed && item.badge && (
-          <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 rounded-full">
+          <span className="px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] bg-[#EEF2FF] text-[#4338CA] border border-[#C7D2FE] dark:bg-indigo-600/20 dark:text-indigo-400 dark:border-indigo-500/20 rounded-full">
             {item.badge}
           </span>
         )}
@@ -443,7 +443,7 @@ export function Sidebar() {
           <p className="text-[11px] text-slate-600 dark:text-zinc-400 leading-relaxed mb-2.5">
             Unlock unlimited agents, API access, and priority compute.
           </p>
-          <Button className="w-full h-8 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs" asChild>
+          <Button className="w-full h-8 text-xs bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-xl shadow-xs" asChild>
             <Link href="/billing">View Plans</Link>
           </Button>
         </div>
@@ -452,8 +452,8 @@ export function Sidebar() {
       {/* User Info / Footer */}
       <div className="p-3 border-t border-slate-200/80 dark:border-white/[0.06]">
         <div className={cn("flex items-center gap-3", isCollapsed ? "justify-center" : "")}>
-          <Avatar className="h-9 w-9 border border-slate-200 dark:border-white/10 shrink-0 shadow-xs">
-            <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-violet-600 text-[#ffffff] font-semibold text-sm">
+          <Avatar className="h-9 w-9 border border-slate-200 dark:border-white/10 shrink-0 shadow-xs bg-[#4F46E5]">
+            <AvatarFallback className="bg-[#4F46E5] bg-gradient-to-br from-indigo-600 to-violet-600 text-white font-semibold text-sm" style={{ backgroundColor: "#4F46E5" }}>
               {initials}
             </AvatarFallback>
           </Avatar>

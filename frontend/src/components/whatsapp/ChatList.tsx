@@ -74,7 +74,7 @@ export function ChatList({ contacts, selectedContactId, onSelectContact, onClear
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-1">
           {filteredContacts.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 dark:text-zinc-500 text-xs">
+            <div className="text-center py-8 text-[#475569] dark:text-zinc-400 text-xs font-medium">
               No contacts found
             </div>
           ) : (

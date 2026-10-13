@@ -700,7 +700,8 @@ export default function StockIntelligencePage() {
             <Button
               onClick={() => analyzeStock()}
               disabled={isAnalyzing || !ticker.trim()}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white px-7 h-12 shadow-lg shadow-emerald-600/20 font-semibold rounded-xl transition-all hover:shadow-emerald-500/30 disabled:opacity-40"
+              style={{ backgroundColor: "#047857" }}
+              className="bg-[#047857] bg-gradient-to-r from-emerald-700 to-emerald-600 hover:from-emerald-600 hover:to-emerald-500 text-white px-7 h-12 shadow-lg shadow-emerald-700/20 font-semibold rounded-xl transition-all hover:shadow-emerald-600/30 disabled:opacity-40"
             >
               {isAnalyzing ? (
                 <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Analyzing</>
@@ -711,8 +712,8 @@ export default function StockIntelligencePage() {
           </div>
 
           {/* Quick Assets */}
-          <div className="flex flex-wrap items-center gap-2 mt-3.5 pt-3.5 border-t border-white/[0.04]">
-            <span className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] mr-1">Popular Markets:</span>
+          <div className="flex flex-wrap items-center gap-2 mt-3.5 pt-3.5 border-t border-slate-200 dark:border-white/[0.04]">
+            <span className="text-[#475569] dark:text-zinc-400 font-bold uppercase tracking-widest text-[10px] mr-1">Popular Markets:</span>
             {[
               { symbol: "RELIANCE.NS", label: "Reliance" },
               { symbol: "TMCV.NS", label: "Tata Motors" },
@@ -730,9 +731,9 @@ export default function StockIntelligencePage() {
               <button
                 key={item.symbol}
                 onClick={() => { setTicker(item.symbol); analyzeStock(item.symbol); }}
-                className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-white/[0.03] hover:bg-emerald-500/15 border border-white/[0.06] hover:border-emerald-500/30 text-zinc-400 hover:text-emerald-300 transition-all font-medium"
+                className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-[#F8FAFC] dark:bg-white/[0.03] border border-[#CBD5E1] dark:border-white/[0.06] text-[#334155] dark:text-zinc-300 hover:bg-[#EEF2FF] hover:border-[#C7D2FE] hover:text-[#4338CA] transition-all font-semibold cursor-pointer"
               >
-                {item.label} <span className="text-[9px] text-zinc-600 font-normal">({item.symbol})</span>
+                {item.label} <span className="text-[10px] text-[#475569] dark:text-zinc-400 font-normal">({item.symbol})</span>
               </button>
             ))}
           </div>
@@ -755,17 +756,17 @@ export default function StockIntelligencePage() {
 
       {/* ═══ Tab Navigation ═══ */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-zinc-900/40 border border-white/[0.06] p-1 rounded-xl w-full overflow-x-auto scrollbar-none flex justify-start sm:justify-center min-w-0">
-          <TabsTrigger value="analyze" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-500 rounded-lg gap-2">
+        <TabsList className="bg-[#F1F5F9] dark:bg-zinc-900/40 border border-slate-200 dark:border-white/[0.06] p-1 rounded-xl w-full overflow-x-auto scrollbar-none flex justify-start sm:justify-center min-w-0">
+          <TabsTrigger value="analyze" className="data-[state=active]:bg-[#4F46E5] data-[state=active]:text-white text-[#475569] dark:text-zinc-400 font-semibold rounded-lg gap-2">
             <Activity className="h-4 w-4" /> Analysis
           </TabsTrigger>
-          <TabsTrigger value="watchlist" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-500 rounded-lg gap-2">
-            <Eye className="h-4 w-4" /> Watchlist <span className="text-[10px] ml-0.5 opacity-60">({watchlist.length})</span>
+          <TabsTrigger value="watchlist" className="data-[state=active]:bg-[#4F46E5] data-[state=active]:text-white text-[#475569] dark:text-zinc-400 font-semibold rounded-lg gap-2">
+            <Eye className="h-4 w-4" /> Watchlist <span className="text-[10px] ml-1 font-bold">({watchlist.length})</span>
           </TabsTrigger>
-           <TabsTrigger value="portfolio" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-500 rounded-lg gap-2">
-             <BarChart3 className="h-4 w-4" /> Portfolio
-           </TabsTrigger>
-          <TabsTrigger value="practice" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-zinc-500 rounded-lg gap-2">
+          <TabsTrigger value="portfolio" className="data-[state=active]:bg-[#4F46E5] data-[state=active]:text-white text-[#475569] dark:text-zinc-400 font-semibold rounded-lg gap-2">
+            <BarChart3 className="h-4 w-4" /> Portfolio
+          </TabsTrigger>
+          <TabsTrigger value="practice" className="data-[state=active]:bg-[#047857] data-[state=active]:text-white text-[#475569] dark:text-zinc-400 font-semibold rounded-lg gap-2">
             <Zap className="h-4 w-4" /> Practice
           </TabsTrigger>
         </TabsList>
@@ -1173,8 +1174,8 @@ export default function StockIntelligencePage() {
                   </div>
                 </div>
                 <div className="text-center space-y-2">
-                  <h3 className="text-xl font-bold text-white">Start Analyzing</h3>
-                  <p className="text-sm text-zinc-500 max-w-md leading-relaxed">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Start Analyzing</h3>
+                  <p className="text-sm text-[#475569] dark:text-zinc-400 max-w-md leading-relaxed">
                     Enter any ticker symbol above to get AI-powered analysis with real-time technical indicators, buy/sell signals, and chart patterns.
                   </p>
                 </div>
@@ -1182,11 +1183,11 @@ export default function StockIntelligencePage() {
                 {/* Quick Start Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl mt-2">
                   {[
-                    { title: "Stocks", textColor: "text-emerald-400", symbols: ["AAPL", "TSLA", "NVDA", "MSFT"] },
-                    { title: "Crypto", textColor: "text-violet-400", symbols: ["BTC-USD", "ETH-USD", "SOL-USD", "ADA-USD"] },
-                    { title: "Forex", textColor: "text-cyan-400", symbols: ["EURUSD=X", "GBPUSD=X", "USDJPY=X", "AUDUSD=X"] },
+                    { title: "Stocks", textColor: "text-emerald-700 dark:text-emerald-400", symbols: ["AAPL", "TSLA", "NVDA", "MSFT"] },
+                    { title: "Crypto", textColor: "text-indigo-700 dark:text-violet-400", symbols: ["BTC-USD", "ETH-USD", "SOL-USD", "ADA-USD"] },
+                    { title: "Forex", textColor: "text-cyan-700 dark:text-cyan-400", symbols: ["EURUSD=X", "GBPUSD=X", "USDJPY=X", "AUDUSD=X"] },
                   ].map((cat) => (
-                    <div key={cat.title} className="p-4 rounded-xl border border-white/[0.05] bg-zinc-950/30 space-y-2.5">
+                    <div key={cat.title} className="p-4 rounded-xl border border-slate-200 dark:border-white/[0.05] bg-[#F8FAFC] dark:bg-zinc-950/30 space-y-2.5">
                       <span className={`text-[10px] font-bold uppercase tracking-widest ${cat.textColor}`}>{cat.title}</span>
                       <div className="flex flex-wrap gap-1.5">
                         {cat.symbols.map((sym) => (
@@ -1195,7 +1196,7 @@ export default function StockIntelligencePage() {
                             size="sm"
                             variant="outline"
                             onClick={() => { setTicker(sym); analyzeStock(sym); }}
-                            className="border-white/[0.06] text-zinc-400 hover:text-white hover:bg-white/5 text-[11px] font-semibold h-7 px-2.5 rounded-md"
+                            className="bg-white dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.06] text-[#334155] dark:text-zinc-300 hover:text-[#0F172A] hover:bg-[#EEF2FF] text-[11px] font-semibold h-7 px-2.5 rounded-md"
                           >
                             {sym}
                           </Button>

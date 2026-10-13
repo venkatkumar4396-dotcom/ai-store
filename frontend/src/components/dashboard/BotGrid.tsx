@@ -78,11 +78,11 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "automation": return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20";
-      case "communication": return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20";
-      case "analytics": return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20";
-      case "productivity": return "bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-500/20";
-      default: return "bg-slate-100 text-slate-700 dark:bg-zinc-500/10 dark:text-zinc-400 border border-slate-200 dark:border-zinc-500/15";
+      case "automation": return "bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
+      case "communication": return "bg-[#EEF2FF] text-[#4338CA] border border-[#C7D2FE] dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20";
+      case "analytics": return "bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0] dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+      case "productivity": return "bg-[#EDE9FE] text-[#6D28D9] border border-[#DDD6FE] dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20";
+      default: return "bg-[#F1F5F9] text-[#334155] border border-[#CBD5E1] dark:bg-zinc-500/10 dark:text-zinc-400 dark:border-zinc-500/15";
     }
   };
 
@@ -90,16 +90,15 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
     hidden: { opacity: 1 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.06 },
+      transition: { staggerChildren: 0.04 },
     },
   };
 
   const item = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 0, opacity: 1 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: "spring" as const, stiffness: 120, damping: 16 },
     },
   };
 
@@ -163,7 +162,7 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
               </div>
               <div className="font-semibold">
                 {bot.price === "free" ? (
-                  <span className="text-emerald-500 dark:text-emerald-400">Free</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">Free</span>
                 ) : (
                   <span className="text-slate-900 dark:text-white">${bot.price}/mo</span>
                 )}
@@ -176,7 +175,7 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 h-9"
+                    className="flex-1 border-[#CBD5E1] bg-white text-[#1E1B4B] hover:border-[#4F46E5] hover:bg-[#EEF2FF] hover:text-[#4338CA] h-9 font-semibold"
                     onClick={() => window.open(bot.standaloneUrl, "_blank")}
                   >
                     <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
@@ -184,7 +183,7 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/10 h-9"
+                    className="bg-[#4F46E5] hover:bg-[#4338CA] text-white shadow-md h-9 font-semibold"
                     onClick={() => onDeploy?.(bot.id)}
                   >
                     Open Here
@@ -196,7 +195,7 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-slate-200 dark:border-white/[0.08] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white h-9"
+                    className="flex-1 border-[#CBD5E1] bg-white text-[#1E1B4B] hover:border-[#4F46E5] hover:bg-[#EEF2FF] hover:text-[#4338CA] h-9 font-semibold"
                     onClick={() => onConfigure?.(bot.id)}
                   >
                     <Settings2 className="h-3.5 w-3.5 mr-1.5" />
@@ -204,7 +203,7 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
                   </Button>
                   <Button
                     size="sm"
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/10 h-9"
+                    className="flex-1 bg-[#4F46E5] hover:bg-[#4338CA] text-white shadow-md h-9 font-semibold"
                     onClick={() => onDeploy?.(bot.id)}
                   >
                     Deploy
