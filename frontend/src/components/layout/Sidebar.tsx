@@ -227,7 +227,7 @@ export function Sidebar() {
           isCollapsed && "justify-center px-0 mx-1",
           isActive
             ? "text-indigo-600 bg-indigo-50/90 border border-indigo-200/60 font-semibold shadow-xs dark:text-indigo-400 dark:bg-indigo-600/15 dark:border-indigo-500/20"
-            : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100/70 dark:hover:bg-zinc-800/20 font-medium"
+            : "text-[#334155] dark:text-zinc-400 hover:text-[#0F172A] dark:hover:text-zinc-100 hover:bg-[#F1F5F9] dark:hover:bg-zinc-800/20 font-medium"
         )}
       >
         {/* Active indicator pill */}
@@ -240,7 +240,7 @@ export function Sidebar() {
         <span
           className={cn(
             "transition-colors shrink-0",
-            isActive ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-zinc-500 group-hover:text-slate-600 dark:group-hover:text-zinc-300"
+            isActive ? "text-indigo-600 dark:text-indigo-400" : "text-[#475569] dark:text-zinc-500 group-hover:text-[#0F172A] dark:group-hover:text-zinc-300"
           )}
         >
           <Icon className="h-[18px] w-[18px]" />
@@ -321,7 +321,7 @@ export function Sidebar() {
               {!isCollapsed && (
                 <button
                   onClick={() => toggleGroup(group.label)}
-                  className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest hover:text-slate-600 dark:hover:text-zinc-400 transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold text-[#475569] dark:text-zinc-400 uppercase tracking-widest hover:text-[#0F172A] dark:hover:text-zinc-200 transition-colors"
                 >
                   <span>{group.label}</span>
                   <ChevronDown
@@ -376,25 +376,25 @@ export function Sidebar() {
                                     "w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all group",
                                     catHasActive
                                       ? "text-indigo-700 bg-indigo-50/80 dark:text-indigo-300 dark:bg-indigo-500/10"
-                                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/40"
+                                      : "text-[#334155] hover:text-[#0F172A] hover:bg-[#F1F5F9] dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800/40"
                                   )}
                                 >
                                   <div className="flex items-center gap-2 min-w-0">
                                     <span
                                       className={cn(
                                         "w-1.5 h-1.5 rounded-full shrink-0 transition-colors",
-                                        catHasActive ? "bg-indigo-600 dark:bg-indigo-400" : "bg-slate-300 dark:bg-zinc-600 group-hover:bg-slate-400 dark:group-hover:bg-zinc-400"
+                                        catHasActive ? "bg-indigo-600 dark:bg-indigo-400" : "bg-slate-400 dark:bg-zinc-500 group-hover:bg-slate-600 dark:group-hover:bg-zinc-300"
                                       )}
                                     />
                                     <span className="truncate">{cat.name}</span>
                                   </div>
                                   <div className="flex items-center gap-1.5 shrink-0">
-                                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200 dark:bg-zinc-800/80 dark:text-zinc-400 dark:border-white/[0.04]">
+                                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-[#F1F5F9] text-[#334155] border border-[#CBD5E1] dark:bg-zinc-800/80 dark:text-zinc-400 dark:border-white/[0.04]">
                                       {visibleCategoryItems.length}
                                     </span>
                                     <ChevronDown
                                       className={cn(
-                                        "h-3 w-3 text-slate-400 dark:text-zinc-500 group-hover:text-slate-600 dark:group-hover:text-zinc-300 transition-transform duration-200",
+                                        "h-3 w-3 text-[#475569] dark:text-zinc-500 group-hover:text-[#0F172A] dark:group-hover:text-zinc-300 transition-transform duration-200",
                                         !isCategoryOpen && "-rotate-90"
                                       )}
                                     />
