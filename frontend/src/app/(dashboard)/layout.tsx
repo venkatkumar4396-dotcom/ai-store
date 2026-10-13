@@ -121,15 +121,15 @@ export default function DashboardLayout({
             <ParticleBackground />
             <div className="max-w-7xl mx-auto space-y-6 pb-8 relative z-10">
               {!isBackendConnected && (
-                <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-950/20 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg shadow-rose-950/10 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-950/20 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
                       <WifiOff className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-rose-200 text-sm">Backend API Server Unreachable</h4>
-                      <p className="text-zinc-400 text-xs mt-0.5">
-                        The frontend cannot connect to the backend server at <code className="text-rose-300 bg-rose-950/40 px-1 py-0.5 rounded font-mono text-[11px]">{backendTargetUrl}</code>. Please ensure the backend service is running.
+                      <h4 className="font-semibold text-rose-900 dark:text-rose-200 text-sm">Backend API Server Unreachable</h4>
+                      <p className="text-rose-700 dark:text-zinc-400 text-xs mt-0.5">
+                        The frontend cannot connect to the backend server at <code className="text-rose-800 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/40 px-1 py-0.5 rounded font-mono text-[11px]">{backendTargetUrl}</code>. Please ensure the backend service is running.
                       </p>
                     </div>
                   </div>
@@ -138,7 +138,7 @@ export default function DashboardLayout({
                     disabled={isChecking}
                     variant="outline"
                     size="sm"
-                    className="border-rose-500/30 hover:bg-rose-500/10 text-rose-300 hover:text-rose-200 self-start md:self-center font-semibold text-xs gap-1.5"
+                    className="border-rose-300 hover:bg-rose-100 text-rose-800 dark:border-rose-500/30 dark:hover:bg-rose-500/10 dark:text-rose-300 self-start md:self-center font-semibold text-xs gap-1.5"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${isChecking ? "animate-spin" : ""}`} />
                     {isChecking ? "Retrying..." : "Retry Connection"}

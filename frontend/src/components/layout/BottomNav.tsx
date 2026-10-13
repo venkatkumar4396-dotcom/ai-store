@@ -40,7 +40,7 @@ export function BottomNav() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {/* Frosted glass bar */}
-      <div className="bg-zinc-950/85 border-t border-white/[0.07] backdrop-blur-2xl px-2 py-1.5">
+      <div className="bg-white/90 dark:bg-zinc-950/85 border-t border-slate-200/80 dark:border-white/[0.07] backdrop-blur-2xl px-2 py-1.5 shadow-lg shadow-slate-200/50 dark:shadow-none">
         <div className="flex items-center justify-around">
           {BOTTOM_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -58,7 +58,7 @@ export function BottomNav() {
                 {isActive && (
                   <motion.span
                     layoutId="bottomNavPill"
-                    className="absolute inset-0 rounded-xl bg-indigo-600/12 mx-0.5"
+                    className="absolute inset-0 rounded-xl bg-indigo-50 border border-indigo-200/60 dark:bg-indigo-600/15 dark:border-transparent mx-0.5"
                     transition={{ type: "spring", stiffness: 380, damping: 32 }}
                   />
                 )}
@@ -67,8 +67,8 @@ export function BottomNav() {
                   className={cn(
                     "relative z-10 p-1.5 rounded-lg transition-all duration-200",
                     isActive
-                      ? "text-indigo-400 scale-110"
-                      : "text-zinc-500 group-hover:text-zinc-300"
+                      ? "text-indigo-600 dark:text-indigo-400 scale-110"
+                      : "text-slate-500 dark:text-zinc-500 group-hover:text-slate-800 dark:group-hover:text-zinc-300"
                   )}
                 >
                   <Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.2 : 1.7} />
@@ -77,7 +77,7 @@ export function BottomNav() {
                 <span
                   className={cn(
                     "relative z-10 text-[9px] font-semibold tracking-tight transition-colors duration-200",
-                    isActive ? "text-indigo-400" : "text-zinc-600 group-hover:text-zinc-400"
+                    isActive ? "text-indigo-600 dark:text-indigo-400" : "text-slate-500 dark:text-zinc-500 group-hover:text-slate-700 dark:group-hover:text-zinc-400"
                   )}
                 >
                   {item.label}

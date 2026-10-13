@@ -43,44 +43,67 @@
   color: #0f172a;
 }
 
+:root:not(.dark) body,
 .light body {
   background-color: var(--background);
   color: #0f172a;
 }
 
 /* Headings in bright theme always have strong dark slate styling */
-.light h1:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]),
-.light h2:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]),
+:root:not(.dark) h1:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-clip-text"]),
+.light h1:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-clip-text"]),
+:root:not(.dark) h2:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-clip-text"]),
+.light h2:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-clip-text"]),
+:root:not(.dark) h3:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]),
 .light h3:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]),
+:root:not(.dark) h4:not(button):not(button *),
 .light h4:not(button):not(button *),
+:root:not(.dark) h5:not(button):not(button *),
 .light h5:not(button):not(button *),
+:root:not(.dark) h6:not(button):not(button *),
 .light h6:not(button):not(button *) {
   color: #0f172a !important;
 }
 
 /* Paragraphs, descriptions and spans in bright theme */
+:root:not(.dark) p:not(button *):not([class*="text-emerald"]):not([class*="text-amber"]):not([class*="text-rose"]):not([class*="text-indigo"]):not([class*="text-cyan"]),
 .light p:not(button *):not([class*="text-emerald"]):not([class*="text-amber"]):not([class*="text-rose"]):not([class*="text-indigo"]):not([class*="text-cyan"]),
+:root:not(.dark) label:not(button *),
 .light label:not(button *) {
   color: #334155 !important;
 }
 
 /* Adapt zinc/white text classes in bright theme so words never wash out */
+:root:not(.dark) .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-blue"]):not([class*="bg-gradient"]):not(.badge):not([data-badge]),
 .light .text-white:not(button):not(button *):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-violet"]):not([class*="bg-blue"]):not([class*="bg-gradient"]):not(.badge):not([data-badge]),
+:root:not(.dark) .text-zinc-100:not(button *),
 .light .text-zinc-100:not(button *),
+:root:not(.dark) .text-zinc-200:not(button *),
 .light .text-zinc-200:not(button *) {
   color: #0f172a !important;
 }
 
+:root:not(.dark) .text-zinc-300:not(button *),
 .light .text-zinc-300:not(button *),
+:root:not(.dark) .text-zinc-400:not(button *),
 .light .text-zinc-400:not(button *) {
-  color: #475569 !important;
+  color: #334155 !important;
 }
 
+:root:not(.dark) .text-zinc-500:not(button *),
 .light .text-zinc-500:not(button *) {
   color: #64748b !important;
 }
 
 /* Card backgrounds and borders in bright theme */
+:root:not(.dark) .rounded-xl.border.bg-zinc-950\/40,
+:root:not(.dark) .rounded-xl.border.bg-zinc-950\/60,
+:root:not(.dark) .rounded-xl.border.bg-zinc-950\/20,
+:root:not(.dark) .glass-card,
+:root:not(.dark) [class*="bg-zinc-950/"],
+:root:not(.dark) .bg-zinc-950,
+:root:not(.dark) .bg-zinc-900,
+:root:not(.dark) [class*="bg-zinc-900/"],
 .light .rounded-xl.border.bg-zinc-950\/40,
 .light .rounded-xl.border.bg-zinc-950\/60,
 .light .rounded-xl.border.bg-zinc-950\/20,
@@ -91,29 +114,44 @@
 .light [class*="bg-zinc-900/"] {
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06) !important;
   color: #0f172a !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
+/* Borders in bright theme */
+:root:not(.dark) [class*="border-white/"],
+.light [class*="border-white/"],
+:root:not(.dark) [class*="border-zinc-800"],
+.light [class*="border-zinc-800"],
+:root:not(.dark) [class*="border-zinc-900"],
+.light [class*="border-zinc-900"] {
+  border-color: #e2e8f0 !important;
+}
+
 /* Sidebar in Bright Theme */
+:root:not(.dark) aside,
 .light aside {
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
   box-shadow: 2px 0 8px 0 rgba(0, 0, 0, 0.04) !important;
 }
 
+:root:not(.dark) aside a,
 .light aside a {
   color: #1e293b !important;
   font-weight: 500;
 }
 
+:root:not(.dark) aside a:hover,
 .light aside a:hover {
   background-color: #f1f5f9 !important;
   color: #0f172a !important;
 }
 
+:root:not(.dark) aside a.bg-indigo-600\/10,
+:root:not(.dark) aside a[class*="text-indigo-400"],
 .light aside a.bg-indigo-600\/10,
 .light aside a[class*="text-indigo-400"] {
   background-color: rgba(99, 102, 241, 0.15) !important;
@@ -121,17 +159,21 @@
   font-weight: 700 !important;
 }
 
+:root:not(.dark) aside a.bg-indigo-600\/10 *,
+:root:not(.dark) aside a[class*="text-indigo-400"] *,
 .light aside a.bg-indigo-600\/10 *,
 .light aside a[class*="text-indigo-400"] * {
   color: #4338ca !important;
   stroke: #4338ca !important;
 }
 
+:root:not(.dark) aside button,
 .light aside button {
   color: #334155 !important;
   font-weight: 700 !important;
 }
 
+:root:not(.dark) aside span[class*="font-mono"],
 .light aside span[class*="font-mono"] {
   background-color: #e2e8f0 !important;
   color: #1e293b !important;
@@ -140,6 +182,7 @@
 }
 
 /* Header in Bright Theme */
+:root:not(.dark) header,
 .light header {
   background-color: rgba(255, 255, 255, 0.98) !important;
   border-color: #cbd5e1 !important;
@@ -148,6 +191,17 @@
 }
 
 /* Tabs in Bright Theme */
+:root:not(.dark) [role="tablist"],
+.light [role="tablist"],
+:root:not(.dark) [class*="TabsList"],
+.light [class*="TabsList"] {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+:root:not(.dark) [role="tab"],
+:root:not(.dark) [class*="TabsTrigger"],
+:root:not(.dark) button[role="tab"],
 .light [role="tab"],
 .light [class*="TabsTrigger"],
 .light button[role="tab"] {
@@ -155,30 +209,41 @@
   font-weight: 600 !important;
 }
 
+:root:not(.dark) [data-state=active],
+:root:not(.dark) [class*="data-[state=active]"],
 .light [data-state=active],
 .light [class*="data-[state=active]"] {
   background-color: #ffffff !important;
   color: #4338ca !important;
   font-weight: 700 !important;
-  border: 1px solid #94a3b8 !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
 }
 
 /* Inputs in Bright Theme */
+:root:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
 .light input:not([type="checkbox"]):not([type="radio"]),
+:root:not(.dark) textarea,
 .light textarea,
+:root:not(.dark) select,
 .light select {
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
   color: #0f172a !important;
 }
 
+:root:not(.dark) input::placeholder,
 .light input::placeholder,
+:root:not(.dark) textarea::placeholder,
 .light textarea::placeholder {
   color: #94a3b8 !important;
 }
 
+:root:not(.dark) input:focus,
 .light input:focus,
+:root:not(.dark) textarea:focus,
 .light textarea:focus,
+:root:not(.dark) select:focus,
 .light select:focus {
   border-color: #4f46e5 !important;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;

@@ -79,32 +79,32 @@ const CopyButton = ({ text }: { text: string }) => {
 /* ─── Markdown Renderer Components ─── */
 const markdownComponents = {
   p: ({ children, ...props }: any) => <p className="mb-2 last:mb-0 leading-relaxed" {...props}>{children}</p>,
-  strong: ({ children, ...props }: any) => <strong className="font-bold text-white" {...props}>{children}</strong>,
-  em: ({ children, ...props }: any) => <em className="italic text-zinc-300" {...props}>{children}</em>,
-  ul: ({ children, ...props }: any) => <ul className="list-disc list-inside space-y-1 mb-2 text-zinc-300" {...props}>{children}</ul>,
-  ol: ({ children, ...props }: any) => <ol className="list-decimal list-inside space-y-1 mb-2 text-zinc-300" {...props}>{children}</ol>,
-  li: ({ children, ...props }: any) => <li className="text-sm text-zinc-300 leading-relaxed" {...props}>{children}</li>,
-  h1: ({ children, ...props }: any) => <h1 className="text-lg font-bold text-white mb-2 mt-3" {...props}>{children}</h1>,
-  h2: ({ children, ...props }: any) => <h2 className="text-base font-bold text-white mb-2 mt-3" {...props}>{children}</h2>,
-  h3: ({ children, ...props }: any) => <h3 className="text-sm font-bold text-white mb-1.5 mt-2" {...props}>{children}</h3>,
+  strong: ({ children, ...props }: any) => <strong className="font-bold text-slate-900 dark:text-white" {...props}>{children}</strong>,
+  em: ({ children, ...props }: any) => <em className="italic text-slate-700 dark:text-zinc-300" {...props}>{children}</em>,
+  ul: ({ children, ...props }: any) => <ul className="list-disc list-inside space-y-1 mb-2 text-slate-700 dark:text-zinc-300" {...props}>{children}</ul>,
+  ol: ({ children, ...props }: any) => <ol className="list-decimal list-inside space-y-1 mb-2 text-slate-700 dark:text-zinc-300" {...props}>{children}</ol>,
+  li: ({ children, ...props }: any) => <li className="text-sm text-slate-700 dark:text-zinc-300 leading-relaxed" {...props}>{children}</li>,
+  h1: ({ children, ...props }: any) => <h1 className="text-lg font-bold text-slate-900 dark:text-white mb-2 mt-3" {...props}>{children}</h1>,
+  h2: ({ children, ...props }: any) => <h2 className="text-base font-bold text-slate-900 dark:text-white mb-2 mt-3" {...props}>{children}</h2>,
+  h3: ({ children, ...props }: any) => <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1.5 mt-2" {...props}>{children}</h3>,
   code: ({ inline, className, children, ...props }: any) => {
     if (inline) {
       return (
-        <code className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/15 text-indigo-300 text-[12px] font-mono" {...props}>
+        <code className="px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/15 text-indigo-700 dark:text-indigo-300 text-[12px] font-mono" {...props}>
           {children}
         </code>
       );
     }
     return (
       <div className="relative group my-2">
-        <pre className="bg-black/40 border border-white/[0.06] rounded-xl p-4 overflow-x-auto text-[12px] font-mono text-zinc-300 leading-relaxed">
+        <pre className="bg-slate-900 dark:bg-black/40 border border-slate-800 dark:border-white/[0.06] rounded-xl p-4 overflow-x-auto text-[12px] font-mono text-slate-100 dark:text-zinc-300 leading-relaxed">
           <code {...props}>{children}</code>
         </pre>
       </div>
     );
   },
   blockquote: ({ children, ...props }: any) => (
-    <blockquote className="border-l-2 border-indigo-500/40 pl-4 py-1 my-2 text-zinc-400 italic" {...props}>
+    <blockquote className="border-l-2 border-indigo-500/40 pl-4 py-1 my-2 text-slate-600 dark:text-zinc-400 italic" {...props}>
       {children}
     </blockquote>
   ),
@@ -114,17 +114,17 @@ const markdownComponents = {
     </div>
   ),
   th: ({ children, ...props }: any) => (
-    <th className="text-left text-[11px] font-bold text-zinc-400 uppercase tracking-wider px-3 py-2 border-b border-white/[0.06]" {...props}>{children}</th>
+    <th className="text-left text-[11px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider px-3 py-2 border-b border-slate-200 dark:border-white/[0.06]" {...props}>{children}</th>
   ),
   td: ({ children, ...props }: any) => (
-    <td className="px-3 py-2 text-sm text-zinc-300 border-b border-white/[0.03]" {...props}>{children}</td>
+    <td className="px-3 py-2 text-sm text-slate-700 dark:text-zinc-300 border-b border-slate-100 dark:border-white/[0.03]" {...props}>{children}</td>
   ),
   a: ({ children, href, ...props }: any) => (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2" {...props}>
+    <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline underline-offset-2" {...props}>
       {children}
     </a>
   ),
-  hr: (props: any) => <hr className="my-3 border-white/[0.06]" {...props} />,
+  hr: (props: any) => <hr className="my-3 border-slate-200 dark:border-white/[0.06]" {...props} />,
 };
 
 /* ─── Single Chat Message ─── */
@@ -141,7 +141,7 @@ const ChatBubble = ({ msg, isLast }: { msg: ChatMessage; isLast: boolean }) => {
         transition={{ duration: 0.3 }}
         className="flex justify-center py-2"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-zinc-900/50 border border-white/[0.04] rounded-full text-[11px] text-zinc-500 italic">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-100 dark:bg-zinc-900/50 border border-slate-200 dark:border-white/[0.04] rounded-full text-[11px] text-slate-500 dark:text-zinc-500 italic">
           <Cpu className="h-3 w-3" />
           <span>Session initialized</span>
         </div>
@@ -169,18 +169,18 @@ const ChatBubble = ({ msg, isLast }: { msg: ChatMessage; isLast: boolean }) => {
       <div className={`flex flex-col ${isUser ? "items-end" : "items-start"} max-w-[78%] min-w-0`}>
         {/* Sender Label */}
         <div className={`flex items-center gap-2 mb-1 ${isUser ? "flex-row-reverse" : ""}`}>
-          <span className="text-[11px] font-semibold text-zinc-500">
+          <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-500">
             {isUser ? "You" : (msg.model || "AI Assistant")}
           </span>
-          <span className="text-[10px] text-zinc-600">{relativeTime(msg.timestamp)}</span>
+          <span className="text-[10px] text-slate-400 dark:text-zinc-600">{relativeTime(msg.timestamp)}</span>
         </div>
 
         {/* Bubble */}
         <div
           className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isUser
-              ? "bg-indigo-600 text-white rounded-tr-sm"
-              : "bg-zinc-800/80 text-zinc-100 rounded-tl-sm border border-white/[0.06]"
+              ? "bg-indigo-600 text-white rounded-tr-sm shadow-xs"
+              : "bg-slate-100 text-slate-900 border border-slate-200/80 rounded-tl-sm dark:bg-zinc-800/80 dark:text-zinc-100 dark:border-white/[0.06] shadow-xs"
           }`}
         >
           {isUser ? (
@@ -465,18 +465,18 @@ export default function AiPlaygroundPage() {
   const visibleMessages = messages.filter((m) => m.role !== "system" || messages.length === 1);
 
   return (
-    <div className="space-y-5 text-white">
+    <div className="space-y-5 text-slate-900 dark:text-white">
       {/* ═══ Header ═══ */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-600/20 via-violet-600/15 to-purple-600/10 border border-indigo-500/20 shadow-lg shadow-indigo-500/5">
-            <Sparkles className="h-6 w-6 text-indigo-400" />
+            <Sparkles className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
               AI Playground
             </h1>
-            <p className="text-zinc-500 text-sm mt-0.5">
+            <p className="text-slate-600 dark:text-zinc-500 text-sm mt-0.5">
               Chat with AI models and deployed agents in real time
             </p>
           </div>
@@ -485,22 +485,22 @@ export default function AiPlaygroundPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 items-stretch">
         {/* ═══ Left Panel: Config ═══ */}
-        <Card className="lg:col-span-1 border border-white/[0.08] bg-zinc-950/40 relative overflow-hidden flex flex-col justify-between backdrop-blur-xl">
+        <Card className="lg:col-span-1 border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950/40 relative overflow-hidden flex flex-col justify-between shadow-xs">
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
 
           <CardHeader className="p-5">
-            <CardTitle className="text-base font-semibold text-white">Agent & Parameters</CardTitle>
-            <CardDescription className="text-xs text-zinc-500 mt-1">
+            <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">Agent & Parameters</CardTitle>
+            <CardDescription className="text-xs text-slate-500 dark:text-zinc-500 mt-1">
               Select assistant agent or model backend.
             </CardDescription>
           </CardHeader>
 
           <CardContent className="p-5 pt-0 space-y-4 flex-1">
             {/* Agent Selector */}
-            <div className="space-y-1.5 border-b border-white/5 pb-4">
-              <label className="text-xs font-semibold text-zinc-400 block">Agent Profile</label>
+            <div className="space-y-1.5 border-b border-slate-100 dark:border-white/5 pb-4">
+              <label className="text-xs font-semibold text-slate-700 dark:text-zinc-400 block">Agent Profile</label>
               <Select value={selectedBotId} onValueChange={handleBotChange}>
-                <SelectTrigger className="bg-indigo-600/10 border-indigo-500/20 text-indigo-300">
+                <SelectTrigger className="bg-indigo-50 dark:bg-indigo-600/10 border-indigo-200 dark:border-indigo-500/20 text-indigo-900 dark:text-indigo-300">
                   <SelectValue placeholder="General Assistant" />
                 </SelectTrigger>
                 <SelectContent>
@@ -516,7 +516,7 @@ export default function AiPlaygroundPage() {
 
             {/* Provider Selector */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-400 block">AI Provider</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-zinc-400 block">AI Provider</label>
               <Select value={selectedProviderId} onValueChange={handleProviderChange}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
                   <SelectValue placeholder="Select provider" />
@@ -714,26 +714,26 @@ export default function AiPlaygroundPage() {
         </Card>
 
         {/* ═══ Right Side: Chat Window ═══ */}
-        <Card className="lg:col-span-3 border border-white/[0.08] bg-zinc-950/30 flex flex-col h-[calc(100vh-220px)] min-h-[500px] max-h-[850px] overflow-hidden backdrop-blur-xl relative">
+        <Card className="lg:col-span-3 border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950/30 flex flex-col h-[calc(100vh-220px)] min-h-[500px] max-h-[850px] overflow-hidden shadow-xs relative">
           {/* Chat Header */}
-          <div className="p-4 border-b border-white/[0.06] flex items-center justify-between shrink-0 bg-zinc-950/60 backdrop-blur-xl">
+          <div className="p-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between shrink-0 bg-slate-50/70 dark:bg-zinc-950/60 backdrop-blur-xl">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-600/15">
                 <Brain className="h-4.5 w-4.5 text-white" />
               </div>
               <div>
-                <CardTitle className="text-sm text-white font-semibold flex items-center gap-2">
+                <CardTitle className="text-sm text-slate-900 dark:text-white font-semibold flex items-center gap-2">
                   {selectedBotId === "general" ? "AI Playground" : (activeBots.find((b) => b.botId === selectedBotId)?.bot?.name || "AI Agent")}
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Online
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-[10px] text-emerald-700 dark:text-emerald-400 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
                   </span>
                 </CardTitle>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
+                <p className="text-[11px] text-slate-500 dark:text-zinc-500 mt-0.5">
                   {activeProvider.name} · {activeModel.name}
                 </p>
               </div>
             </div>
-            <Button onClick={clearChat} variant="ghost" size="sm" className="h-8 text-xs text-zinc-500 hover:text-white hover:bg-white/5 gap-1.5">
+            <Button onClick={clearChat} variant="ghost" size="sm" className="h-8 text-xs text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-500 dark:hover:text-white dark:hover:bg-white/5 gap-1.5">
               <RefreshCw className="h-3.5 w-3.5" /> New Chat
             </Button>
           </div>
@@ -823,7 +823,7 @@ export default function AiPlaygroundPage() {
           </AnimatePresence>
 
           {/* ═══ Input Area ═══ */}
-          <div className="p-4 border-t border-white/[0.06] bg-zinc-950/60 backdrop-blur-xl shrink-0 space-y-3">
+          <div className="p-4 border-t border-slate-100 dark:border-white/[0.06] bg-slate-50/70 dark:bg-zinc-950/60 backdrop-blur-xl shrink-0 space-y-3">
             {/* Quick Suggestion Chips */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
               {[
@@ -838,7 +838,7 @@ export default function AiPlaygroundPage() {
                   type="button"
                   onClick={() => handleSendMessage(null, chip.prompt)}
                   disabled={isLoading}
-                  className="shrink-0 px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-indigo-500/15 border border-white/[0.08] hover:border-indigo-500/30 text-zinc-300 hover:text-white text-[11px] font-medium transition-all"
+                  className="shrink-0 px-2.5 py-1 rounded-lg bg-white dark:bg-white/[0.04] hover:bg-indigo-50 dark:hover:bg-indigo-500/15 border border-slate-200 dark:border-white/[0.08] hover:border-indigo-300 dark:hover:border-indigo-500/30 text-slate-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-white text-[11px] font-medium transition-all shadow-xs"
                 >
                   {chip.label}
                 </button>
@@ -855,7 +855,7 @@ export default function AiPlaygroundPage() {
                   placeholder={selectedBotId === "general" ? `Message ${activeModel.name}...` : `Message ${activeBots.find((b) => b.botId === selectedBotId)?.bot?.name || "Agent"}...`}
                   disabled={isLoading}
                   rows={1}
-                  className="w-full resize-none bg-white/[0.04] border border-white/[0.08] text-white placeholder-zinc-600 rounded-xl px-4 py-3 pr-12 text-sm leading-relaxed focus:outline-none focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 focus:shadow-[0_0_20px_rgba(99,102,241,0.08)] transition-all disabled:opacity-50"
+                  className="w-full resize-none bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-600 rounded-xl px-4 py-3 pr-12 text-sm leading-relaxed focus:outline-none focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 focus:shadow-[0_0_20px_rgba(99,102,241,0.08)] transition-all disabled:opacity-50"
                   style={{ maxHeight: "160px" }}
                 />
                 <div className="absolute bottom-2 right-2 flex items-center gap-1">

@@ -130,7 +130,7 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-zinc-200/10 dark:border-white/[0.06] bg-zinc-950/80 backdrop-blur-2xl px-3 md:px-6 flex items-center justify-between sticky top-0 z-30 text-zinc-100 shrink-0">
+    <header className="h-14 border-b border-slate-200/80 dark:border-white/[0.06] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl px-3 md:px-6 flex items-center justify-between sticky top-0 z-30 text-slate-800 dark:text-zinc-100 shrink-0 shadow-xs">
       {/* Left: Mobile nav trigger + Brand / Desktop: Breadcrumbs */}
       <div className="flex items-center gap-3">
         {/* Mobile nav trigger & Brand */}
@@ -139,12 +139,12 @@ export function Header() {
             variant="ghost"
             size="icon"
             onClick={() => setIsMobileNavOpen(true)}
-            className="text-zinc-400 hover:text-zinc-100 h-9 w-9 rounded-xl hover:bg-white/[0.06]"
+            className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 h-9 w-9 rounded-xl dark:hover:bg-white/[0.06]"
           >
             <Menu className="h-5 w-5" />
           </Button>
           {/* Current page name on mobile */}
-          <span className="font-semibold text-sm text-white truncate max-w-[140px]">
+          <span className="font-semibold text-sm text-slate-900 dark:text-white truncate max-w-[140px]">
             {breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].label : "Nexora"}
           </span>
         </div>
@@ -153,19 +153,19 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-1.5 text-sm">
           <Link
             href="/dashboard"
-            className="text-zinc-500 hover:text-zinc-400 transition-colors font-medium"
+            className="text-slate-500 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-zinc-400 transition-colors font-medium text-xs"
           >
             Home
           </Link>
           {breadcrumbs.map((crumb) => (
             <React.Fragment key={crumb.href}>
-              <ChevronRight className="h-3 w-3 text-zinc-600" />
+              <ChevronRight className="h-3 w-3 text-slate-400 dark:text-zinc-600" />
               {crumb.isLast ? (
-                <span className="text-zinc-100 font-semibold">{crumb.label}</span>
+                <span className="text-slate-900 dark:text-zinc-100 font-bold text-xs">{crumb.label}</span>
               ) : (
                 <Link
                   href={crumb.href}
-                  className="text-zinc-500 hover:text-zinc-400 transition-colors font-medium"
+                  className="text-slate-500 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-zinc-400 transition-colors font-medium text-xs"
                 >
                   {crumb.label}
                 </Link>
@@ -181,11 +181,11 @@ export function Header() {
         <Button
           variant="ghost"
           onClick={triggerCommandPalette}
-          className="hidden md:flex items-center gap-2 h-8 px-3 text-zinc-500 hover:text-zinc-400 hover:bg-zinc-800/10 border border-zinc-200/10 rounded-lg"
+          className="hidden md:flex items-center gap-2 h-8 px-3 text-slate-500 hover:text-slate-800 hover:bg-slate-100/80 dark:text-zinc-500 dark:hover:text-zinc-400 dark:hover:bg-zinc-800/10 border border-slate-200 dark:border-zinc-200/10 rounded-lg shadow-2xs"
         >
           <Search className="h-3.5 w-3.5" />
           <span className="text-xs">Search...</span>
-          <kbd className="ml-2 flex items-center gap-0.5 px-1.5 py-0.5 bg-zinc-800/10 border border-zinc-200/20 rounded text-[10px] text-zinc-500 font-mono">
+          <kbd className="ml-2 flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-100 dark:bg-zinc-800/10 border border-slate-200 dark:border-zinc-200/20 rounded text-[10px] text-slate-600 dark:text-zinc-500 font-mono">
             <Command className="h-2.5 w-2.5" />K
           </kbd>
         </Button>
@@ -195,7 +195,7 @@ export function Header() {
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800/10 h-8 w-8"
+          className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-500 dark:hover:text-zinc-100 dark:hover:bg-zinc-800/10 h-8 w-8 rounded-lg"
           title="Toggle Theme"
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -207,7 +207,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800/10 h-8 w-8 relative"
+              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-500 dark:hover:text-zinc-100 dark:hover:bg-zinc-800/10 h-8 w-8 rounded-lg relative"
               title="Notifications"
             >
               <Bell className="h-4 w-4" />

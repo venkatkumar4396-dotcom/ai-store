@@ -249,7 +249,7 @@ export default function OverviewDashboardPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-gradient-to-br from-indigo-500/[0.08] via-violet-500/[0.04] to-slate-100/50 dark:to-transparent p-6 md:p-8"
+        className="relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-white/[0.06] bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/50 dark:from-indigo-950/20 dark:via-zinc-950/40 dark:to-transparent p-6 md:p-8 shadow-xs"
       >
         <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-violet-500/8 rounded-full blur-2xl pointer-events-none" />
@@ -258,11 +258,11 @@ export default function OverviewDashboardPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               {greeting.icon}
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 {greeting.text}{userName ? `, ${userName}` : ""}
               </h1>
             </div>
-            <p className="text-slate-800 dark:text-zinc-300 text-sm max-w-lg font-medium">
+            <p className="text-slate-600 dark:text-zinc-300 text-sm max-w-lg font-medium leading-relaxed">
               Monitor your AI agents, track performance, and manage your automated workflows from one unified control center.
             </p>
           </div>
@@ -271,12 +271,12 @@ export default function OverviewDashboardPage() {
               onClick={() => fetchDashboardData(true)}
               disabled={isRefreshing}
               variant="outline"
-              className="border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white gap-1.5"
+              className="border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white gap-1.5 rounded-xl shadow-xs"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
               Sync
             </Button>
-            <Button className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/10 gap-1.5" asChild>
+            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 gap-1.5 rounded-xl font-semibold" asChild>
               <Link href="/bots">
                 Deploy Agent <ArrowRight className="h-4 w-4" />
               </Link>
@@ -293,7 +293,7 @@ export default function OverviewDashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <Card className="border border-dashed border-indigo-500/25 bg-gradient-to-br from-indigo-600/[0.06] via-violet-600/[0.03] to-transparent relative overflow-hidden">
+          <Card className="border border-dashed border-indigo-500/25 bg-gradient-to-br from-indigo-50 via-white to-violet-50/50 dark:from-indigo-600/[0.06] dark:via-violet-600/[0.03] dark:to-transparent relative overflow-hidden shadow-xs">
             <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet-500/8 rounded-full blur-2xl pointer-events-none" />
             <CardContent className="p-8 md:p-10 relative z-10">
@@ -302,13 +302,13 @@ export default function OverviewDashboardPage() {
                   <Rocket className="h-8 w-8 text-white" />
                 </div>
                 <div className="flex-1 text-center md:text-left space-y-2">
-                  <h3 className="text-xl font-bold text-white">Get Started with AI Agents</h3>
-                  <p className="text-zinc-400 text-sm max-w-lg leading-relaxed">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Get Started with AI Agents</h3>
+                  <p className="text-slate-600 dark:text-zinc-400 text-sm max-w-lg leading-relaxed">
                     Welcome to Nexora! Deploy your first AI agent from the Bot Store to unlock powerful features — stock analysis, travel booking, document processing, and more.
                   </p>
                 </div>
                 <Button
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 px-6 h-11 font-semibold gap-2 shrink-0"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 px-6 h-11 font-semibold gap-2 shrink-0 rounded-xl"
                   asChild
                 >
                   <Link href="/bots">
@@ -334,12 +334,12 @@ export default function OverviewDashboardPage() {
               >
                 <Link
                   href={action.href}
-                  className="group flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-zinc-950/40 hover:bg-white/[0.04] hover:border-indigo-500/20 transition-all duration-200"
+                  className="group flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:border-indigo-300 dark:hover:border-indigo-500/20 transition-all duration-200 shadow-xs hover:shadow-md hover:shadow-slate-200/50"
                 >
-                  <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs`}>
                     <Icon className="h-4 w-4 text-white" />
                   </div>
-                  <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
                     {action.label}
                   </span>
                 </Link>

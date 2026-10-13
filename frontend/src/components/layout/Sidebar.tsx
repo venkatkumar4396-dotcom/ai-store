@@ -223,24 +223,24 @@ export function Sidebar() {
         href={item.href}
         title={isCollapsed ? item.label : undefined}
         className={cn(
-          "relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
+          "relative flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group",
           isCollapsed && "justify-center px-0 mx-1",
           isActive
-            ? "text-indigo-400 bg-indigo-600/10"
-            : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/10"
+            ? "text-indigo-600 bg-indigo-50/90 border border-indigo-200/60 font-semibold shadow-xs dark:text-indigo-400 dark:bg-indigo-600/15 dark:border-indigo-500/20"
+            : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100/70 dark:hover:bg-zinc-800/20 font-medium"
         )}
       >
         {/* Active indicator pill */}
         {isActive && (
           <span
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-500 rounded-full shadow-md shadow-indigo-500/50 transition-all duration-150"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-600 dark:bg-indigo-500 rounded-full shadow-xs transition-all duration-150"
           />
         )}
 
         <span
           className={cn(
             "transition-colors shrink-0",
-            isActive ? "text-indigo-400" : "text-zinc-500 group-hover:text-zinc-300"
+            isActive ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-zinc-500 group-hover:text-slate-600 dark:group-hover:text-zinc-300"
           )}
         >
           <Icon className="h-[18px] w-[18px]" />
@@ -254,14 +254,14 @@ export function Sidebar() {
 
         {/* Badge */}
         {!isCollapsed && item.badge && (
-          <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 rounded-full">
+          <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 rounded-full">
             {item.badge}
           </span>
         )}
 
         {/* Active glow dot (collapsed) */}
         {isActive && isCollapsed && (
-          <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-md shadow-indigo-400/50" />
+          <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 shadow-xs" />
         )}
       </Link>
     );
@@ -271,10 +271,10 @@ export function Sidebar() {
     <motion.aside
       animate={{ width: isCollapsed ? 70 : 260 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="hidden md:flex flex-col h-screen bg-zinc-950/95 backdrop-blur-xl border-r border-zinc-200/10 dark:border-white/[0.06] shrink-0 sticky top-0 text-zinc-100 z-40 overflow-hidden"
+      className="hidden md:flex flex-col h-screen bg-white dark:bg-zinc-950/95 backdrop-blur-xl border-r border-slate-200/80 dark:border-white/[0.06] shrink-0 sticky top-0 text-slate-800 dark:text-zinc-100 z-40 overflow-hidden shadow-xs"
     >
       {/* Header */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-zinc-200/10 dark:border-white/[0.06]">
+      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200/80 dark:border-white/[0.06]">
         <AnimatePresence mode="wait">
           {!isCollapsed && (
             <motion.div
@@ -284,10 +284,10 @@ export function Sidebar() {
               transition={{ duration: 0.2 }}
               className="flex items-center gap-2.5"
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 via-violet-500 to-cyan-500 flex items-center justify-center font-bold text-[#ffffff] shadow-lg shadow-indigo-500/20">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 via-violet-500 to-cyan-500 flex items-center justify-center font-bold text-[#ffffff] shadow-md shadow-indigo-600/20">
                 N
               </div>
-              <span className="font-bold text-lg gradient-text-white">
+              <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">
                 Nexora
               </span>
             </motion.div>
@@ -295,7 +295,7 @@ export function Sidebar() {
         </AnimatePresence>
 
         {isCollapsed && (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 via-violet-500 to-cyan-500 flex items-center justify-center font-bold text-[#ffffff] mx-auto shadow-lg shadow-indigo-500/20">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 via-violet-500 to-cyan-500 flex items-center justify-center font-bold text-[#ffffff] mx-auto shadow-md shadow-indigo-600/20">
             N
           </div>
         )}
@@ -304,7 +304,7 @@ export function Sidebar() {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800/10 h-8 w-8"
+          className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-zinc-500 dark:hover:text-zinc-100 dark:hover:bg-zinc-800/10 h-8 w-8 rounded-lg"
         >
           <ChevronLeft
             className={cn("h-4 w-4 transition-transform duration-300", isCollapsed && "rotate-180")}
@@ -321,7 +321,7 @@ export function Sidebar() {
               {!isCollapsed && (
                 <button
                   onClick={() => toggleGroup(group.label)}
-                  className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest hover:text-zinc-400 transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest hover:text-slate-600 dark:hover:text-zinc-400 transition-colors"
                 >
                   <span>{group.label}</span>
                   <ChevronDown
@@ -335,7 +335,7 @@ export function Sidebar() {
 
               {/* Collapsed divider */}
               {isCollapsed && group.label !== "Overview" && (
-                <div className="mx-3 my-2 h-px bg-white/5" />
+                <div className="mx-3 my-2 h-px bg-slate-200 dark:bg-white/5" />
               )}
 
               {/* Group Content */}
@@ -375,26 +375,26 @@ export function Sidebar() {
                                   className={cn(
                                     "w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all group",
                                     catHasActive
-                                      ? "text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/15"
-                                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                                      ? "text-indigo-700 bg-indigo-50/80 dark:text-indigo-300 dark:bg-indigo-500/10"
+                                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/40"
                                   )}
                                 >
                                   <div className="flex items-center gap-2 min-w-0">
                                     <span
                                       className={cn(
                                         "w-1.5 h-1.5 rounded-full shrink-0 transition-colors",
-                                        catHasActive ? "bg-indigo-400" : "bg-zinc-600 group-hover:bg-zinc-400"
+                                        catHasActive ? "bg-indigo-600 dark:bg-indigo-400" : "bg-slate-300 dark:bg-zinc-600 group-hover:bg-slate-400 dark:group-hover:bg-zinc-400"
                                       )}
                                     />
                                     <span className="truncate">{cat.name}</span>
                                   </div>
                                   <div className="flex items-center gap-1.5 shrink-0">
-                                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800/80 text-zinc-400 group-hover:text-zinc-300 border border-white/[0.04]">
+                                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200 dark:bg-zinc-800/80 dark:text-zinc-400 dark:border-white/[0.04]">
                                       {visibleCategoryItems.length}
                                     </span>
                                     <ChevronDown
                                       className={cn(
-                                        "h-3 w-3 text-zinc-500 group-hover:text-zinc-300 transition-transform duration-200",
+                                        "h-3 w-3 text-slate-400 dark:text-zinc-500 group-hover:text-slate-600 dark:group-hover:text-zinc-300 transition-transform duration-200",
                                         !isCategoryOpen && "-rotate-90"
                                       )}
                                     />
@@ -408,7 +408,7 @@ export function Sidebar() {
                                       animate={{ height: "auto", opacity: 1 }}
                                       exit={{ height: 0, opacity: 0 }}
                                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                                      className="overflow-hidden space-y-0.5 pl-2 ml-2 border-l border-zinc-800/60"
+                                      className="overflow-hidden space-y-0.5 pl-2 ml-2 border-l border-slate-200 dark:border-zinc-800/60"
                                     >
                                       {visibleCategoryItems.map(renderNavItem)}
                                     </motion.div>
@@ -435,32 +435,32 @@ export function Sidebar() {
 
       {/* Upgrade Banner (collapsed = hidden) */}
       {!isCollapsed && (
-        <div className="mx-3 mb-3 p-3 rounded-xl bg-gradient-to-br from-indigo-600/10 via-violet-600/5 to-transparent border border-indigo-500/10">
-          <div className="flex items-center gap-2 mb-2">
-            <Crown className="h-4 w-4 text-amber-400" />
-            <span className="text-xs font-semibold text-white">Upgrade to Pro</span>
+        <div className="mx-3 mb-3 p-3 rounded-2xl bg-gradient-to-br from-indigo-50 via-violet-50/50 to-white dark:from-indigo-600/10 dark:via-violet-600/5 dark:to-transparent border border-indigo-100 dark:border-indigo-500/10 shadow-xs">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Crown className="h-4 w-4 text-amber-500" />
+            <span className="text-xs font-bold text-slate-900 dark:text-white">Upgrade to Pro</span>
           </div>
-          <p className="text-[10px] text-zinc-400 leading-relaxed mb-2">
-            Unlock unlimited agents, API access, and priority support.
+          <p className="text-[11px] text-slate-600 dark:text-zinc-400 leading-relaxed mb-2.5">
+            Unlock unlimited agents, API access, and priority compute.
           </p>
-          <Button className="w-full h-7 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold" asChild>
+          <Button className="w-full h-8 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs" asChild>
             <Link href="/billing">View Plans</Link>
           </Button>
         </div>
       )}
 
       {/* User Info / Footer */}
-      <div className="p-3 border-t border-white/[0.06]">
+      <div className="p-3 border-t border-slate-200/80 dark:border-white/[0.06]">
         <div className={cn("flex items-center gap-3", isCollapsed ? "justify-center" : "")}>
-          <Avatar className="h-9 w-9 border border-zinc-200/10 dark:border-white/10 shrink-0 shadow-lg shadow-indigo-500/5">
+          <Avatar className="h-9 w-9 border border-slate-200 dark:border-white/10 shrink-0 shadow-xs">
             <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-violet-600 text-[#ffffff] font-semibold text-sm">
               {initials}
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-sm font-semibold truncate text-zinc-100">{profile.name}</span>
-              <span className="text-[11px] text-zinc-500 truncate">{profile.email || "Free Plan"}</span>
+              <span className="text-sm font-semibold truncate text-slate-900 dark:text-zinc-100">{profile.name}</span>
+              <span className="text-[11px] text-slate-500 dark:text-zinc-500 truncate">{profile.email || "Free Plan"}</span>
             </div>
           )}
           {!isCollapsed && (
@@ -468,7 +468,7 @@ export function Sidebar() {
               variant="ghost"
               size="icon"
               onClick={handleLogout}
-              className="h-8 w-8 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 shrink-0"
+              className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:text-zinc-500 dark:hover:text-rose-400 dark:hover:bg-rose-500/10 rounded-lg shrink-0"
               title="Sign Out"
             >
               <LogOut className="h-4 w-4" />

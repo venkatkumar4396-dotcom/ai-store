@@ -57,26 +57,26 @@ export function ChatWindow({
   }
 
   return (
-    <div className="flex flex-col h-full border border-white/10 bg-zinc-950/20 rounded-xl overflow-hidden text-white">
+    <div className="flex flex-col h-full border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-950/20 rounded-xl overflow-hidden text-slate-900 dark:text-white shadow-xs">
       {/* Contact Header */}
-      <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-zinc-950/40">
+      <div className="p-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between shrink-0 bg-slate-50/70 dark:bg-zinc-950/40">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border border-white/5">
-            <AvatarFallback className="bg-zinc-800 text-zinc-300">
+          <Avatar className="h-10 w-10 border border-slate-200 dark:border-white/5">
+            <AvatarFallback className="bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-300">
               {contact.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-semibold text-sm">{contact.name}</span>
-            <span className="text-xs text-zinc-500">{contact.phoneNumber}</span>
+            <span className="font-semibold text-sm text-slate-900 dark:text-white">{contact.name}</span>
+            <span className="text-xs text-slate-500 dark:text-zinc-500">{contact.phoneNumber}</span>
           </div>
         </div>
 
         {/* AI Auto-reply Toggle */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-full px-3 py-1.5">
-            <Bot className={isAiEnabled ? "h-4 w-4 text-indigo-400" : "h-4 w-4 text-zinc-500"} />
-            <Label htmlFor="ai-toggle" className="text-xs cursor-pointer select-none">
+          <div className="flex items-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-full px-3 py-1.5 shadow-xs">
+            <Bot className={isAiEnabled ? "h-4 w-4 text-indigo-600 dark:text-indigo-400" : "h-4 w-4 text-slate-400 dark:text-zinc-500"} />
+            <Label htmlFor="ai-toggle" className="text-xs cursor-pointer select-none text-slate-700 dark:text-zinc-300 font-medium">
               AI Auto-Reply
             </Label>
             <Switch
@@ -86,16 +86,16 @@ export function ChatWindow({
               className="scale-90"
             />
           </div>
-          <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white">
+          <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white">
             <MoreVertical className="h-4.5 w-4.5" />
           </Button>
         </div>
       </div>
 
       {/* Messages Viewport */}
-      <div className="flex-1 p-4 overflow-y-auto" ref={scrollContainerRef}>
+      <div className="flex-1 p-4 overflow-y-auto bg-slate-50/30 dark:bg-transparent" ref={scrollContainerRef}>
         {messages.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-zinc-500 text-sm">
+          <div className="h-full flex items-center justify-center text-slate-400 dark:text-zinc-500 text-sm">
             No messages yet. Send a message to start the conversation.
           </div>
         ) : (
@@ -104,12 +104,12 @@ export function ChatWindow({
       </div>
 
       {/* Input Form */}
-      <form onSubmit={handleSubmit} className="p-4 border-t border-white/10 bg-zinc-950/40 shrink-0 flex items-center gap-2">
+      <form onSubmit={handleSubmit} className="p-4 border-t border-slate-100 dark:border-white/10 bg-white dark:bg-zinc-950/40 shrink-0 flex items-center gap-2">
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="text-zinc-400 hover:text-white shrink-0"
+          className="text-slate-400 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white shrink-0"
         >
           <Paperclip className="h-4.5 w-4.5" />
         </Button>
@@ -118,7 +118,7 @@ export function ChatWindow({
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder={isAiEnabled ? "Type a reply (AI will learn from this)..." : "Type a message..."}
-          className="flex-1 bg-white/5 border-white/10 text-white placeholder-zinc-500 focus-visible:ring-indigo-500 h-10"
+          className="flex-1 h-10"
         />
 
         <Button

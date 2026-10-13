@@ -58,10 +58,10 @@ export default function WhatsAppSetupWizardPage() {
   };
 
   return (
-    <div className="space-y-6 text-white max-w-4xl mx-auto">
+    <div className="space-y-6 text-slate-800 dark:text-white max-w-4xl mx-auto">
       {/* Back button */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white" asChild>
+        <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white" asChild>
           <Link href="/whatsapp">
             <ArrowLeft className="h-4 w-4 mr-1.5" /> Back to Channels
           </Link>
@@ -71,10 +71,10 @@ export default function WhatsAppSetupWizardPage() {
       {!isSaved ? (
         <div className="space-y-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex items-center gap-2">
-              WhatsApp AI Customizer <Sparkles className="h-5 w-5 text-indigo-400" />
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              WhatsApp AI Customizer <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </h1>
-            <p className="text-zinc-400 text-sm mt-1">
+            <p className="text-slate-600 dark:text-zinc-400 text-sm mt-1">
               Train the LLM models on your products, customer support hours, brand tone, and customized Q&As.
             </p>
           </div>
@@ -85,17 +85,17 @@ export default function WhatsAppSetupWizardPage() {
           />
         </div>
       ) : (
-        <Card className="border border-white/10 bg-zinc-950/40 p-8 text-center max-w-xl mx-auto space-y-6 relative overflow-hidden">
+        <Card className="border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-950/40 p-8 text-center max-w-xl mx-auto space-y-6 shadow-xl relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-violet-500/0 to-cyan-500/5 blur-2xl pointer-events-none" />
           
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto animate-bounce">
+          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto animate-bounce">
             <CheckCircle2 className="h-8 w-8" />
           </div>
 
           <div className="space-y-2 relative z-10">
-            <h2 className="text-xl font-bold text-white">AI Agent Trained Successfully!</h2>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Your business customization guidelines have been compiled. The AI chatbot model has loaded these policies and is ready to resolve customer queries for <strong className="text-white">{savedData?.businessName}</strong>.
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">AI Agent Trained Successfully!</h2>
+            <p className="text-slate-600 dark:text-zinc-400 text-sm leading-relaxed">
+              Your business customization guidelines have been compiled. The AI chatbot model has loaded these policies and is ready to resolve customer queries for <strong className="text-slate-900 dark:text-white">{savedData?.businessName}</strong>.
             </p>
           </div>
 
@@ -103,7 +103,7 @@ export default function WhatsAppSetupWizardPage() {
             <Button
               onClick={() => setIsSaved(false)}
               variant="outline"
-              className="border-white/10 hover:bg-white/5 text-zinc-300"
+              className="border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-zinc-300"
             >
               Reconfigure Profile
             </Button>

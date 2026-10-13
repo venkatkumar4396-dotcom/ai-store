@@ -288,7 +288,7 @@ export function DashboardUsageChart({ data }: DashboardUsageChartProps) {
         {/* Dynamic Interactive Tooltip Card */}
         {hoveredIdx !== null && (
           <div
-            className="absolute z-20 pointer-events-none p-3.5 bg-zinc-950/90 border border-white/10 rounded-xl flex flex-col gap-1.5 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150"
+            className="absolute z-20 pointer-events-none p-3.5 bg-white/95 dark:bg-zinc-950/90 border border-slate-200 dark:border-white/10 rounded-xl flex flex-col gap-1.5 shadow-xl shadow-slate-200/50 dark:shadow-none backdrop-blur-md animate-in fade-in zoom-in-95 duration-150"
             style={{
               left: Math.max(
                 12,
@@ -301,30 +301,30 @@ export function DashboardUsageChart({ data }: DashboardUsageChartProps) {
               minWidth: "155px",
             }}
           >
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider">
               {new Date(data[hoveredIdx].date).toLocaleDateString(undefined, {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
+                 month: "long",
+                 day: "numeric",
+                 year: "numeric",
+               })}
             </span>
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between text-xs font-medium">
-                <span className="text-zinc-400">Inbound Messages</span>
-                <span className="font-mono font-bold text-indigo-400">
+                <span className="text-slate-600 dark:text-zinc-400">Inbound Messages</span>
+                <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
                   {data[hoveredIdx].inbound}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs font-medium">
-                <span className="text-zinc-400">Outbound Replies</span>
-                <span className="font-mono font-bold text-cyan-400">
+                <span className="text-slate-600 dark:text-zinc-400">Outbound Replies</span>
+                <span className="font-mono font-bold text-cyan-600 dark:text-cyan-400">
                   {data[hoveredIdx].outbound}
                 </span>
               </div>
-              <div className="border-t border-zinc-200/10 dark:border-white/5 my-1" />
+              <div className="border-t border-slate-200 dark:border-white/5 my-1" />
               <div className="flex items-center justify-between text-xs font-semibold">
-                <span className="text-zinc-100">Total Messages</span>
-                <span className="font-mono text-zinc-100">
+                <span className="text-slate-900 dark:text-zinc-100">Total Messages</span>
+                <span className="font-mono text-slate-900 dark:text-zinc-100">
                   {data[hoveredIdx].total}
                 </span>
               </div>

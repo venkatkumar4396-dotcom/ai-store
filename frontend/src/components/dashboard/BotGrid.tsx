@@ -78,11 +78,11 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "automation": return "bg-amber-500/10 text-amber-400 border border-amber-500/15";
-      case "communication": return "bg-indigo-500/10 text-indigo-400 border border-indigo-500/15";
-      case "analytics": return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/15";
-      case "productivity": return "bg-violet-500/10 text-violet-400 border border-violet-500/15";
-      default: return "bg-zinc-500/10 text-zinc-400 border border-zinc-500/15";
+      case "automation": return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20";
+      case "communication": return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20";
+      case "analytics": return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20";
+      case "productivity": return "bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-500/20";
+      default: return "bg-slate-100 text-slate-700 dark:bg-zinc-500/10 dark:text-zinc-400 border border-slate-200 dark:border-zinc-500/15";
     }
   };
 

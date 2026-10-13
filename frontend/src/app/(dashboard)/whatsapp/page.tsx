@@ -375,7 +375,7 @@ export default function WhatsAppControlCenterPage() {
 
       {/* Control Tabs */}
       <Tabs defaultValue="chat" className="w-full">
-        <TabsList className="bg-zinc-950/40 border border-white/10 w-full md:w-auto flex justify-start overflow-x-auto">
+        <TabsList className="bg-slate-100 dark:bg-zinc-950/40 border border-slate-200 dark:border-white/10 w-full md:w-auto flex justify-start overflow-x-auto">
           <TabsTrigger value="chat" className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" /> Live Chat
           </TabsTrigger>
@@ -416,15 +416,15 @@ export default function WhatsAppControlCenterPage() {
 
         {/* 2. MESSAGE TEMPLATES TAB */}
         <TabsContent value="templates" className="mt-4 space-y-4">
-          <Card className="border border-white/10 bg-zinc-950/40">
+          <Card className="border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-950/40 shadow-xs">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base text-white">Registered Templates</CardTitle>
-                <CardDescription className="text-xs text-zinc-400 mt-1">
+                <CardTitle className="text-base text-slate-900 dark:text-white">Registered Templates</CardTitle>
+                <CardDescription className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
                   Message templates approved by WhatsApp for customer outreach.
                 </CardDescription>
               </div>
-              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500">
+              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs">
                 <Plus className="h-4 w-4 mr-1" /> Create Template
               </Button>
             </CardHeader>
@@ -432,7 +432,7 @@ export default function WhatsAppControlCenterPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-white/10 text-zinc-500 text-xs uppercase">
+                    <tr className="border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-zinc-500 text-xs uppercase">
                       <th className="py-2.5">Template Name</th>
                       <th className="py-2.5">Category</th>
                       <th className="py-2.5">Status</th>
@@ -440,24 +440,24 @@ export default function WhatsAppControlCenterPage() {
                       <th className="py-2.5">Preview Content</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5 text-zinc-300">
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-slate-700 dark:text-zinc-300">
                     {templates.map((t) => (
-                      <tr key={t.id} className="hover:bg-white/5">
-                        <td className="py-3 font-semibold text-white font-mono text-xs">{t.name}</td>
+                      <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-white/5">
+                        <td className="py-3 font-semibold text-slate-900 dark:text-white font-mono text-xs">{t.name}</td>
                         <td className="py-3">{t.category}</td>
                         <td className="py-3">
                           {t.status === "approved" ? (
-                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5">
+                            <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5">
                               Approved
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5">
+                            <Badge variant="outline" className="bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 px-2 py-0.5">
                               Pending
                             </Badge>
                           )}
                         </td>
                         <td className="py-3">{t.language}</td>
-                        <td className="py-3 text-xs text-zinc-400 font-mono truncate max-w-[200px]" title={t.content}>
+                        <td className="py-3 text-xs text-slate-500 dark:text-zinc-400 font-mono truncate max-w-[200px]" title={t.content}>
                           {t.content}
                         </td>
                       </tr>
@@ -471,28 +471,28 @@ export default function WhatsAppControlCenterPage() {
 
         {/* 3. BROADCASTS TAB */}
         <TabsContent value="broadcasts" className="mt-4">
-          <Card className="border border-white/10 bg-zinc-950/40">
+          <Card className="border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-950/40 shadow-xs">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base text-white">Broadcast Campaigns</CardTitle>
-                <CardDescription className="text-xs text-zinc-400 mt-1">
+                <CardTitle className="text-base text-slate-900 dark:text-white">Broadcast Campaigns</CardTitle>
+                <CardDescription className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
                   Launch message streams to tag cohorts in mass.
                 </CardDescription>
               </div>
-              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500">
+              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs">
                 <Megaphone className="h-4 w-4 mr-1.5" /> Launch Broadcast
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-lg">
-                <Users className="h-5 w-5 text-indigo-400 shrink-0" />
+              <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-lg">
+                <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <span className="font-semibold text-white text-sm block">Summer Announcement VIPs</span>
-                  <p className="text-xs text-zinc-400 mt-0.5">Dispatched welcome templates to 1,245 VIP recipients.</p>
+                  <span className="font-semibold text-slate-900 dark:text-white text-sm block">Summer Announcement VIPs</span>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 mt-0.5">Dispatched welcome templates to 1,245 VIP recipients.</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Sent 100%</Badge>
-                  <span className="text-[10px] text-zinc-500 block mt-1">2 days ago</span>
+                  <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">Sent 100%</Badge>
+                  <span className="text-[10px] text-slate-500 dark:text-zinc-500 block mt-1">2 days ago</span>
                 </div>
               </div>
             </CardContent>
@@ -502,29 +502,29 @@ export default function WhatsAppControlCenterPage() {
         {/* 4. ANALYTICS TAB */}
         <TabsContent value="analytics" className="mt-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border border-white/10 bg-zinc-950/40">
+            <Card className="border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-950/40 shadow-xs">
               <CardHeader className="p-4">
-                <CardTitle className="text-xs uppercase text-zinc-500 font-semibold tracking-wider">Messages Delivered</CardTitle>
-                <h3 className="text-3xl font-extrabold text-white mt-2">98.4%</h3>
-                <span className="text-[11px] text-emerald-400 flex items-center mt-1">
+                <CardTitle className="text-xs uppercase text-slate-500 dark:text-zinc-500 font-semibold tracking-wider">Messages Delivered</CardTitle>
+                <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-2">98.4%</h3>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center mt-1">
                   <TrendingUp className="h-3 w-3 mr-0.5" /> +1.2% this week
                 </span>
               </CardHeader>
             </Card>
-            <Card className="border border-white/10 bg-zinc-950/40">
+            <Card className="border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-950/40 shadow-xs">
               <CardHeader className="p-4">
-                <CardTitle className="text-xs uppercase text-zinc-500 font-semibold tracking-wider">Read-through Rate</CardTitle>
-                <h3 className="text-3xl font-extrabold text-white mt-2">84.2%</h3>
-                <span className="text-[11px] text-emerald-400 flex items-center mt-1">
+                <CardTitle className="text-xs uppercase text-slate-500 dark:text-zinc-500 font-semibold tracking-wider">Read-through Rate</CardTitle>
+                <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-2">84.2%</h3>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center mt-1">
                   <TrendingUp className="h-3 w-3 mr-0.5" /> +2.4% this week
                 </span>
               </CardHeader>
             </Card>
-            <Card className="border border-white/10 bg-zinc-950/40">
+            <Card className="border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-950/40 shadow-xs">
               <CardHeader className="p-4">
-                <CardTitle className="text-xs uppercase text-zinc-500 font-semibold tracking-wider">AI Handling Rate</CardTitle>
-                <h3 className="text-3xl font-extrabold text-white mt-2">91.6%</h3>
-                <span className="text-[11px] text-emerald-400 flex items-center mt-1">
+                <CardTitle className="text-xs uppercase text-slate-500 dark:text-zinc-500 font-semibold tracking-wider">AI Handling Rate</CardTitle>
+                <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-2">91.6%</h3>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center mt-1">
                   <TrendingUp className="h-3 w-3 mr-0.5" /> +4.8% this week
                 </span>
               </CardHeader>

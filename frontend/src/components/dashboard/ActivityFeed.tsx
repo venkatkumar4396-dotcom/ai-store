@@ -71,16 +71,16 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
   };
 
   return (
-    <Card className="h-full border border-white/[0.06] bg-zinc-950/40 relative overflow-hidden">
+    <Card className="h-full border border-slate-200/80 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 shadow-xs relative overflow-hidden">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <Clock className="h-5 w-5 text-indigo-400 animate-pulse-glow" />
+        <CardTitle className="text-lg font-semibold flex items-center gap-2 text-slate-900 dark:text-white">
+          <Clock className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
           Recent Activity
         </CardTitle>
       </CardHeader>
       <CardContent>
         {activities.length === 0 ? (
-          <div className="text-center py-8 text-zinc-500 text-xs">
+          <div className="text-center py-8 text-slate-500 dark:text-zinc-500 text-xs">
             No recent activity to report.
           </div>
         ) : (
@@ -88,7 +88,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="relative border-l border-white/5 ml-3 pl-6 space-y-5"
+            className="relative border-l border-slate-200 dark:border-white/5 ml-3 pl-6 space-y-5"
           >
             {activities.map((activity) => {
               const { icon, colorClass } = getActivityIcon(activity.type);
@@ -107,17 +107,17 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
 
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="font-semibold text-sm text-white group-hover:text-indigo-300 transition-colors">
+                      <span className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
                         {activity.title}
                       </span>
-                      <span className="text-[11px] text-zinc-500 shrink-0 font-medium">
+                      <span className="text-[11px] text-slate-500 dark:text-zinc-500 shrink-0 font-medium">
                         {getRelativeTime(activity.timestamp)}
                       </span>
                     </div>
-                    <span className="text-xs text-zinc-400">{activity.description}</span>
+                    <span className="text-xs text-slate-600 dark:text-zinc-400">{activity.description}</span>
                     
                     {activity.metadata && Object.keys(activity.metadata).length > 0 && (
-                      <div className="mt-1.5 p-2 rounded bg-white/[0.02] text-[10px] text-zinc-500 border border-white/[0.04] font-mono overflow-x-auto">
+                      <div className="mt-1.5 p-2 rounded bg-slate-50 dark:bg-white/[0.02] text-[10px] text-slate-600 dark:text-zinc-500 border border-slate-200/80 dark:border-white/[0.04] font-mono overflow-x-auto">
                         {JSON.stringify(activity.metadata)}
                       </div>
                     )}

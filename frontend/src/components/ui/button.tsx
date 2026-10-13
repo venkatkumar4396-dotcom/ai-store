@@ -10,17 +10,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-indigo-600 text-[#ffffff] shadow-md shadow-indigo-600/10 hover:bg-indigo-500 hover:shadow-indigo-500/20 active:bg-indigo-700",
+          "bg-indigo-600 text-[#ffffff] shadow-sm shadow-indigo-600/20 hover:bg-indigo-700 active:bg-indigo-800 font-semibold",
         destructive:
-          "bg-rose-600 text-[#ffffff] shadow-sm hover:bg-rose-500 active:bg-rose-700",
+          "bg-rose-600 text-[#ffffff] shadow-sm hover:bg-rose-700 active:bg-rose-800 font-semibold",
         outline:
-          "border border-white/10 bg-white/5 text-white backdrop-blur-sm hover:bg-white/10 hover:text-white active:bg-white/15",
+          "border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white shadow-xs font-semibold",
         secondary:
-          "bg-violet-600 text-[#ffffff] shadow-md shadow-violet-600/10 hover:bg-violet-500 hover:shadow-violet-500/20 active:bg-violet-700",
+          "bg-slate-100 dark:bg-violet-600 text-slate-800 dark:text-[#ffffff] hover:bg-slate-200 dark:hover:bg-violet-500 font-semibold",
         ghost:
-          "text-zinc-400 hover:bg-white/5 hover:text-white",
+          "text-slate-600 dark:text-zinc-400 hover:bg-slate-100/80 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white font-medium",
         link:
-          "text-indigo-400 underline-offset-4 hover:underline",
+          "text-indigo-600 dark:text-indigo-400 underline-offset-4 hover:underline font-semibold",
       },
       size: {
         default: "h-9 px-4 py-2",
