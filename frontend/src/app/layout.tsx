@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ToastProvider } from "@/components/ui/toaster";
 import { CommandPalette } from "@/components/shared/CommandPalette";
+import { DevContrastGuard } from "@/components/shared/DevContrastGuard";
 import "./globals.css";
 
 const inter = Inter({
@@ -68,6 +69,7 @@ export default function RootLayout({
           <ToastProvider>
             {children}
             <CommandPalette />
+            <DevContrastGuard />
           </ToastProvider>
         </ThemeProvider>
       </body>

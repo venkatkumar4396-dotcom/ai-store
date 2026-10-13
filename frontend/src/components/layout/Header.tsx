@@ -153,19 +153,19 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-1.5 text-sm">
           <Link
             href="/dashboard"
-            className="text-slate-500 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-zinc-400 transition-colors font-medium text-xs"
+            className="text-[#475569] hover:text-[#0F172A] dark:text-zinc-400 dark:hover:text-white transition-colors font-medium text-xs"
           >
             Home
           </Link>
           {breadcrumbs.map((crumb) => (
             <React.Fragment key={crumb.href}>
-              <ChevronRight className="h-3 w-3 text-slate-400 dark:text-zinc-600" />
+              <ChevronRight className="h-3 w-3 text-[#475569] dark:text-zinc-600" />
               {crumb.isLast ? (
-                <span className="text-slate-900 dark:text-zinc-100 font-bold text-xs">{crumb.label}</span>
+                <span className="text-[#0F172A] dark:text-white font-semibold text-xs">{crumb.label}</span>
               ) : (
                 <Link
                   href={crumb.href}
-                  className="text-slate-500 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-zinc-400 transition-colors font-medium text-xs"
+                  className="text-[#475569] hover:text-[#0F172A] dark:text-zinc-400 dark:hover:text-white transition-colors font-medium text-xs"
                 >
                   {crumb.label}
                 </Link>

@@ -249,7 +249,7 @@ export default function OverviewDashboardPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-white/[0.06] bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/50 dark:from-indigo-950/20 dark:via-zinc-950/40 dark:to-transparent p-6 md:p-8 shadow-xs"
+        className="relative overflow-hidden rounded-3xl border border-[#C7D2FE] dark:border-white/[0.06] bg-gradient-to-br from-[#EEF2FF] to-[#FFFFFF] dark:from-indigo-950/20 dark:via-zinc-950/40 dark:to-transparent p-6 md:p-8 shadow-xs"
       >
         <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-violet-500/8 rounded-full blur-2xl pointer-events-none" />
@@ -258,11 +258,11 @@ export default function OverviewDashboardPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               {greeting.icon}
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#0F172A] dark:text-white">
                 {greeting.text}{userName ? `, ${userName}` : ""}
               </h1>
             </div>
-            <p className="text-slate-600 dark:text-zinc-300 text-sm max-w-lg font-medium leading-relaxed">
+            <p className="text-[#334155] dark:text-zinc-300 text-sm max-w-lg font-medium leading-relaxed">
               Monitor your AI agents, track performance, and manage your automated workflows from one unified control center.
             </p>
           </div>
@@ -271,12 +271,12 @@ export default function OverviewDashboardPage() {
               onClick={() => fetchDashboardData(true)}
               disabled={isRefreshing}
               variant="outline"
-              className="border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white gap-1.5 rounded-xl shadow-xs"
+              className="bg-white border-[1.5px] border-[#CBD5E1] text-[#1E1B4B] hover:bg-[#F8FAFC] dark:bg-transparent dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/5 gap-1.5 rounded-xl shadow-xs font-semibold"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
               Sync
             </Button>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 gap-1.5 rounded-xl font-semibold" asChild>
+            <Button className="bg-[#4F46E5] hover:bg-[#4338CA] active:bg-[#3730A3] text-white shadow-sm shadow-indigo-600/20 gap-1.5 rounded-xl font-semibold" asChild>
               <Link href="/bots">
                 Deploy Agent <ArrowRight className="h-4 w-4" />
               </Link>
@@ -334,12 +334,12 @@ export default function OverviewDashboardPage() {
               >
                 <Link
                   href={action.href}
-                  className="group flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:border-indigo-300 dark:hover:border-indigo-500/20 transition-all duration-200 shadow-xs hover:shadow-md hover:shadow-slate-200/50"
+                  className="group flex items-center gap-3 p-3.5 rounded-[16px] border border-[rgba(15,23,42,0.10)] dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 hover:bg-[#F8FAFC] dark:hover:bg-white/[0.04] hover:border-[#C7D2FE] dark:hover:border-indigo-500/20 transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"
                 >
                   <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs`}>
                     <Icon className="h-4 w-4 text-white" />
                   </div>
-                  <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                  <span className="text-sm font-semibold text-[#0F172A] dark:text-zinc-200 transition-colors">
                     {action.label}
                   </span>
                 </Link>
@@ -393,10 +393,10 @@ export default function OverviewDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Usage Chart */}
-          <Card className="border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 relative overflow-hidden shadow-sm">
+          <Card className="border border-[rgba(15,23,42,0.10)] dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 relative overflow-hidden shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base font-semibold text-slate-800 dark:text-slate-100">System Usage Analytics</CardTitle>
-              <CardDescription className="text-slate-500 dark:text-zinc-400 text-xs">
+              <CardTitle className="text-[17px] font-bold text-[#0F172A] dark:text-white">System Usage Analytics</CardTitle>
+              <CardDescription className="text-[14px] text-[#475569] dark:text-zinc-400">
                 Real-time monitor of LLM-generated message payloads and responses.
               </CardDescription>
             </CardHeader>
@@ -410,14 +410,14 @@ export default function OverviewDashboardPage() {
         </div>
 
         {/* System Integration Status */}
-        <Card className="border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 relative overflow-hidden h-full flex flex-col justify-between shadow-sm">
+        <Card className="border border-[rgba(15,23,42,0.10)] dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 relative overflow-hidden h-full flex flex-col justify-between shadow-sm">
           <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl pointer-events-none" />
           
           <CardHeader>
-            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-indigo-400" /> Integration Status
+            <CardTitle className="text-[17px] font-bold text-[#0F172A] dark:text-white flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-[#4F46E5]" /> Integration Status
             </CardTitle>
-            <CardDescription className="text-slate-500 dark:text-zinc-400 text-sm mt-1.5">
+            <CardDescription className="text-[14px] text-[#475569] dark:text-zinc-400 mt-1">
               Platform health and service connectivity.
             </CardDescription>
           </CardHeader>
@@ -428,11 +428,11 @@ export default function OverviewDashboardPage() {
               { label: "Model Pipeline", desc: "Tokens pipeline fully active.", status: "online" },
               { label: "WhatsApp Bridge", desc: "Core connection channel online.", status: "online" },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.04] rounded-lg">
+              <div key={item.label} className="flex items-center gap-3 p-3 bg-[#F8FAFC] dark:bg-white/[0.02] border border-[rgba(15,23,42,0.08)] dark:border-white/[0.04] rounded-xl">
                 <div className={`status-dot ${item.status === "online" ? "status-dot-online" : "status-dot-offline"}`} />
                 <div className="flex flex-col min-w-0">
-                  <span className="font-semibold text-sm text-slate-900 dark:text-white">{item.label}</span>
-                  <span className="text-[11px] text-slate-500 dark:text-zinc-500 truncate">{item.desc}</span>
+                  <span className="font-semibold text-sm text-[#0F172A] dark:text-white">{item.label}</span>
+                  <span className="text-[12px] text-[#475569] dark:text-zinc-400 truncate">{item.desc}</span>
                 </div>
               </div>
             ))}

@@ -74,44 +74,44 @@ export function StatsCard({
   }, [sparklineData]);
 
   return (
-    <Card className="relative overflow-hidden group border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 shadow-sm">
-      {/* Glow effect on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-violet-500/0 to-cyan-500/0 group-hover:from-indigo-500/5 group-hover:to-cyan-500/5 transition-all duration-500" />
+    <Card className="relative overflow-hidden group rounded-[16px] border border-[rgba(15,23,42,0.10)] dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 shadow-sm hover-lift">
+      {/* Subtle glow effect on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-violet-500/0 to-cyan-500/0 group-hover:from-indigo-500/5 group-hover:to-cyan-500/5 transition-all duration-500 pointer-events-none" />
       
       <CardContent className="p-5 flex flex-col justify-between h-full relative z-10">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-slate-600 dark:text-zinc-400 font-semibold tracking-wide uppercase">{label}</span>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-zinc-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+          <span className="text-[12px] text-[#475569] dark:text-zinc-400 font-semibold tracking-wide uppercase">{label}</span>
+          <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] dark:bg-white/5 border border-[#C7D2FE] dark:border-white/10 flex items-center justify-center text-[#4F46E5] dark:text-indigo-400 group-hover:bg-[#4F46E5] group-hover:text-white transition-colors">
             <IconComponent className="h-4.5 w-4.5" />
           </div>
         </div>
 
         <div className="flex items-end justify-between gap-4">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              <AnimatedCounter value={value} prefix={prefix} suffix={suffix} />
+          <div className="space-y-2">
+            <h2 className="text-[34px] font-extrabold tracking-tight text-[#0F172A] dark:text-white leading-none">
+              <AnimatedCounter value={value ?? 0} prefix={prefix} suffix={suffix} />
             </h2>
             {change !== undefined && (
               <div className="flex items-center gap-1.5 pt-0.5">
                 {changeType === "increase" && (
-                  <span className="flex items-center text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/15">
+                  <span className="flex items-center text-[11px] font-semibold text-[#166534] bg-[#DCFCE7] dark:text-emerald-400 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-[#BBF7D0] dark:border-emerald-500/15">
                     <ArrowUpRight className="h-3 w-3 mr-0.5" />
                     {change}%
                   </span>
                 )}
                 {changeType === "decrease" && (
-                  <span className="flex items-center text-[10px] font-semibold text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded-full border border-rose-500/15">
+                  <span className="flex items-center text-[11px] font-semibold text-[#B91C1C] bg-[#FEE2E2] dark:text-rose-400 dark:bg-rose-500/10 px-2 py-0.5 rounded-full border border-[#FECACA] dark:border-rose-500/15">
                     <ArrowDownRight className="h-3 w-3 mr-0.5" />
                     {change}%
                   </span>
                 )}
                 {changeType === "neutral" && (
-                  <span className="flex items-center text-[10px] font-semibold text-zinc-400 bg-zinc-500/10 px-1.5 py-0.5 rounded-full border border-zinc-500/15">
+                  <span className="flex items-center text-[11px] font-semibold text-[#334155] bg-[#F1F5F9] dark:text-zinc-300 dark:bg-zinc-500/10 px-2 py-0.5 rounded-full border border-[#CBD5E1] dark:border-zinc-500/15">
                     <Minus className="h-3 w-3 mr-0.5" />
                     {change}%
                   </span>
                 )}
-                <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-medium">vs last month</span>
+                <span className="text-[11px] text-[#475569] dark:text-zinc-500 font-medium">vs last month</span>
               </div>
             )}
           </div>
@@ -121,8 +121,8 @@ export function StatsCard({
             <svg width="70" height="34" className="overflow-visible">
               <polyline
                 fill="none"
-                stroke={sparklineColor}
-                strokeWidth="1.8"
+                stroke="#4F46E5"
+                strokeWidth="2"
                 points={polylinePoints}
                 className="sparkline"
               />

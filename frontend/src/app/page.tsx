@@ -247,7 +247,7 @@ export default function LandingPage() {
 
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-[#0F172A] dark:text-white leading-[1.05]">
             Intelligence,{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#3730A3] via-[#4F46E5] to-[#2563EB]">
+            <span className="gradient-text">
               Automated.
             </span>
           </h1>

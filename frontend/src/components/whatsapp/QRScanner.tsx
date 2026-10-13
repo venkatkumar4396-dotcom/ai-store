@@ -138,31 +138,31 @@ export function QRScanner({
       <CardHeader className="border-b border-slate-100 dark:border-white/5 pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-              WhatsApp Integration <MessageCircle className="h-5 w-5 text-emerald-500" />
+            <CardTitle className="text-[18px] font-bold text-[#0F172A] dark:text-white flex items-center gap-2">
+              Link your WhatsApp device <MessageCircle className="h-5 w-5 text-[#4F46E5]" />
             </CardTitle>
-            <CardDescription className="text-slate-500 dark:text-zinc-400 text-sm mt-1">
+            <CardDescription className="text-[14px] text-[#475569] dark:text-zinc-400 mt-1">
               Link your WhatsApp device with the Nexora AI Assistant to manage automated chats.
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {status === "connected" && (
-              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-1 font-semibold">
+              <Badge variant="outline" className="bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0] dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 px-3 py-1 text-xs font-semibold rounded-full">
                 ● Connected
               </Badge>
             )}
             {status === "qr_pending" && (
-              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2.5 py-1 font-semibold">
+              <Badge variant="outline" className="bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20 px-3 py-1 text-xs font-semibold rounded-full">
                 ● Ready to Scan / Pair
               </Badge>
             )}
             {status === "connecting" && (
-              <Badge variant="outline" className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 px-2.5 py-1 font-semibold">
+              <Badge variant="outline" className="bg-[#EEF2FF] text-[#3730A3] border border-[#C7D2FE] dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20 px-3 py-1 text-xs font-semibold rounded-full">
                 ● Connecting to WhatsApp...
               </Badge>
             )}
             {status === "disconnected" && (
-              <Badge variant="outline" className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 px-2.5 py-1 font-semibold">
+              <Badge variant="outline" className="bg-[#FEE2E2] text-[#B91C1C] border border-[#FECACA] dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20 px-3 py-1 text-xs font-semibold rounded-full">
                 ● Offline
               </Badge>
             )}
@@ -174,24 +174,24 @@ export function QRScanner({
           <div className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-white/5 mt-3">
             <button
               onClick={() => setActiveTab("qr")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[14px] font-semibold transition-all ${
                 activeTab === "qr"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white"
+                  ? "bg-[#4F46E5] text-white shadow-sm"
+                  : "bg-[#F1F5F9] dark:bg-white/5 text-[#475569] dark:text-zinc-400 hover:bg-[#E2E8F0] hover:text-[#0F172A] dark:hover:text-white"
               }`}
             >
-              <QrIcon className="h-3.5 w-3.5" />
+              <QrIcon className="h-4 w-4" />
               <span>WhatsApp Web QR</span>
             </button>
             <button
               onClick={() => setActiveTab("phone")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[14px] font-semibold transition-all ${
                 activeTab === "phone"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white"
+                  ? "bg-[#4F46E5] text-white shadow-sm"
+                  : "bg-[#F1F5F9] dark:bg-white/5 text-[#475569] dark:text-zinc-400 hover:bg-[#E2E8F0] hover:text-[#0F172A] dark:hover:text-white"
               }`}
             >
-              <KeyRound className="h-3.5 w-3.5" />
+              <KeyRound className="h-4 w-4" />
               <span>Link with Phone Code</span>
             </button>
           </div>
@@ -201,19 +201,19 @@ export function QRScanner({
       <CardContent className="flex flex-col items-center justify-center py-6">
         {status === "disconnected" ? (
           <div className="text-center space-y-4 max-w-md py-4">
-            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-zinc-500/10 border border-slate-200 dark:border-zinc-500/20 flex items-center justify-center text-slate-600 dark:text-zinc-400 mx-auto">
-              <Smartphone className="h-8 w-8 text-emerald-500" />
+            <div className="w-16 h-16 rounded-full bg-[#EEF2FF] dark:bg-zinc-500/10 border border-[#C7D2FE] dark:border-zinc-500/20 flex items-center justify-center text-[#4F46E5] mx-auto">
+              <Smartphone className="h-8 w-8 text-[#4F46E5]" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">WhatsApp Assistant is Offline</h3>
-              <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+              <h3 className="text-lg font-bold text-[#0F172A] dark:text-white">WhatsApp Assistant is Offline</h3>
+              <p className="text-sm text-[#475569] dark:text-zinc-400 leading-relaxed font-normal">
                 Launch the engine to generate your official WhatsApp Web pairing QR code or link via phone code.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
               <Button
                 onClick={onStart}
-                className="w-full sm:flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center justify-center gap-2"
+                className="w-full sm:flex-1 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold flex items-center justify-center gap-2"
               >
                 <RefreshCw className="h-4 w-4" />
                 <span>Launch WhatsApp QR</span>

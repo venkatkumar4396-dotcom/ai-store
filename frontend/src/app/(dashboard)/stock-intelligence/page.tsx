@@ -633,14 +633,14 @@ export default function StockIntelligencePage() {
             onClick={() => setIsIntraday(!isIntraday)}
             className={`group flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 border ${
               isIntraday
-                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/10"
-                : "bg-white/[0.03] border-white/10 text-zinc-400 hover:border-white/20 hover:text-zinc-300"
+                ? "bg-[#DCFCE7] border-[#BBF7D0] text-[#166534] shadow-sm dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-400"
+                : "bg-[#EEF2FF] border-[#C7D2FE] text-[#4338CA] hover:bg-[#E0E7FF] dark:bg-white/[0.03] dark:border-white/10 dark:text-zinc-400"
             }`}
           >
-            <Clock className={`h-4 w-4 transition-colors ${isIntraday ? "text-emerald-400" : "text-zinc-500"}`} />
+            <Clock className={`h-4 w-4 transition-colors ${isIntraday ? "text-[#166534] dark:text-emerald-400" : "text-[#4338CA] dark:text-zinc-400"}`} />
             <span>Intraday</span>
             <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${
-              isIntraday ? "bg-emerald-500/20 text-emerald-300" : "bg-white/5 text-zinc-500"
+              isIntraday ? "bg-[#BBF7D0] text-[#166534] dark:bg-emerald-500/20 dark:text-emerald-300" : "bg-[#C7D2FE] text-[#3730A3] dark:bg-white/10 dark:text-zinc-300"
             }`}>
               5MIN
             </span>
@@ -649,11 +649,11 @@ export default function StockIntelligencePage() {
       </div>
 
       {/* ═══ Search Bar ═══ */}
-      <Card className="border border-white/[0.08] bg-zinc-950/50 backdrop-blur-xl">
+      <Card className="border border-[rgba(15,23,42,0.10)] dark:border-white/[0.08] bg-white dark:bg-zinc-950/50 shadow-sm">
         <CardContent className="p-4">
           <div className="flex gap-3 items-center">
             <div ref={suggestionsRef} className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569] dark:text-zinc-400" />
               <Input
                 placeholder="Search by company name or symbol (e.g. Apple, Reliance, AAPL)..."
                 value={ticker}
@@ -663,15 +663,15 @@ export default function StockIntelligencePage() {
                 }}
                 onFocus={() => ticker.trim().length >= 2 && setShowSuggestions(true)}
                 onKeyDown={(e) => e.key === "Enter" && analyzeStock()}
-                className="pl-10 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-600 h-12 text-sm tracking-wide rounded-xl focus:border-emerald-500/40 focus:ring-emerald-500/20"
+                className="pl-10 bg-white dark:bg-white/[0.03] border-slate-300 dark:border-white/[0.08] text-[#0F172A] dark:text-white placeholder:text-[#94A3B8] dark:placeholder:text-zinc-600 h-12 text-sm tracking-wide rounded-xl focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20"
               />
 
               {/* Suggestions Dropdown */}
               {showSuggestions && (suggestions.length > 0 || isSearchingSuggestions) && (
-                <div className="absolute left-0 right-0 top-[52px] z-50 rounded-xl border border-white/[0.08] bg-zinc-950/95 backdrop-blur-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
+                <div className="absolute left-0 right-0 top-[52px] z-50 rounded-xl border border-[rgba(15,23,42,0.12)] dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-lg overflow-hidden max-h-60 overflow-y-auto">
                   {isSearchingSuggestions && (
-                    <div className="p-3 text-xs text-zinc-500 flex items-center gap-2 border-b border-white/[0.03]">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-400" />
+                    <div className="p-3 text-xs text-[#475569] dark:text-zinc-400 flex items-center gap-2 border-b border-slate-100 dark:border-white/[0.03]">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-[#4F46E5] dark:text-emerald-400" />
                       Searching assets...
                     </div>
                   )}
@@ -683,15 +683,15 @@ export default function StockIntelligencePage() {
                         setShowSuggestions(false);
                         analyzeStock(item.symbol);
                       }}
-                      className="w-full flex items-center justify-between px-4 py-3 text-left text-xs hover:bg-emerald-500/10 transition-colors border-b border-white/[0.03] last:border-0"
+                      className="w-full min-h-[44px] flex items-center justify-between px-4 py-2.5 text-left text-xs hover:bg-[#EEF2FF] dark:hover:bg-white/5 transition-colors border-b border-slate-100 dark:border-white/[0.03] last:border-0"
                     >
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-semibold text-white">{item.name}</span>
-                        <span className="text-[10px] text-zinc-500">{item.exchange} · {item.type}</span>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="font-bold font-mono text-[#0F172A] dark:text-white text-xs shrink-0">{item.symbol}</span>
+                        <span className="text-[#475569] dark:text-zinc-400 text-xs truncate">{item.name}</span>
                       </div>
-                      <Badge variant="outline" className="border-emerald-500/25 text-emerald-400 font-mono font-bold text-[10px]">
-                        {item.symbol}
-                      </Badge>
+                      <span className="bg-[#F1F5F9] dark:bg-white/5 border border-[#CBD5E1] dark:border-white/10 text-[#334155] dark:text-zinc-300 text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2">
+                        {item.exchange} · {item.type}
+                      </span>
                     </button>
                   ))}
                 </div>

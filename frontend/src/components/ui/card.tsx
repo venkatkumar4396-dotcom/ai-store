@@ -6,7 +6,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     <div
       ref={ref}
       className={cn(
-        "rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-zinc-950/40 text-slate-900 dark:text-white shadow-xs backdrop-blur-md transition-all duration-300 hover:border-slate-300 dark:hover:border-white/15 hover:shadow-md hover:shadow-slate-200/50 dark:hover:shadow-indigo-500/5",
+        "rounded-[16px] border border-[rgba(15,23,42,0.10)] dark:border-white/10 bg-white dark:bg-zinc-950/40 text-[#0F172A] dark:text-white shadow-sm transition-all duration-200 hover:shadow-md",
         className
       )}
       {...props}
@@ -30,7 +30,7 @@ const CardTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("font-bold text-lg leading-snug tracking-tight text-slate-900 dark:text-white", className)}
+      className={cn("font-bold text-[17px] leading-snug tracking-tight text-[#0F172A] dark:text-white", className)}
       {...props}
     />
   )
@@ -41,7 +41,7 @@ const CardDescription = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("text-sm text-slate-500 dark:text-zinc-400 leading-relaxed", className)}
+      className={cn("text-[14px] text-[#475569] dark:text-zinc-400 leading-relaxed font-normal", className)}
       {...props}
     />
   )

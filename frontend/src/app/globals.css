@@ -13,10 +13,14 @@
   --background: #f8fafc;
   --foreground: #0f172a;
   
-  /* STEP 1 DESIGN TOKENS */
+  /* STEP 1 & 2 SEMANTIC DESIGN TOKENS */
   --text-strong: #0F172A;
   --text-body: #334155;
   --text-muted: #475569;
+  
+  --surface: #FFFFFF;
+  --surface-subtle: #F8FAFC;
+  --surface-raised: #FFFFFF;
   
   --bg: #FFFFFF;
   --bg-subtle: #F8FAFC;
@@ -280,20 +284,22 @@
 }
 
 /* Solid action buttons keep white text */
-button[class*="bg-indigo-600"],
-button[class*="bg-indigo-700"],
-button[class*="bg-indigo-500"],
-button[class*="bg-emerald"],
-button[class*="bg-rose"],
-button[class*="bg-violet"],
+button.bg-indigo-600,
+button.bg-indigo-700,
+button.bg-indigo-500,
+button.bg-emerald-600,
+button.bg-emerald-700,
+button.bg-rose-600,
+button.bg-violet-600,
 .bg-indigo-600,
 .bg-indigo-700 {
   color: #ffffff !important;
 }
 
-button[class*="bg-indigo"] *,
-button[class*="bg-emerald"] *,
-button[class*="bg-rose"] * {
+button.bg-indigo-600 *,
+button.bg-indigo-700 *,
+button.bg-emerald-600 *,
+button.bg-rose-600 * {
   color: #ffffff;
 }
 
@@ -517,17 +523,41 @@ body {
 /* ═══════════ GRADIENT TEXT ═══════════ */
 
 .gradient-text {
-  background: linear-gradient(135deg, rgb(var(--accent-primary)), rgb(var(--accent-secondary)), rgb(var(--accent-tertiary)));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #1E1B4B;
+  background-image: linear-gradient(135deg, #3730A3, #4F46E5, #2563EB);
   background-clip: text;
 }
 
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .gradient-text {
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.dark .gradient-text {
+  color: #FFFFFF;
+  background-image: linear-gradient(135deg, rgb(var(--accent-primary)), rgb(var(--accent-secondary)), rgb(var(--accent-tertiary)));
+}
+
 .gradient-text-white {
-  background: linear-gradient(135deg, #fff, #a1a1aa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #0F172A;
+  background-image: linear-gradient(135deg, #0F172A, #334155);
   background-clip: text;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .gradient-text-white {
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.dark .gradient-text-white {
+  color: #FFFFFF;
+  background-image: linear-gradient(135deg, #fff, #a1a1aa);
 }
 
 /* ═══════════ NEON BORDERS ═══════════ */
@@ -1062,15 +1092,49 @@ body {
 }
 
 /* Chrome / Safari / Edge Autofill Fix for Dark Mode */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active {
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover, 
+.dark input:-webkit-autofill:focus, 
+.dark input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #0e101f inset !important;
   -webkit-text-fill-color: #ffffff !important;
   caret-color: #ffffff !important;
   transition: background-color 5000s ease-in-out 0s;
   border-radius: inherit;
+}
+
+/* Light Mode Autofill */
+:root:not(.dark) input:-webkit-autofill,
+:root:not(.dark) input:-webkit-autofill:hover, 
+:root:not(.dark) input:-webkit-autofill:focus, 
+:root:not(.dark) input:-webkit-autofill:active,
+.light input:-webkit-autofill,
+.light input:-webkit-autofill:hover, 
+.light input:-webkit-autofill:focus, 
+.light input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #0F172A !important;
+  caret-color: #0F172A !important;
+  transition: background-color 5000s ease-in-out 0s;
+  border-radius: inherit;
+}
+
+/* Global focus-visible ring */
+:focus-visible {
+  outline: none;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--background, #ffffff), 0 0 0 4px #4F46E5 !important;
+}
+
+/* Card hover lift */
+@media (prefers-reduced-motion: no-preference) {
+  .hover-lift {
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
 }
 
 /* On mobile, the glass card should be more readable */

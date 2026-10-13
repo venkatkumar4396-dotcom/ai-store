@@ -17,27 +17,27 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       case "bot_activated":
         return {
           icon: <Zap className="h-4 w-4" />,
-          colorClass: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+          colorClass: "bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0] dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
         };
       case "message_sent":
         return {
           icon: <MessageCircle className="h-4 w-4" />,
-          colorClass: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
+          colorClass: "bg-[#EEF2FF] text-[#4F46E5] border border-[#C7D2FE] dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20",
         };
       case "file_changed":
         return {
           icon: <FileText className="h-4 w-4" />,
-          colorClass: "bg-violet-500/10 text-violet-400 border border-violet-500/20",
+          colorClass: "bg-[#EDE9FE] text-[#6D28D9] border border-[#DDD6FE] dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20",
         };
       case "api_call":
         return {
           icon: <Globe className="h-4 w-4" />,
-          colorClass: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
+          colorClass: "bg-[#E0F2FE] text-[#0369A1] border border-[#BAE6FD] dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20",
         };
       default:
         return {
           icon: <User className="h-4 w-4" />,
-          colorClass: "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20",
+          colorClass: "bg-[#F1F5F9] text-[#334155] border border-[#CBD5E1] dark:bg-zinc-500/10 dark:text-zinc-400 dark:border-zinc-500/20",
         };
     }
   };
@@ -71,24 +71,29 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
   };
 
   return (
-    <Card className="h-full border border-slate-200/80 dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 shadow-xs relative overflow-hidden">
+    <Card className="h-full border border-[rgba(15,23,42,0.10)] dark:border-white/[0.06] bg-white dark:bg-zinc-950/40 shadow-sm relative overflow-hidden">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold flex items-center gap-2 text-slate-900 dark:text-white">
-          <Clock className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+        <CardTitle className="text-[17px] font-bold flex items-center gap-2 text-[#0F172A] dark:text-white">
+          <Clock className="h-5 w-5 text-[#4F46E5]" />
           Recent Activity
         </CardTitle>
       </CardHeader>
       <CardContent>
         {activities.length === 0 ? (
-          <div className="text-center py-8 text-slate-500 dark:text-zinc-500 text-xs">
-            No recent activity to report.
+          <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
+            <div className="w-10 h-10 rounded-full bg-[#EEF2FF] flex items-center justify-center text-[#4F46E5]">
+              <Clock className="h-5 w-5" />
+            </div>
+            <p className="text-sm font-medium text-[#475569] dark:text-zinc-400">
+              No recent activity recorded.
+            </p>
           </div>
         ) : (
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="relative border-l border-slate-200 dark:border-white/5 ml-3 pl-6 space-y-5"
+            className="relative border-l border-[#CBD5E1] dark:border-white/5 ml-3 pl-6 space-y-5"
           >
             {activities.map((activity) => {
               const { icon, colorClass } = getActivityIcon(activity.type);
@@ -107,17 +112,17 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
 
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                      <span className="font-semibold text-sm text-[#0F172A] dark:text-white group-hover:text-[#4F46E5] dark:group-hover:text-indigo-300 transition-colors">
                         {activity.title}
                       </span>
-                      <span className="text-[11px] text-slate-500 dark:text-zinc-500 shrink-0 font-medium">
+                      <span className="text-[11px] text-[#475569] dark:text-zinc-400 shrink-0 font-medium">
                         {getRelativeTime(activity.timestamp)}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-600 dark:text-zinc-400">{activity.description}</span>
+                    <span className="text-xs text-[#334155] dark:text-zinc-300 font-normal leading-relaxed">{activity.description}</span>
                     
                     {activity.metadata && Object.keys(activity.metadata).length > 0 && (
-                      <div className="mt-1.5 p-2 rounded bg-slate-50 dark:bg-white/[0.02] text-[10px] text-slate-600 dark:text-zinc-500 border border-slate-200/80 dark:border-white/[0.04] font-mono overflow-x-auto">
+                      <div className="mt-1.5 p-2 rounded-lg bg-[#F8FAFC] dark:bg-white/[0.02] text-[10px] text-[#475569] dark:text-zinc-400 border border-[rgba(15,23,42,0.08)] dark:border-white/[0.04] font-mono overflow-x-auto">
                         {JSON.stringify(activity.metadata)}
                       </div>
                     )}

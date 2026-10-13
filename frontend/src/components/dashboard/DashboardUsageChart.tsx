@@ -36,8 +36,11 @@ export function DashboardUsageChart({ data }: DashboardUsageChartProps) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-[260px] flex items-center justify-center text-zinc-500 text-sm">
-        No analytical usage data available.
+      <div className="h-[260px] flex flex-col items-center justify-center gap-3 text-[#475569] text-sm">
+        <div className="w-10 h-10 rounded-full bg-[#EEF2FF] flex items-center justify-center text-[#4F46E5]">
+          <TrendingUp className="h-5 w-5" />
+        </div>
+        <span>No analytical usage data available.</span>
       </div>
     );
   }
@@ -124,33 +127,33 @@ export function DashboardUsageChart({ data }: DashboardUsageChartProps) {
       {/* Header Info */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-indigo-400" />
-          <span className="text-sm font-semibold text-slate-800 dark:text-zinc-100">AI Usage Frequency</span>
+          <TrendingUp className="h-4 w-4 text-[#4F46E5]" />
+          <span className="text-sm font-bold text-[#0F172A] dark:text-zinc-100">AI Usage Frequency</span>
           {isAllZero && (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 border border-amber-500/25 text-amber-500 dark:text-amber-400">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] dark:bg-amber-500/10 dark:text-amber-400">
               No requests recorded this week
             </span>
           )}
         </div>
         <div className="flex items-center gap-4 text-xs font-semibold">
-          <span className="flex items-center gap-1.5 text-slate-600 dark:text-zinc-400">
-            <span className="w-2.5 h-2.5 rounded bg-[#6366f1]" /> Inbound
+          <span className="flex items-center gap-1.5 text-[#334155] dark:text-zinc-300">
+            <span className="w-2.5 h-2.5 rounded bg-[#4F46E5]" /> Inbound
           </span>
-          <span className="flex items-center gap-1.5 text-slate-600 dark:text-zinc-400">
-            <span className="w-2.5 h-2.5 rounded bg-[#06b6d4]" /> Outbound
+          <span className="flex items-center gap-1.5 text-[#334155] dark:text-zinc-300">
+            <span className="w-2.5 h-2.5 rounded bg-[#0284C7]" /> Outbound
           </span>
         </div>
       </div>
 
       {/* SVG Chart */}
-      <div className="relative bg-slate-50/50 dark:bg-zinc-950/40 border border-slate-200 dark:border-white/5 rounded-xl p-4 overflow-hidden group">
-        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/0 via-violet-500/0 to-cyan-500/0 group-hover:from-indigo-500/2 group-hover:to-cyan-500/2 transition-all duration-500" />
+      <div className="relative bg-[#F8FAFC] dark:bg-zinc-950/40 border border-[rgba(15,23,42,0.10)] dark:border-white/5 rounded-xl p-4 overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/0 via-violet-500/0 to-cyan-500/0 group-hover:from-indigo-500/2 group-hover:to-cyan-500/2 transition-all duration-500 pointer-events-none" />
 
         {isAllZero && (
           <div className="absolute inset-0 flex items-center justify-center z-15 pointer-events-none">
-            <div className="px-4 py-2 rounded-xl bg-zinc-950/85 border border-zinc-800 backdrop-blur-md shadow-xl flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              <span className="text-xs font-medium text-zinc-300">
+            <div className="px-4 py-2 rounded-xl bg-white dark:bg-zinc-950/85 border border-[#CBD5E1] dark:border-zinc-800 shadow-md flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-[#D97706] animate-pulse" />
+              <span className="text-xs font-semibold text-[#475569] dark:text-zinc-300">
                 No requests recorded this week
               </span>
             </div>
