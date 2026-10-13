@@ -109,6 +109,26 @@ router.post('/github', authLimiter, async (req: Request, res: Response, next: Ne
 });
 
 /**
+ * @route   POST /api/auth/facebook
+ * @desc    Facebook OAuth login/register callback
+ * @access  Public
+ */
+router.post('/facebook', authLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { providerId, email, name, avatar } = req.body;
+    if (!providerId || !email || !name) {
+      res.status(400).json({ error: 'Facebook OAuth providerId, email, and name are required' });
+      return;
+    }
+    const result = await loginWithOAuth('facebook', providerId, email, name, avatar);
+    setAuthCookie(req, res, result.token);
+    res.status(200).json({ user: result.user, token: result.token });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * @route   POST /api/auth/logout
  * @desc    Clear secure auth cookie
  * @access  Public
