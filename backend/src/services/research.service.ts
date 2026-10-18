@@ -112,13 +112,25 @@ Research Description: ${data.description}`;
       skip: offset,
     });
 
-    return projects.map(proj => ({
-      ...proj,
-      summaryReport: JSON.parse(proj.summaryReport),
-      citations: JSON.parse(proj.citations),
-      methodology: JSON.parse(proj.methodology),
-      gapReport: JSON.parse(proj.gapReport),
-    }));
+    return projects.map((proj) => {
+      let summaryReport = {};
+      let citations = [];
+      let methodology = {};
+      let gapReport = {};
+
+      try { summaryReport = typeof proj.summaryReport === 'string' ? JSON.parse(proj.summaryReport) : proj.summaryReport; } catch {}
+      try { citations = typeof proj.citations === 'string' ? JSON.parse(proj.citations) : proj.citations; } catch {}
+      try { methodology = typeof proj.methodology === 'string' ? JSON.parse(proj.methodology) : proj.methodology; } catch {}
+      try { gapReport = typeof proj.gapReport === 'string' ? JSON.parse(proj.gapReport) : proj.gapReport; } catch {}
+
+      return {
+        ...proj,
+        summaryReport,
+        citations,
+        methodology,
+        gapReport,
+      };
+    });
   }
 
   async deleteProject(userId: string, id: string): Promise<any> {

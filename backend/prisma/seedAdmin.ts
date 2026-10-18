@@ -7,9 +7,9 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function createAdmin() {
-  const email = (process.env.ADMIN_SEED_EMAIL || 'admin@nexora.ai').toLowerCase().trim();
-  const password = process.env.ADMIN_SEED_PASSWORD || 'ChangeMeImmediately!123';
-  const name = process.env.ADMIN_SEED_NAME || 'Admin';
+  const email = (process.env.ADMIN_SEED_EMAIL || 'kumar@nexora.ai').toLowerCase().trim();
+  const password = process.env.ADMIN_SEED_PASSWORD || 'kumar@4396';
+  const name = process.env.ADMIN_SEED_NAME || 'Kumar (Administrator)';
 
   const salt = await bcrypt.genSalt(12);
   const passwordHash = await bcrypt.hash(password, salt);

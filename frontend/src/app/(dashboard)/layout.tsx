@@ -8,6 +8,7 @@ import { WifiOff, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ParticleBackground } from "@/components/shared/ParticleBackground";
 import { DeployedBotsProvider } from "@/lib/DeployedBotsContext";
+import { getBaseURL } from "@/lib/api";
 
 export default function DashboardLayout({
   children,
@@ -23,34 +24,9 @@ export default function DashboardLayout({
   const checkConnection = React.useCallback(async () => {
     setIsChecking(true);
     try {
-      let healthUrl = "";
-      let targetDisplay = "";
-
-      if (process.env.NEXT_PUBLIC_API_URL) {
-        healthUrl = process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, "/health");
-        targetDisplay = process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, "");
-      } else if (typeof window !== "undefined") {
-        const hostname = window.location.hostname;
-        if (hostname.includes("onrender.com")) {
-          healthUrl = "https://ai-store-87n2.onrender.com/health";
-          targetDisplay = "https://ai-store-87n2.onrender.com";
-        } else {
-          // Dev tunnel check: matches 4 or 5 digits port e.g. -3000
-          const tunnelMatch = hostname.match(/-(\d{4,5})(?=[.\-]|$)/);
-          if (tunnelMatch) {
-            const currentPort = tunnelMatch[1];
-            const backendHostname = hostname.replace(`-${currentPort}`, "-5000");
-            healthUrl = `https://${backendHostname}/health`;
-            targetDisplay = `https://${backendHostname}`;
-          } else {
-            healthUrl = `${window.location.protocol}//${hostname}:5000/health`;
-            targetDisplay = `${hostname}:5000`;
-          }
-        }
-      } else {
-        healthUrl = "https://ai-store-87n2.onrender.com/health";
-        targetDisplay = "https://ai-store-87n2.onrender.com";
-      }
+      const apiBase = getBaseURL();
+      const healthUrl = apiBase.replace(/\/api\/?$/, "/health");
+      const targetDisplay = apiBase.replace(/\/api\/?$/, "");
 
       setBackendTargetUrl(targetDisplay);
 
@@ -121,15 +97,15 @@ export default function DashboardLayout({
             <ParticleBackground />
             <div className="max-w-7xl mx-auto space-y-6 pb-8 relative z-10">
               {!isBackendConnected && (
-                <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-950/20 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="p-3.5 rounded-2xl border border-amber-200/80 dark:border-amber-500/20 bg-amber-50/90 dark:bg-amber-950/20 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-3.5 shadow-xs animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
-                      <WifiOff className="h-5 w-5" />
+                    <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 shadow-2xs">
+                      <WifiOff className="h-4.5 w-4.5" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-rose-900 dark:text-rose-200 text-sm">Backend API Server Unreachable</h4>
-                      <p className="text-rose-700 dark:text-zinc-400 text-xs mt-0.5">
-                        The frontend cannot connect to the backend server at <code className="text-rose-800 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/40 px-1 py-0.5 rounded font-mono text-[11px]">{backendTargetUrl}</code>. Please ensure the backend service is running.
+                      <h4 className="font-semibold text-amber-900 dark:text-amber-200 text-xs sm:text-sm">Connecting to Cloud Intelligence Engine</h4>
+                      <p className="text-amber-700 dark:text-zinc-400 text-[11px] sm:text-xs mt-0.5">
+                        Waking up backend service at <code className="text-amber-900 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-950/40 px-1 py-0.5 rounded font-mono text-[10px]">{backendTargetUrl}</code>. Client offline fallback session is active.
                       </p>
                     </div>
                   </div>
@@ -138,10 +114,10 @@ export default function DashboardLayout({
                     disabled={isChecking}
                     variant="outline"
                     size="sm"
-                    className="border-rose-300 hover:bg-rose-100 text-rose-800 dark:border-rose-500/30 dark:hover:bg-rose-500/10 dark:text-rose-300 self-start md:self-center font-semibold text-xs gap-1.5"
+                    className="border-amber-300 hover:bg-amber-100 text-amber-800 dark:border-amber-500/30 dark:hover:bg-amber-500/10 dark:text-amber-300 self-start md:self-center font-semibold text-xs gap-1.5 h-8 rounded-xl cursor-pointer"
                   >
-                    <RefreshCw className={`h-3.5 w-3.5 ${isChecking ? "animate-spin" : ""}`} />
-                    {isChecking ? "Retrying..." : "Retry Connection"}
+                    <RefreshCw className={`h-3 w-3 ${isChecking ? "animate-spin" : ""}`} />
+                    {isChecking ? "Connecting..." : "Reconnect"}
                   </Button>
                 </div>
               )}

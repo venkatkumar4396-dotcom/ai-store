@@ -1048,6 +1048,16 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+:root:not(.dark) .glass-glow-card,
+.light .glass-glow-card {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+  box-shadow:
+    0 10px 30px -10px rgba(15, 23, 42, 0.08),
+    0 0 1px rgba(99, 102, 241, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
 /* Focus glow effect for inputs */
 .input-focus-glow:focus {
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2), 0 0 20px rgba(99, 102, 241, 0.1);
@@ -1183,13 +1193,22 @@ body {
   }
 }
 
-/* On mobile, the glass card should be more readable */
+/* On mobile, the glass card should be readable in both themes */
 @media (max-width: 640px) {
   .glass-glow-card {
     border-radius: 1.25rem;
-    background: rgba(7, 7, 18, 0.85) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
+  }
+  .dark .glass-glow-card {
+    background: rgba(7, 7, 18, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+  :root:not(.dark) .glass-glow-card,
+  .light .glass-glow-card {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
   }
 }
 

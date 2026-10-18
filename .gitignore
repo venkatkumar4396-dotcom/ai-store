@@ -58,3 +58,7 @@ backend/data/uploads/*
 backend/data/whatsapp-sessions/*
 !backend/data/uploads/.gitkeep
 !backend/data/whatsapp-sessions/.gitkeep
+
+# Excluded Projects
+no name project/
+no name project

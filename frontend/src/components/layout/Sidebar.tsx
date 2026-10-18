@@ -145,17 +145,18 @@ export function Sidebar() {
     Travel: false,
     Productivity: false,
   });
-  const [profile, setProfile] = React.useState<{ name: string; email: string }>(() => {
+  const [profile, setProfile] = React.useState<{ name: string; email: string; role?: string }>(() => {
     if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem("nexora_user");
+        const role = localStorage.getItem("nexora_user_type") || "";
         if (stored) {
           const u = JSON.parse(stored);
-          return { name: u.name || "User", email: u.email || "" };
+          return { name: u.name || "User", email: u.email || "", role: u.role || role };
         }
       } catch {}
     }
-    return { name: "User", email: "" };
+    return { name: "User", email: "", role: "" };
   });
 
   // Auto-expand category if active route is inside it
@@ -180,15 +181,20 @@ export function Sidebar() {
       try {
         const res = await api.get("/user/me");
         if (res.data) {
-          setProfile({ name: res.data.name || "User", email: res.data.email || "" });
+          setProfile({
+            name: res.data.name || "User",
+            email: res.data.email || "",
+            role: res.data.role || "",
+          });
         }
       } catch {
         if (typeof window !== "undefined") {
           try {
             const stored = localStorage.getItem("nexora_user");
+            const role = localStorage.getItem("nexora_user_type") || "";
             if (stored) {
               const u = JSON.parse(stored);
-              setProfile({ name: u.name || "User", email: u.email || "" });
+              setProfile({ name: u.name || "User", email: u.email || "", role: u.role || role });
             }
           } catch {}
         }
@@ -212,10 +218,14 @@ export function Sidebar() {
     setExpandedCategories((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
-  /** Only kumar@nexora.ai can see and access the Admin Console */
+  /** Authorized administrators can see and access the Admin Console */
   const isNavItemVisible = (href: string): boolean => {
     if (href === "/admin") {
-      return profile.email?.toLowerCase().trim() === "kumar@nexora.ai";
+      const isKumar = profile.email?.toLowerCase().trim() === "kumar@nexora.ai";
+      const isAdminRole =
+        profile.role === "admin" ||
+        (typeof window !== "undefined" && localStorage.getItem("nexora_user_type") === "admin");
+      return isKumar || isAdminRole;
     }
     return true;
   };

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
@@ -163,7 +164,8 @@ export default function AdminPage() {
       const user = res.data;
       setProfile(user);
 
-      const isAuthorized = user && user.role === "admin" && user.email?.toLowerCase().trim() === AUTHORIZED_ADMIN_EMAIL;
+      const isAuthorized =
+        user && (user.role === "admin" || user.email?.toLowerCase().trim() === AUTHORIZED_ADMIN_EMAIL);
 
       if (isAuthorized) {
         setIsAdmin(true);
@@ -172,15 +174,14 @@ export default function AdminPage() {
         setIsAdmin(false);
       }
     } catch {
-      // Offline fallback: strictly check if authenticated user in localStorage is kumar@nexora.ai
+      // Offline fallback: check if authenticated user in localStorage has admin role or kumar@nexora.ai
       const localUserRaw = typeof window !== "undefined" ? localStorage.getItem("nexora_user") : null;
       let localUser: any = null;
       try { localUser = localUserRaw ? JSON.parse(localUserRaw) : null; } catch {}
 
       const isAuthorized =
-        localUser &&
-        localUser.email?.toLowerCase().trim() === AUTHORIZED_ADMIN_EMAIL &&
-        localUser.role === "admin";
+        (localUser && (localUser.role === "admin" || localUser.email?.toLowerCase().trim() === AUTHORIZED_ADMIN_EMAIL)) ||
+        (typeof window !== "undefined" && localStorage.getItem("nexora_user_type") === "admin");
 
       if (isAuthorized) {
         setProfile(localUser);
@@ -474,10 +475,10 @@ export default function AdminPage() {
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Button
-                onClick={() => (window.location.href = "/dashboard")}
-                className="w-full sm:w-auto bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-xl px-5 text-xs h-10 shadow-sm"
+                asChild
+                className="w-full sm:w-auto bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-xl px-5 text-xs h-10 shadow-sm cursor-pointer"
               >
-                Return to Workspace
+                <Link href="/dashboard">Return to Workspace</Link>
               </Button>
               <Button
                 variant="outline"

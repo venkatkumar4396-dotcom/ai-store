@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   MessageCircle,
   Megaphone,
@@ -353,8 +354,10 @@ export default function WhatsAppControlCenterPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={() => window.location.href = "/whatsapp/setup"} className="bg-indigo-600 hover:bg-indigo-500 text-white">
-            Configure AI Setup Wizard <ArrowRight className="h-4 w-4 ml-1.5" />
+          <Button asChild className="bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer">
+            <Link href="/whatsapp/setup">
+              Configure AI Setup Wizard <ArrowRight className="h-4 w-4 ml-1.5" />
+            </Link>
           </Button>
         </div>
       </div>

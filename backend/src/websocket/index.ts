@@ -18,13 +18,17 @@ export function initWebSocket(server: HttpServer): SocketIOServer {
           callback(null, true);
           return;
         }
+        const allowedOrigins = (env.CORS_ORIGIN || '').split(',').map((o) => o.trim()).filter(Boolean);
         const isAllowed =
           env.NODE_ENV === 'development' ||
-          origin === env.CORS_ORIGIN ||
+          allowedOrigins.includes(origin) ||
           origin.includes('localhost') ||
           origin.includes('127.0.0.1') ||
           origin.includes('192.168.') ||
-          origin.endsWith('.devtunnels.ms');
+          origin.endsWith('.devtunnels.ms') ||
+          origin.endsWith('.vercel.app') ||
+          origin.endsWith('.onrender.com') ||
+          origin.endsWith('.pages.dev');
         if (isAllowed) {
           callback(null, origin);
         } else {

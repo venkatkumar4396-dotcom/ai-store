@@ -29,6 +29,8 @@ import {
   Clock,
   Menu,
   X,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +38,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FEATURED_BOTS, STATS, HOW_IT_WORKS } from "@/lib/constants";
 import { ParticleBackground } from "@/components/shared/ParticleBackground";
 import { AnimatedCounter } from "@/components/shared/AnimatedCounter";
+import { useTheme } from "@/components/layout/ThemeProvider";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -121,6 +124,7 @@ function SectionHeading({ badge, title, subtitle }: { badge?: string; title: str
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-[#0F172A] dark:text-foreground flex flex-col relative overflow-x-hidden">
@@ -164,6 +168,18 @@ export default function LandingPage() {
         </nav>
 
         <div className="flex items-center gap-2.5">
+          {/* Theme toggle button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800/40 h-9 w-9 rounded-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4F46E5]"
+            title="Toggle theme"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-700" />}
+          </Button>
+
           <Link
             href="/login"
             className="hidden sm:inline-flex items-center justify-center border border-[#CBD5E1] dark:border-white/10 bg-white dark:bg-transparent text-[#1E1B4B] dark:text-zinc-200 font-semibold text-sm px-[18px] py-2 h-9 rounded-[10px] hover:bg-[#F1F5F9] dark:hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4F46E5] focus-visible:ring-offset-2"
@@ -196,7 +212,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="fixed top-16 inset-x-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-2xl border-b border-[rgba(15,23,42,0.10)] dark:border-white/10 z-40 p-5 md:hidden space-y-4 shadow-xl"
+          className="fixed top-16 inset-x-0 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-2xl border-b border-[rgba(15,23,42,0.10)] dark:border-white/10 z-40 p-5 md:hidden space-y-4 shadow-xl"
         >
           <nav className="flex flex-col space-y-3 font-medium text-[#334155] dark:text-zinc-300">
             <a href="#agents" onClick={() => setIsMobileMenuOpen(false)} className="py-2 hover:text-[#4F46E5] transition-colors">Agents</a>
@@ -205,18 +221,40 @@ export default function LandingPage() {
             <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="py-2 hover:text-[#4F46E5] transition-colors">Pricing</a>
             <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="py-2 hover:text-[#4F46E5] transition-colors">FAQ</a>
           </nav>
-          <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex flex-col gap-2.5">
+
+          {/* Mobile Theme Switcher Row */}
+          <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-700 dark:text-zinc-300">Theme</span>
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-zinc-900 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun className="h-4 w-4 text-amber-400" />
+                  <span>Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="h-4 w-4 text-slate-700" />
+                  <span>Dark Mode</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex flex-col gap-2.5">
             <Link
               href="/login"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full text-center border border-[#CBD5E1] dark:border-white/10 text-[#1E1B4B] dark:text-zinc-200 font-semibold py-2.5 rounded-[10px] hover:bg-[#F1F5F9]"
+              className="w-full text-center border border-[#CBD5E1] dark:border-white/10 text-[#1E1B4B] dark:text-zinc-200 font-semibold py-2.5 rounded-[10px] hover:bg-[#F1F5F9] dark:hover:bg-white/10 transition-colors"
             >
               Log In
             </Link>
             <Link
               href="/register"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full text-center bg-[#4F46E5] text-white font-semibold py-2.5 rounded-[10px]"
+              className="w-full text-center bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold py-2.5 rounded-[10px] shadow-sm transition-colors"
             >
               Get Started Free
             </Link>

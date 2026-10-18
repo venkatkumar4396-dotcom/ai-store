@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Bell,
@@ -55,6 +55,7 @@ const BREADCRUMB_LABELS: Record<string, string> = {
 };
 
 export function Header() {
+  const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
@@ -139,6 +140,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             onClick={() => setIsMobileNavOpen(true)}
+            aria-label="Open navigation menu"
             className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 h-9 w-9 rounded-xl dark:hover:bg-white/[0.06]"
           >
             <Menu className="h-5 w-5" />
@@ -219,41 +221,40 @@ export function Header() {
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-80 right-0 mt-2" align="end">
-            <div className="flex items-center justify-between p-3">
-              <span className="font-semibold text-sm">Notifications</span>
+          <DropdownMenuContent className="w-80 right-0 mt-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-white/10 shadow-xl rounded-2xl p-0 overflow-hidden" align="end">
+            <div className="flex items-center justify-between p-3.5 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-white/5">
+              <span className="font-semibold text-sm text-slate-900 dark:text-white">Notifications</span>
               {unreadCount > 0 && (
                 <button
                   onClick={markAllRead}
-                  className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                  className="flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors cursor-pointer"
                 >
                   <CheckCheck className="h-3 w-3" />
                   Mark all read
                 </button>
               )}
             </div>
-            <DropdownMenuSeparator />
-            <div className="max-h-[300px] overflow-y-auto">
+            <div className="max-h-[300px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/5">
               {notifications.length === 0 ? (
-                <div className="p-6 text-center text-sm text-zinc-500">
-                  <Bell className="h-8 w-8 mx-auto mb-2 text-zinc-600" />
+                <div className="p-6 text-center text-sm text-slate-500 dark:text-zinc-500">
+                  <Bell className="h-8 w-8 mx-auto mb-2 text-slate-400 dark:text-zinc-600" />
                   No new notifications
                 </div>
               ) : (
                 notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`p-3 border-b border-white/5 text-sm transition-colors hover:bg-white/5 flex gap-3 ${
-                      !n.read ? "bg-indigo-600/5" : ""
+                    className={`p-3 text-sm transition-colors hover:bg-slate-50 dark:hover:bg-white/5 flex gap-3 ${
+                      !n.read ? "bg-indigo-50/40 dark:bg-indigo-600/10" : ""
                     }`}
                   >
                     {!n.read && (
-                      <span className="w-2 h-2 rounded-full bg-indigo-500 mt-2 shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-500 mt-2 shrink-0" />
                     )}
                     <div className={`flex flex-col gap-0.5 min-w-0 ${n.read ? "ml-5" : ""}`}>
-                      <span className="font-semibold text-white text-xs truncate">{n.title}</span>
-                      <span className="text-[11px] text-zinc-500">{n.desc}</span>
-                      <span className="text-[10px] text-zinc-600 mt-0.5">{n.time}</span>
+                      <span className="font-semibold text-slate-900 dark:text-white text-xs truncate">{n.title}</span>
+                      <span className="text-[11px] text-slate-600 dark:text-zinc-400 leading-snug">{n.desc}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">{n.time}</span>
                     </div>
                   </div>
                 ))
@@ -265,7 +266,7 @@ export function Header() {
         {/* User Avatar Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0 border border-slate-200 dark:border-white/10 hover:border-indigo-500/30 transition-colors">
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0 border border-slate-200 dark:border-white/10 hover:border-indigo-500/30 transition-colors cursor-pointer">
               <Avatar className="h-8 w-8 bg-[#4F46E5]">
                 <AvatarFallback className="bg-[#4F46E5] bg-gradient-to-br from-indigo-600 to-violet-600 text-white font-semibold text-xs" style={{ backgroundColor: "#4F46E5" }}>
                   {initials}
@@ -273,22 +274,22 @@ export function Header() {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 right-0 mt-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-white/10" align="end">
-            <DropdownMenuLabel className="flex flex-col">
-              <span className="font-semibold text-slate-900 dark:text-white">{profile.name}</span>
-              <span className="text-xs text-[#475569] dark:text-zinc-500">{profile.email}</span>
+          <DropdownMenuContent className="w-56 right-0 mt-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-white/10 shadow-xl rounded-2xl p-1.5" align="end">
+            <DropdownMenuLabel className="flex flex-col px-3 py-2">
+              <span className="font-semibold text-slate-900 dark:text-white text-sm">{profile.name}</span>
+              <span className="text-xs text-slate-500 dark:text-zinc-500 truncate">{profile.email}</span>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => window.location.href = "/settings"}>
-              <User className="mr-2 h-4 w-4" />
+            <DropdownMenuSeparator className="my-1 border-slate-100 dark:border-white/5" />
+            <DropdownMenuItem onClick={() => router.push("/settings")} className="cursor-pointer rounded-xl">
+              <User className="mr-2 h-4 w-4 text-slate-500 dark:text-zinc-400" />
               <span>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => window.location.href = "/settings"}>
-              <Settings className="mr-2 h-4 w-4" />
+            <DropdownMenuItem onClick={() => router.push("/settings")} className="cursor-pointer rounded-xl">
+              <Settings className="mr-2 h-4 w-4 text-slate-500 dark:text-zinc-400" />
               <span>Settings</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-rose-400 focus:text-rose-300 hover:bg-rose-500/10">
+            <DropdownMenuSeparator className="my-1 border-slate-100 dark:border-white/5" />
+            <DropdownMenuItem onClick={handleLogout} className="text-rose-600 dark:text-rose-400 focus:text-rose-700 dark:focus:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer rounded-xl">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Sign Out</span>
             </DropdownMenuItem>

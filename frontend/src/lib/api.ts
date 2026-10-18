@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 
-const getBaseURL = () => {
+export const getBaseURL = () => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
   if (envUrl && (envUrl.startsWith("http://") || envUrl.startsWith("https://"))) {
     return envUrl;
@@ -9,9 +9,15 @@ const getBaseURL = () => {
   if (typeof window !== "undefined") {
     const { hostname, protocol } = window.location;
 
-    // If we are on production frontend (onrender.com), point directly to the backend
-    if (hostname.includes("onrender.com")) {
-      return "https://ai-store-87n2.onrender.com/api";
+    // Check if running on local machine
+    const isLocal =
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.startsWith("192.168.") ||
+      hostname.startsWith("10.");
+
+    if (isLocal) {
+      return `${protocol}//${hostname}:5000/api`;
     }
 
     // ── Dev Tunnels / Codespaces / Ngrok / Cloudflare Tunnel / Port Forwarding ──
@@ -21,8 +27,8 @@ const getBaseURL = () => {
       return `${protocol}//${backendHost}/api`;
     }
 
-    // ── Plain local / IP fallback ────────────────────────────────────
-    return `${protocol}//${hostname}:5000/api`;
+    // ── All cloud deployments (onrender.com, vercel.app, netlify.app, custom domains) ──
+    return "https://ai-store-87n2.onrender.com/api";
   }
   return "https://ai-store-87n2.onrender.com/api";
 };

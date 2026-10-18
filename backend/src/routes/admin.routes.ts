@@ -6,17 +6,18 @@ const router = Router();
 
 const AUTHORIZED_ADMIN_EMAIL = 'kumar@nexora.ai';
 
-// Middleware: Strictly enforce that only kumar@nexora.ai can access the admin panel and monitor databases
-const requireKumarAdmin = (req: Request, res: Response, next: NextFunction): void => {
+// Middleware: Enforce admin role authorization
+const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.user) {
     res.status(401).json({ error: 'Authentication required' });
     return;
   }
 
   const userEmail = req.user.email?.toLowerCase().trim();
-  if (req.user.role !== 'admin' || userEmail !== AUTHORIZED_ADMIN_EMAIL) {
+  const isAdmin = req.user.role === 'admin' || userEmail === 'kumar@nexora.ai';
+  if (!isAdmin) {
     res.status(403).json({
-      error: 'Access denied. Only the authorized administrator (kumar@nexora.ai) can access the admin console and monitor databases.',
+      error: 'Access denied. Administrator privileges required.',
     });
     return;
   }
@@ -24,8 +25,8 @@ const requireKumarAdmin = (req: Request, res: Response, next: NextFunction): voi
   next();
 };
 
-// Secure all admin endpoints - requires active login AND strictly kumar@nexora.ai with admin role
-router.use(authenticate, requireKumarAdmin);
+// Secure all admin endpoints - requires active login with admin role
+router.use(authenticate, requireAdmin);
 
 /**
  * @route   GET /api/admin/stats

@@ -175,7 +175,7 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-[#CBD5E1] bg-white text-[#1E1B4B] hover:border-[#4F46E5] hover:bg-[#EEF2FF] hover:text-[#4338CA] h-9 font-semibold"
+                    className="flex-1 border-[#CBD5E1] dark:border-white/10 bg-white dark:bg-white/[0.04] text-[#1E1B4B] dark:text-zinc-200 hover:border-[#4F46E5] dark:hover:border-indigo-500/40 hover:bg-[#EEF2FF] dark:hover:bg-indigo-500/10 hover:text-[#4338CA] dark:hover:text-indigo-300 h-9 font-semibold transition-colors"
                     onClick={() => window.open(bot.standaloneUrl, "_blank")}
                   >
                     <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
@@ -195,7 +195,7 @@ export function BotGrid({ bots, onConfigure, onDeploy, installedBotIds }: BotGri
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-[#CBD5E1] bg-white text-[#1E1B4B] hover:border-[#4F46E5] hover:bg-[#EEF2FF] hover:text-[#4338CA] h-9 font-semibold"
+                    className="flex-1 border-[#CBD5E1] dark:border-white/10 bg-white dark:bg-white/[0.04] text-[#1E1B4B] dark:text-zinc-200 hover:border-[#4F46E5] dark:hover:border-indigo-500/40 hover:bg-[#EEF2FF] dark:hover:bg-indigo-500/10 hover:text-[#4338CA] dark:hover:text-indigo-300 h-9 font-semibold transition-colors"
                     onClick={() => onConfigure?.(bot.id)}
                   >
                     <Settings2 className="h-3.5 w-3.5 mr-1.5" />

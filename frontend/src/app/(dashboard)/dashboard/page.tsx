@@ -19,6 +19,7 @@ import {
   Rocket,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
@@ -79,6 +80,7 @@ const DEFAULT_DASHBOARD_METRICS: DashboardStats = {
 };
 
 export default function OverviewDashboardPage() {
+  const router = useRouter();
   const { addToast } = useToast();
   const [stats, setStats] = React.useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -92,8 +94,20 @@ export default function OverviewDashboardPage() {
     const fetchUser = async () => {
       try {
         const res = await api.get("/user/me");
-        if (res.data?.name) setUserName(res.data.name.split(" ")[0]);
+        if (res.data?.name) {
+          setUserName(res.data.name.split(" ")[0]);
+          return;
+        }
       } catch { /* silent */ }
+      if (typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("nexora_user");
+          if (stored) {
+            const u = JSON.parse(stored);
+            if (u.name) setUserName(u.name.split(" ")[0]);
+          }
+        } catch {}
+      }
     };
     fetchUser();
   }, []);
@@ -153,7 +167,7 @@ export default function OverviewDashboardPage() {
     };
 
     const target = BOT_ROUTES[botId] || CATEGORY_ROUTES[bot.category] || "/settings";
-    window.location.href = target;
+    router.push(target);
   };
 
   const handleDeploy = async (botId: string) => {
