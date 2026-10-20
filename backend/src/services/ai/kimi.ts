@@ -37,6 +37,7 @@ export class KimiProvider implements AIProvider {
 
   // Cache availability to avoid redundant health-check calls
   private availabilityVerified: boolean = false;
+  private quotaExceeded: boolean = false;
   private lastAvailabilityCheck: number = 0;
   private readonly AVAILABILITY_CHECK_INTERVAL_MS = 300_000; // 5 minutes
 
@@ -51,7 +52,7 @@ export class KimiProvider implements AIProvider {
   }
 
   async isAvailable(): Promise<boolean> {
-    if (!this.apiKey) return false;
+    if (!this.apiKey || this.quotaExceeded) return false;
 
     // Return cached result if recently verified
     const now = Date.now();
@@ -140,6 +141,9 @@ export class KimiProvider implements AIProvider {
         }
 
         const isRateLimitOrQuota = response.status === 429 || response.status === 403 || response.status === 400;
+        if (parsedError.includes('insufficient balance') || parsedError.includes('exceeded_current_quota_error') || parsedError.includes('suspended')) {
+          this.quotaExceeded = true;
+        }
         const errorMsg = isRateLimitOrQuota
           ? `Kimi API limit reached (${response.status}): ${parsedError}`
           : `Kimi API returned ${response.status}: ${parsedError}`;

@@ -48,12 +48,12 @@ export default function WhatsAppSetupWizardPage() {
         isAiEnabled: data.autoReply,
       });
       
-      addToast({ type: "success", title: "Configuration Trained", description: "AI Agent trained with business profile successfully." });
+      addToast({ type: "success", title: "Configuration Saved", description: "Personal AI Assistant profile trained and activated successfully." });
       setIsSaved(true);
     } catch (e: unknown) {
       console.error(e);
       const err = e as { response?: { data?: { error?: string } }; message?: string };
-      addToast({ type: "error", title: "Training Failed", description: err.response?.data?.error || err.message });
+      addToast({ type: "error", title: "Setup Failed", description: err.response?.data?.error || err.message });
     }
   };
 
@@ -63,7 +63,7 @@ export default function WhatsAppSetupWizardPage() {
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white" asChild>
           <Link href="/whatsapp">
-            <ArrowLeft className="h-4 w-4 mr-1.5" /> Back to Channels
+            <ArrowLeft className="h-4 w-4 mr-1.5" /> Back to WhatsApp
           </Link>
         </Button>
       </div>
@@ -72,10 +72,10 @@ export default function WhatsAppSetupWizardPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-              WhatsApp AI Customizer <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              WhatsApp Personal AI Assistant Setup <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </h1>
             <p className="text-slate-600 dark:text-zinc-400 text-sm mt-1">
-              Train the LLM models on your products, customer support hours, brand tone, and customized Q&As.
+              Customize your WhatsApp AI Assistant: name, personality tone, focus areas, custom notes, and auto-reply preferences.
             </p>
           </div>
 
@@ -93,9 +93,9 @@ export default function WhatsAppSetupWizardPage() {
           </div>
 
           <div className="space-y-2 relative z-10">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">AI Agent Trained Successfully!</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Personal AI Assistant Ready!</h2>
             <p className="text-slate-600 dark:text-zinc-400 text-sm leading-relaxed">
-              Your business customization guidelines have been compiled. The AI chatbot model has loaded these policies and is ready to resolve customer queries for <strong className="text-slate-900 dark:text-white">{savedData?.businessName}</strong>.
+              Your personal assistant has been configured and trained. It will now assist you and respond directly on WhatsApp as <strong className="text-slate-900 dark:text-white">{savedData?.businessName || 'your Personal Assistant'}</strong>.
             </p>
           </div>
 

@@ -347,16 +347,16 @@ export default function WhatsAppControlCenterPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
-            WhatsApp Control Center <MessageCircle className="h-6 w-6 text-indigo-500" />
+            WhatsApp Personal Assistant <MessageCircle className="h-6 w-6 text-indigo-500" />
           </h1>
           <p className="text-sm mt-1">
-            Link WhatsApp account, monitor automated chats, launch broadcasts, and examine messaging analytics.
+            Link WhatsApp account, chat with your intelligent AI personal assistant, plan tasks, and manage conversations.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild className="bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer">
             <Link href="/whatsapp/setup">
-              Configure AI Setup Wizard <ArrowRight className="h-4 w-4 ml-1.5" />
+              Customize Personal Assistant <ArrowRight className="h-4 w-4 ml-1.5" />
             </Link>
           </Button>
         </div>

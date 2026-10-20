@@ -157,32 +157,48 @@ export class FallbackProvider implements AIProvider {
     return `🤖 **Business Automation**\n\nI've noted your request: "${raw}"\n\nI can help automate:\n1. **Lead nurturing sequences** — Email drips & follow-ups\n2. **Data processing** — Auto-format, validate, transform\n3. **Notification systems** — Alert triggers & escalations\n4. **Report scheduling** — Auto-generate & distribute\n5. **API workflows** — Connect multiple services\n\nDescribe the manual process you want to automate!`;
   }
 
-  // ─── WhatsApp Bot ──────────────────────────────────────────
+  // ─── WhatsApp Personal Chat Assistant ─────────────────────
   private whatsappResponse(lower: string, raw: string, systemPrompt: string, isGreeting: boolean, hasHistory: boolean): string {
-    // Parse business info from system prompt if available
-    let businessName = '';
-    const businessMatch = systemPrompt.match(/Business Name:\s*([^\n]+)/i);
-    if (businessMatch) businessName = businessMatch[1].trim();
+    let assistantName = 'Nexora';
+    const nameMatch = systemPrompt.match(/(?:Assistant Name|You are)\s*[:\s]*([^\n,\.]+)/i);
+    if (nameMatch && !nameMatch[1].includes('helpful') && !nameMatch[1].includes('customer')) {
+      assistantName = nameMatch[1].trim();
+    }
 
     if (isGreeting) {
-      return businessName
-        ? `Hello! 👋 Welcome to ${businessName}. How can I assist you today?\n\nYou can ask me about:\n- Our services & pricing\n- Support & troubleshooting\n- Business hours & location\n- FAQs`
-        : `Hello! 👋 Welcome to our WhatsApp Business Assistant!\n\nI'm here to help you with:\n- 📋 Product & service information\n- 💰 Pricing & availability\n- 🔧 Support & troubleshooting\n- 📍 Business hours & location\n\nHow can I assist you today?`;
+      if (hasHistory) {
+        return `Hey! I'm right here. How can I help you today? Ask me anything or let me know what you'd like to work on! 😊`;
+      }
+      return `Hey there! 👋 I'm **${assistantName}**, your WhatsApp personal AI assistant.\n\nI'm here to help you anytime with:\n- 💡 *Answering questions* & explaining any topic\n- ✍️ *Drafting messages*, emails, or notes\n- 💻 *Writing & debugging code*\n- 📋 *Planning tasks* & daily productivity\n- 🧠 *Brainstorming ideas* & quick advice\n\nWhat's on your mind today?`;
     }
 
-    if (lower.includes('price') || lower.includes('cost') || lower.includes('rate')) {
-      return businessName
-        ? `Thank you for your interest in ${businessName}'s pricing! Our team will share detailed pricing based on your specific requirements. Could you tell me:\n\n1. Which service/product are you interested in?\n2. What's your expected volume/usage?\n3. Any specific features you need?\n\nI'll connect you with the right person for a custom quote.`
-        : `Our pricing varies based on your needs. To get you the best quote:\n\n1. What service are you looking for?\n2. What's your expected usage?\n3. Any specific requirements?\n\nI'll have our team prepare a personalized quote for you!`;
+    // Code queries
+    if (lower.includes('code') || lower.includes('function') || lower.includes('bug') || lower.includes('python') || lower.includes('javascript') || lower.includes('typescript') || lower.includes('react') || lower.includes('api')) {
+      return `💻 *Personal Assistant - Code Helper*\n\nHere is a solution for: "${raw}":\n\n\`\`\`javascript\n// Quick helper function\nfunction handleTask(input) {\n  if (!input) return null;\n  return {\n    success: true,\n    data: input,\n    timestamp: new Date().toISOString()\n  };\n}\n\`\`\`\n\nNeed me to adjust this for a specific framework, language, or logic? Just send over more details!`;
     }
 
-    if (lower.includes('support') || lower.includes('help') || lower.includes('problem') || lower.includes('issue')) {
-      return `I'm sorry to hear you're experiencing an issue. Let me help!\n\n**To resolve this quickly:**\n1. Please describe the problem in detail\n2. When did it start?\n3. Have you tried any troubleshooting steps?\n\nIf this is urgent, I'll escalate to our support team immediately. 🔧`;
+    // To-do / Productivity / Scheduling
+    if (lower.includes('task') || lower.includes('todo') || lower.includes('to-do') || lower.includes('plan') || lower.includes('schedule') || lower.includes('focus') || lower.includes('remind')) {
+      return `📋 *Task & Productivity Assistant*\n\nI've noted: "${raw}"\n\nHere is a quick plan to tackle it:\n1. *Immediate action:* Break the task into 2-3 manageable sub-steps\n2. *Time block:* Set a 25-minute focus session (Pomodoro)\n3. *Quick check:* Eliminate tab distractions and phone notifications\n\nWant me to structure a full checklist or draft a daily schedule for you?`;
     }
 
-    return businessName
-      ? `Thank you for reaching out to ${businessName}! I've noted your message about "${raw}". Our team will get back to you shortly.\n\nIn the meantime, is there anything else I can help with?`
-      : `Thank you for your message! I've noted your query about "${raw}". How can I assist you further?\n\nFeel free to ask about our services, pricing, or support options.`;
+    // Writing / Emails / Messages
+    if (lower.includes('write') || lower.includes('draft') || lower.includes('email') || lower.includes('message') || lower.includes('reply')) {
+      return `✍️ *Draft Helper*\n\nHere is a draft for you:\n\n---\n"Hi there,\n\nI hope you're having a great week. I wanted to follow up regarding ${raw.slice(0, 50)}.\n\nPlease let me know your thoughts when you have a moment, and we can coordinate next steps.\n\nBest regards,"\n---\n\nWould you like me to make it more casual, formal, or add specific details?`;
+    }
+
+    // How-to / Explanations
+    if (lower.startsWith('how') || lower.startsWith('what') || lower.startsWith('why') || lower.startsWith('can you') || lower.includes('explain') || lower.includes('tell me')) {
+      return `💡 *Here's what you need to know regarding "${raw}":*\n\n• *Core takeaway:* Focus on the fundamental steps first, then refine based on results.\n• *Best practice:* Keep it simple, test early, and iterate.\n• *Next step:* If you need a deeper breakdown, examples, or a specific guide, just let me know!\n\nWhat aspect would you like to explore further?`;
+    }
+
+    // Advice / Decisions
+    if (lower.includes('should i') || lower.includes('suggest') || lower.includes('recommend') || lower.includes('advice') || lower.includes('idea')) {
+      return `🤔 *Personal Assistant Insight*\n\nRegarding "${raw}":\n\n• *Option A:* Take the quickest, lowest-risk approach to validate the idea first.\n• *Option B:* Invest time upfront for a higher-quality, long-term solution.\n\n*My suggestion:* Start small today to build momentum. Tell me a bit more about your priorities so I can give you a tailored recommendation!`;
+    }
+
+    // Default intelligent personal conversational response
+    return `Got it! 👍 Regarding "${raw}":\n\nI'm on it. Could you tell me a little more about what you'd like to achieve with this? Whether it's drafting something, researching, solving a problem, or organizing thoughts, I'm here to help!`;
   }
 
   // ─── Compass Advisor ───────────────────────────────────────

@@ -33,11 +33,26 @@ interface WhatsAppClientWrapper {
   phoneNumber?: string;
 }
 
+function cleanPhone(raw: string): string {
+  if (!raw) return '';
+  const noSuffix = raw.split('@')[0].split(':')[0];
+  const digits = noSuffix.replace(/[^0-9]/g, '');
+  return digits || noSuffix;
+}
+
+function normalizeJid(raw: string): string {
+  if (!raw) return '';
+  if (raw.includes('@')) return raw;
+  const digits = raw.replace(/[^0-9]/g, '');
+  return `${digits}@s.whatsapp.net`;
+}
+
 class WhatsAppService {
   private clients: Map<string, WhatsAppClientWrapper> = new Map();
   private io: SocketIOServer | null = null;
   private processedMessageCache: Map<string, number> = new Map();
   private lastFallbackSentTimes: Map<string, number> = new Map();
+  private sentByBotMessageIds: Set<string> = new Set();
 
   setSocketIO(io: SocketIOServer): void {
     this.io = io;
@@ -165,19 +180,35 @@ class WhatsAppService {
       sock.ev.on('messages.upsert', async ({ messages }: any) => {
         if (!messages || !messages.length) return;
         for (const msg of messages) {
-          if (msg.key?.fromMe || !msg.message) continue;
+          if (!msg.message) continue;
+          if (msg.key?.id && this.sentByBotMessageIds.has(msg.key.id)) continue;
+
+          const from = msg.key?.remoteJid || '';
+          if (!from || from.includes('@broadcast') || from.includes('@newsletter')) continue;
+
+          // If fromMe: only allow if user is messaging themselves (e.g. Note to Self / testing personal assistant)
+          if (msg.key?.fromMe) {
+            const selfUser = sock.user?.id || '';
+            const selfBase = selfUser.split(':')[0].split('@')[0];
+            const remoteBase = from.split(':')[0].split('@')[0];
+            if (!selfBase || selfBase !== remoteBase) {
+              // Outgoing message to another contact (user manual chat) - ignore
+              continue;
+            }
+          }
+
           const body =
             msg.message?.conversation ||
             msg.message?.extendedTextMessage?.text ||
             msg.message?.imageMessage?.caption ||
             '';
-          const from = msg.key?.remoteJid || '';
-          if (!from || from.includes('@broadcast') || from.includes('@newsletter')) continue;
+
+          if (!body || !body.trim()) continue;
 
           try {
             await this.handleIncomingMessage(sessionId, userId, {
               from,
-              body,
+              body: body.trim(),
               type: 'text',
               pushName: msg.pushName || null,
             });
@@ -211,12 +242,11 @@ class WhatsAppService {
     const body = msg.body;
     const messageType = msg.type || 'text';
 
-    // 1. CRITICAL: Ignore messages sent by self (outbound messages from bot), status updates, or broadcast channels
-    if (msg.fromMe || msg.isStatus || from?.includes('@broadcast') || from?.includes('@news')) {
+    if (!body || msg.isStatus || from?.includes('@broadcast') || from?.includes('@news')) {
       return;
     }
 
-    const phone = from.replace('@c.us', '').replace('@g.us', '');
+    const phone = cleanPhone(from);
     const now = Date.now();
 
     // 2. Anti-Spam & Deduplication: Suppress identical incoming messages within 5 seconds
@@ -270,20 +300,67 @@ class WhatsAppService {
       message: savedMessage,
     });
 
-    // Check if auto-reply is configured (AI-powered)
+    // Check if auto-reply is configured (AI-powered Personal Assistant)
     const session = await prisma.whatsAppSession.findUnique({
       where: { id: sessionId },
     });
 
     if (session?.isAiEnabled !== false && body && (messageType === 'text' || messageType === 'chat')) {
+      let assistantName = session?.businessName && !session.businessName.startsWith('+')
+        ? session.businessName
+        : 'Nexora';
+
+      let systemPrompt = `You are ${assistantName}, a smart, friendly, and highly capable Personal AI Chat Assistant on WhatsApp.
+
+Your Purpose:
+Act as the user's dedicated personal AI companion, advisor, and helper directly on WhatsApp.
+
+Personality & Communication Style:
+- Warm, thoughtful, engaging, and genuinely helpful.
+- Speak naturally like a knowledgeable, supportive personal assistant (never a corporate helpdesk bot).
+- Format answers cleanly for mobile: use short paragraphs, bullet points for lists, bolding for key terms (*bold* or **bold**), and tasteful emojis.
+- Be concise by default so messages are fast to read on a phone screen, but give complete, thorough answers whenever asked for explanations, guides, code, or details.
+
+Capabilities:
+- Answer questions on any topic: science, coding, writing, business, productivity, daily tasks, health tips, travel, culture, math, or trivia.
+- Help compose or rewrite messages, emails, letters, and social posts.
+- Plan schedules, prioritize tasks, and create actionable to-do lists.
+- Brainstorm creative ideas, troubleshoot problems, and offer balanced advice.
+- Support casual, friendly conversation.
+
+Strict Rules:
+- NEVER say "Thank you for contacting [business]! Our team will get back to you shortly."
+- NEVER say "Let me connect you to a human agent" or act like a helpdesk ticket system.
+- ALWAYS answer the user directly, intelligently, and helpfully.
+- Maintain context from the conversation history naturally.`;
+
+      if (session?.generatedPrompt && !session.generatedPrompt.toLowerCase().includes('customer service agent')) {
+        systemPrompt += `\n\nUser Profile & Custom Preferences:\n${session.generatedPrompt}`;
+      }
+      if (session?.services) {
+        systemPrompt += `\nFocus Areas & Interests: ${session.services}`;
+      }
+      if (session?.faqData) {
+        systemPrompt += `\nPersonal Memory & Notes:\n${session.faqData}`;
+      }
+
       try {
-        logger.info(`WhatsApp AI auto-reply: Processing message from ${phone}`);
+        logger.info(`WhatsApp Personal AI Assistant: Processing message from ${phone}`);
 
         // Fetch past conversation history (last 10 messages) to maintain multi-turn context
         const recentMessages = await prisma.whatsAppMessage.findMany({
           where: {
             sessionId,
-            OR: [{ from }, { to: from }, { to: `${phone}@c.us` }],
+            OR: [
+              { from },
+              { to: from },
+              { from: phone },
+              { to: phone },
+              { from: `${phone}@s.whatsapp.net` },
+              { to: `${phone}@s.whatsapp.net` },
+              { from: `${phone}@c.us` },
+              { to: `${phone}@c.us` },
+            ],
           },
           orderBy: { timestamp: 'desc' },
           take: 10,
@@ -291,66 +368,58 @@ class WhatsAppService {
 
         const chronological = recentMessages.reverse();
 
-        // Build dynamic system prompt incorporating session details
-        let systemPrompt = session?.generatedPrompt || "You are a helpful customer service AI assistant.";
-        if (session?.businessName) {
-          systemPrompt += `\nBusiness Name: ${session.businessName}`;
-        }
-        if (session?.industry) {
-          systemPrompt += `\nIndustry: ${session.industry}`;
-        }
-        if (session?.services) {
-          systemPrompt += `\nServices Offered: ${session.services}`;
-        }
-        if (session?.faqData) {
-          systemPrompt += `\nKnowledge Base / FAQs: ${session.faqData}`;
-        }
-        systemPrompt += "\n\nInstructions: Respond to the customer naturally, helpfully, and concisely. Maintain context from previous messages. Do NOT repeat previous messages verbatim.";
-
         const chatHistory: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> = [
           { role: 'system', content: systemPrompt },
         ];
 
         for (const m of chronological) {
-          const role = m.direction === 'inbound' ? 'user' : 'assistant';
-          chatHistory.push({ role, content: m.body });
+          if (m.body && m.body.trim()) {
+            const role = m.direction === 'inbound' ? 'user' : 'assistant';
+            chatHistory.push({ role, content: m.body });
+          }
         }
 
         const chatResponse = await aiRouter.chat(chatHistory, {
           temperature: 0.7,
-          maxTokens: 350,
+          maxTokens: 500,
         });
 
         let aiResponse = chatResponse.content;
 
-        // Anti-repetition check: do not send identical outbound message twice in a row to the same contact
+        // Anti-repetition check: do not send identical outbound message twice in a row
         const lastOutbound = chronological.filter(m => m.direction === 'outbound').pop()?.body;
         if (lastOutbound && lastOutbound.trim() === aiResponse.trim()) {
           logger.info(`WhatsApp AI auto-reply: Suppressing identical consecutive message to ${phone}`);
-          aiResponse = session?.businessName
-            ? `Thanks for your follow-up! How else can our team at ${session.businessName} assist you with this?`
-            : `Thanks for your follow-up! Is there anything specific I can clarify for you?`;
+          aiResponse = `I'm right here! Feel free to ask me to explain further, dive deeper, or help with something else. 😊`;
         }
 
         if (aiResponse && aiResponse.trim().length > 0) {
           await this.sendMessage(sessionId, from, aiResponse);
-          logger.info(`WhatsApp AI auto-reply: Sent response to ${phone}`);
+          logger.info(`WhatsApp AI personal assistant: Sent response to ${phone}`);
         } else {
           logger.warn(`WhatsApp AI auto-reply: Empty response from AI for message from ${phone}`);
         }
       } catch (error: any) {
         logger.error(`WhatsApp AI auto-reply failed for ${phone}: ${error.message}`);
-        // Rate-limit fallback message (at most once every 5 minutes per contact)
         const fallbackKey = `${sessionId}:${phone}`;
         const lastFallback = this.lastFallbackSentTimes.get(fallbackKey);
-        if (!lastFallback || now - lastFallback > 300000) {
+        if (!lastFallback || now - lastFallback > 60000) {
           this.lastFallbackSentTimes.set(fallbackKey, now);
           try {
-            const fallbackMessage = session?.businessName
-              ? `Thanks for reaching out to ${session.businessName}! We received your message and a team member will get back to you shortly.`
-              : `Thanks for your message! We're currently experiencing a brief technical issue. A team member will respond to you shortly.`;
+            const fallbackProvider = aiRouter.getProvider('fallback');
+            let fallbackMessage = '';
+            if (fallbackProvider) {
+              const res = await fallbackProvider.chat([
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: body },
+              ]);
+              fallbackMessage = res.content;
+            }
+            if (!fallbackMessage) {
+              fallbackMessage = `Hey! I received your message: "${body.slice(0, 50)}". I had a brief network delay, but I'm ready to help! What can I do for you? 😊`;
+            }
             await this.sendMessage(sessionId, from, fallbackMessage);
-            logger.info(`WhatsApp: Sent fallback message to ${phone}`);
+            logger.info(`WhatsApp: Sent personal assistant fallback message to ${phone}`);
           } catch (fallbackErr: any) {
             logger.error(`WhatsApp: Failed to send fallback message to ${phone}: ${fallbackErr.message}`);
           }
@@ -371,15 +440,21 @@ class WhatsAppService {
       throw new Error('WhatsApp client is not connected');
     }
 
-    // Ensure the number has the correct format
-    const cleanPhone = to.replace(/[^0-9]/g, '');
-    const jid = to.includes('@') ? to.replace('@c.us', '@s.whatsapp.net') : `${cleanPhone}@s.whatsapp.net`;
-    const chatId = to.includes('@') ? to : `${to}@c.us`;
+    const jid = normalizeJid(to);
+    const phone = cleanPhone(to);
+    const chatId = `${phone}@s.whatsapp.net`;
 
     try {
       if (wrapper?.sock && wrapper.isReady) {
         try {
-          await wrapper.sock.sendMessage(jid, { text: body });
+          const sentResult = await wrapper.sock.sendMessage(jid, { text: body });
+          if (sentResult?.key?.id) {
+            this.sentByBotMessageIds.add(sentResult.key.id);
+            if (this.sentByBotMessageIds.size > 2000) {
+              const arr = Array.from(this.sentByBotMessageIds);
+              this.sentByBotMessageIds = new Set(arr.slice(1000));
+            }
+          }
         } catch (clientErr: any) {
           logger.warn(`Could not dispatch through Baileys socket (${clientErr.message}). Recording message in database.`);
         }
@@ -398,7 +473,6 @@ class WhatsAppService {
       });
 
       // Update contact last message time
-      const phone = chatId.replace('@c.us', '').replace('@g.us', '');
       await prisma.whatsAppContact.upsert({
         where: { sessionId_phone: { sessionId, phone } },
         create: {
@@ -594,10 +668,10 @@ class WhatsAppService {
 
     for (const msg of messages) {
       const partner = msg.direction === 'inbound' ? msg.from : msg.to;
-      const phone = partner.replace('@c.us', '').replace('@g.us', '');
+      const phone = cleanPhone(partner);
 
       // Exclude test sandbox numbers if any linger in database
-      if (phone === '14155552671' || phone === '+14155552671' || phone === '14155559812' || phone === '+14155559812') {
+      if (phone === '14155552671' || phone === '14155559812') {
         continue;
       }
 
@@ -624,12 +698,12 @@ class WhatsAppService {
     const contactMap = new Map<string, any>();
     for (const c of contacts) {
       contactMap.set(c.phone, c);
-      contactMap.set(c.phone.replace(/[^0-9]/g, ''), c);
+      contactMap.set(cleanPhone(c.phone), c);
     }
 
     const chats = [];
     for (const [phone, chat] of chatMap) {
-      const contact = contactMap.get(phone) || contactMap.get(phone.replace(/[^0-9]/g, ''));
+      const contact = contactMap.get(phone) || contactMap.get(cleanPhone(phone));
       let parsedTags: string[] = [];
       if (contact?.tags) {
         try {
@@ -652,11 +726,22 @@ class WhatsAppService {
    * Get messages for a specific chat
    */
   async getMessages(sessionId: string, phone: string, limit: number = 50, offset: number = 0): Promise<any[]> {
-    const chatId = `${phone}@c.us`;
+    const clean = cleanPhone(phone);
     return prisma.whatsAppMessage.findMany({
       where: {
         sessionId,
-        OR: [{ from: chatId }, { to: chatId }, { from: phone }, { to: phone }],
+        OR: [
+          { from: phone },
+          { to: phone },
+          { from: clean },
+          { to: clean },
+          { from: `${clean}@s.whatsapp.net` },
+          { to: `${clean}@s.whatsapp.net` },
+          { from: `${clean}@c.us` },
+          { to: `${clean}@c.us` },
+          { from: { contains: clean } },
+          { to: { contains: clean } },
+        ],
       },
       orderBy: { timestamp: 'asc' },
       take: limit,
@@ -754,27 +839,22 @@ class WhatsAppService {
     contactInfo?: Record<string, string>;
     isAiEnabled?: boolean;
   }): Promise<any> {
-    // Generate AI prompt based on business data
-    const promptInput = `Create a customer service chatbot system prompt for a business with the following details:
-Business Name: ${data.businessName}
-Industry: ${data.industry}
-Services: ${data.services?.join(', ') || 'N/A'}
-Products: ${data.products?.join(', ') || 'N/A'}
-Brand Tone: ${data.brandTone || 'Professional and friendly'}
-Target Audience: ${data.targetAudience || 'General'}
-FAQ Data: ${data.faqData ? data.faqData.map(f => `Q: ${f.question} A: ${f.answer}`).join('\n') : 'N/A'}
-Support Details: ${data.supportDetails || 'N/A'}
-Pricing Info: ${data.pricingInfo || 'N/A'}
-Website: ${data.websiteLinks?.join(', ') || 'N/A'}
-Contact Info: ${data.contactInfo ? JSON.stringify(data.contactInfo) : 'N/A'}
+    // Generate AI prompt for Personal Assistant profile
+    const assistantName = data.businessName || 'Nexora';
+    const promptInput = `Create a system prompt for a personal WhatsApp AI chat assistant with the following profile:
+Assistant Name: ${assistantName}
+Domain / Specialties: ${data.industry || 'Personal Productivity, Coding & Knowledge'}
+Key Skills: ${data.services?.join(', ') || 'Task management, research, writing, coding'}
+Preferences & Tools: ${data.products?.join(', ') || 'WhatsApp, Notes, Web'}
+Communication Tone: ${data.brandTone || 'Warm, smart, concise, and helpful'}
+User Context: ${data.targetAudience || 'General'}
+User Knowledge / Notes: ${data.faqData ? data.faqData.map(f => `Q: ${f.question} A: ${f.answer}`).join('\n') : 'N/A'}
 
-Generate a comprehensive system prompt that will guide an AI to respond as this business's WhatsApp customer service agent. The prompt should:
-1. Define the bot's personality matching the brand tone
-2. Include knowledge of all products/services with pricing
-3. Handle FAQs naturally
-4. Know when to escalate to a human
-5. Be warm and helpful while staying on-brand
-6. Include specific details from the business information provided
+Generate a comprehensive system prompt that guides the AI to act as a trusted Personal Chat Assistant on WhatsApp. The prompt must:
+1. Act as a dedicated personal chat assistant and advisor on WhatsApp (NOT a corporate business support bot).
+2. Answer all user questions directly, thoroughly, and conversationally.
+3. Be formatted cleanly for mobile reading with short paragraphs, emojis, and bullet points.
+4. Never deflect to a human support team.
 
 Return ONLY the system prompt text, no explanations.`;
 
@@ -786,7 +866,7 @@ Return ONLY the system prompt text, no explanations.`;
       });
     } catch (error: any) {
       logger.warn(`Failed to generate AI prompt: ${error.message}`);
-      generatedPrompt = `You are a helpful customer service agent for ${data.businessName}. You work in the ${data.industry} industry. Be professional, friendly, and helpful. Answer customer questions about our products and services. If you don't know the answer, politely let the customer know you'll connect them with a human agent.`;
+      generatedPrompt = `You are ${assistantName}, a knowledgeable, friendly, and helpful Personal AI Assistant on WhatsApp. Answer questions directly, assist with tasks, coding, writing, and daily planning. Keep responses clear and formatted cleanly with emojis and bullet points for mobile.`;
     }
 
     // Update session with business data

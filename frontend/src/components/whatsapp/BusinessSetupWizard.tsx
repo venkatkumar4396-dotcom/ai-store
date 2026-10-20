@@ -28,9 +28,9 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
     services: initialData?.services || [],
     products: initialData?.products || [],
     brandVoice: initialData?.brandVoice || "friendly",
-    greetingMessage: initialData?.greetingMessage || "Hello! Welcome to our store. How can I help you today?",
+    greetingMessage: initialData?.greetingMessage || "Hey there! 👋 I'm your WhatsApp personal AI assistant. How can I help you today?",
     faq: initialData?.faq || [{ question: "", answer: "" }],
-    supportHours: initialData?.supportHours || "9 AM - 5 PM EST",
+    supportHours: initialData?.supportHours || "24/7 Always Available",
     supportEmail: initialData?.supportEmail || "",
     autoReply: initialData?.autoReply ?? true,
   });
@@ -104,13 +104,13 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
         <div className="flex items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
             <Bot className="h-5 w-5" />
-            <span className="text-sm font-semibold uppercase tracking-wider">AI Customizer</span>
+            <span className="text-sm font-semibold uppercase tracking-wider">Personal Assistant Setup</span>
           </div>
           <span className="text-xs text-slate-500 dark:text-zinc-500 font-medium">Step {step} of {totalSteps}</span>
         </div>
-        <CardTitle className="text-xl text-slate-900 dark:text-white">Business AI Customization</CardTitle>
+        <CardTitle className="text-xl text-slate-900 dark:text-white">Personal AI Chat Assistant Setup</CardTitle>
         <CardDescription className="text-slate-600 dark:text-zinc-400 text-sm">
-          Train your WhatsApp Business AI Agent on your business profile, services, and FAQ.
+          Customize your WhatsApp Personal AI Assistant: persona, tone, core skills, and memory notes.
         </CardDescription>
         <div className="pt-2">
           <Progress value={progressPercentage} className="h-1.5 bg-slate-100 dark:bg-zinc-800" />
@@ -118,63 +118,63 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
       </CardHeader>
 
       <CardContent className="py-6 min-h-[350px]">
-        {/* STEP 1: BUSINESS PROFILE */}
+        {/* STEP 1: ASSISTANT PROFILE */}
         {step === 1 && (
           <div className="space-y-4">
             <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
               <Sparkles className="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
-              1. Business Profile
+              1. Assistant Profile & Persona
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="biz-name" className="text-slate-700 dark:text-zinc-300">Business Name</Label>
+                <Label htmlFor="biz-name" className="text-slate-700 dark:text-zinc-300">Assistant Name</Label>
                 <Input
                   id="biz-name"
                   value={formData.businessName}
                   onChange={(e) => updateField("businessName", e.target.value)}
-                  placeholder="e.g. NexusForge Solutions"
+                  placeholder="e.g. Nexora, Jarvis, or Alex"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="biz-industry" className="text-slate-700 dark:text-zinc-300">Industry</Label>
+                <Label htmlFor="biz-industry" className="text-slate-700 dark:text-zinc-300">Primary Role / Domain</Label>
                 <Input
                   id="biz-industry"
                   value={formData.industry}
                   onChange={(e) => updateField("industry", e.target.value)}
-                  placeholder="e.g. Technology SaaS"
+                  placeholder="e.g. Personal Productivity, Tech & Coding"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="biz-desc" className="text-slate-700 dark:text-zinc-300">Business Description</Label>
+              <Label htmlFor="biz-desc" className="text-slate-700 dark:text-zinc-300">Personal Context & Custom Instructions</Label>
               <Textarea
                 id="biz-desc"
                 value={formData.description}
                 onChange={(e) => updateField("description", e.target.value)}
-                placeholder="Describe your company, what you sell, and your core values..."
+                placeholder="Describe how you'd like your personal assistant to behave, any background details, preferred language, or writing style..."
                 className="h-28"
               />
             </div>
           </div>
         )}
 
-        {/* STEP 2: PRODUCTS & SERVICES */}
+        {/* STEP 2: FOCUS TOPICS & SKILLS */}
         {step === 2 && (
           <div className="space-y-6">
             <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Sparkles className="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
-              2. Products & Services
+              2. Focus Topics & Skills
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Products Setup */}
+              {/* Focus Topics Setup */}
               <div className="space-y-3">
-                <Label className="text-slate-700 dark:text-zinc-300">Products Offered</Label>
+                <Label className="text-slate-700 dark:text-zinc-300">Interests & Topics</Label>
                 <div className="flex gap-2">
                   <Input
                     value={newProduct}
                     onChange={(e) => setNewProduct(e.target.value)}
-                    placeholder="Add a product..."
+                    placeholder="e.g. Coding, Finance, Fitness..."
                   />
                   <Button type="button" onClick={addProduct} size="icon" className="shrink-0 bg-slate-900 hover:bg-slate-800 text-white dark:bg-zinc-800 dark:hover:bg-zinc-700">
                     <Plus className="h-4 w-4" />
@@ -182,7 +182,7 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
                 </div>
                 <div className="max-h-40 overflow-y-auto space-y-1.5 border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950/20 p-2 rounded-lg">
                   {formData.products.length === 0 ? (
-                    <span className="text-xs text-slate-400 dark:text-zinc-500 block p-2">No products added.</span>
+                    <span className="text-xs text-slate-400 dark:text-zinc-500 block p-2">No specific topics added (assistant knows all general topics).</span>
                   ) : (
                     formData.products.map((p, idx) => (
                       <div key={idx} className="flex items-center justify-between bg-white dark:bg-white/5 border border-slate-200/80 dark:border-transparent px-3 py-1.5 rounded text-sm text-slate-800 dark:text-zinc-200">
@@ -196,14 +196,14 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
                 </div>
               </div>
 
-              {/* Services Setup */}
+              {/* Skills Setup */}
               <div className="space-y-3">
-                <Label className="text-slate-700 dark:text-zinc-300">Services Offered</Label>
+                <Label className="text-slate-700 dark:text-zinc-300">Assistance Skills</Label>
                 <div className="flex gap-2">
                   <Input
                     value={newService}
                     onChange={(e) => setNewService(e.target.value)}
-                    placeholder="Add a service..."
+                    placeholder="e.g. Drafting emails, Task planning..."
                   />
                   <Button type="button" onClick={addService} size="icon" className="shrink-0 bg-slate-900 hover:bg-slate-800 text-white dark:bg-zinc-800 dark:hover:bg-zinc-700">
                     <Plus className="h-4 w-4" />
@@ -211,7 +211,7 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
                 </div>
                 <div className="max-h-40 overflow-y-auto space-y-1.5 border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950/20 p-2 rounded-lg">
                   {formData.services.length === 0 ? (
-                    <span className="text-xs text-slate-400 dark:text-zinc-500 block p-2">No services added.</span>
+                    <span className="text-xs text-slate-400 dark:text-zinc-500 block p-2">No custom skills specified (full AI capabilities active).</span>
                   ) : (
                     formData.services.map((s, idx) => (
                       <div key={idx} className="flex items-center justify-between bg-white dark:bg-white/5 border border-slate-200/80 dark:border-transparent px-3 py-1.5 rounded text-sm text-slate-800 dark:text-zinc-200">
@@ -228,15 +228,15 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
           </div>
         )}
 
-        {/* STEP 3: BRAND VOICE & GREETING */}
+        {/* STEP 3: TONE & GREETING */}
         {step === 3 && (
           <div className="space-y-4">
             <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
               <Sparkles className="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
-              3. AI Personality & Greetings
+              3. Assistant Personality & Tone
             </h3>
             <div className="space-y-1.5">
-              <Label htmlFor="brand-voice" className="text-slate-700 dark:text-zinc-300">Brand Voice / Tone</Label>
+              <Label htmlFor="brand-voice" className="text-slate-700 dark:text-zinc-300">Personality Tone</Label>
               <Select
                 value={formData.brandVoice}
                 onValueChange={(val) => updateField("brandVoice", val as BusinessSetupData["brandVoice"])}
@@ -245,10 +245,10 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
                   <SelectValue placeholder="Select a tone" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="professional">Professional & Formal</SelectItem>
-                  <SelectItem value="friendly">Friendly & Welcoming</SelectItem>
-                  <SelectItem value="casual">Casual & Relaxed</SelectItem>
-                  <SelectItem value="formal">Informative & Analytical</SelectItem>
+                  <SelectItem value="friendly">Friendly & Conversational</SelectItem>
+                  <SelectItem value="casual">Casual, Warm & Direct</SelectItem>
+                  <SelectItem value="professional">Smart, Professional & Efficient</SelectItem>
+                  <SelectItem value="formal">Analytical & In-Depth</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -258,25 +258,28 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
                 id="greeting-msg"
                 value={formData.greetingMessage}
                 onChange={(e) => updateField("greetingMessage", e.target.value)}
-                placeholder="Define what the AI says when a customer messages you for the first time..."
+                placeholder="Define what your assistant says when someone chats for the first time..."
                 className="h-24"
               />
             </div>
           </div>
         )}
 
-        {/* STEP 4: FAQ BUILDER */}
+        {/* STEP 4: MEMORY & NOTES BUILDER */}
         {step === 4 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                 <HelpCircle className="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
-                4. Knowledge Base (FAQ)
+                4. Personal Memory & Notes
               </h3>
               <Button type="button" onClick={addFaq} variant="outline" className="h-8 border-indigo-200 text-indigo-600 hover:bg-indigo-50 dark:border-indigo-500/20 dark:text-indigo-400 dark:hover:bg-indigo-500/10">
-                <Plus className="h-3.5 w-3.5 mr-1" /> Add FAQ
+                <Plus className="h-3.5 w-3.5 mr-1" /> Add Note
               </Button>
             </div>
+            <p className="text-xs text-slate-500 dark:text-zinc-400">
+              Add any personal notes, project context, or frequent information you want your assistant to remember.
+            </p>
             <div className="max-h-72 overflow-y-auto space-y-4 pr-2">
               {formData.faq.map((item, idx) => (
                 <div key={idx} className="p-3 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/5 rounded-lg space-y-2 relative">
@@ -288,20 +291,20 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
                     <Trash className="h-3.5 w-3.5" />
                   </button>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-700 dark:text-zinc-300">Question {idx + 1}</Label>
+                    <Label className="text-xs text-slate-700 dark:text-zinc-300">Topic / Key {idx + 1}</Label>
                     <Input
                       value={item.question}
                       onChange={(e) => updateFaq(idx, "question", e.target.value)}
-                      placeholder="e.g. What is your refund policy?"
+                      placeholder="e.g. My preferred tech stack"
                       className="h-8 text-xs"
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-700 dark:text-zinc-300">Answer</Label>
+                    <Label className="text-xs text-slate-700 dark:text-zinc-300">Details / Memory Content</Label>
                     <Textarea
                       value={item.answer}
                       onChange={(e) => updateFaq(idx, "answer", e.target.value)}
-                      placeholder="Answer to train the AI with..."
+                      placeholder="e.g. Next.js, Node.js, TypeScript, PostgreSQL"
                       className="h-16 text-xs"
                     />
                   </div>
@@ -311,17 +314,17 @@ export function BusinessSetupWizard({ onSave, initialData }: BusinessSetupWizard
           </div>
         )}
 
-        {/* STEP 5: SCHEDULE & COMPLETION */}
+        {/* STEP 5: AUTO-REPLY SETTINGS */}
         {step === 5 && (
           <div className="space-y-6">
             <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Sparkles className="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
-              5. Live Auto-Replies & Schedule
+              5. Live Auto-Replies & Settings
             </h3>
             <div className="p-4 bg-indigo-50 dark:bg-indigo-600/10 border border-indigo-200/80 dark:border-indigo-500/20 rounded-xl flex items-center justify-between gap-4">
               <div className="space-y-0.5">
-                <span className="font-semibold text-sm text-slate-900 dark:text-white">Enable AI Agent Auto-replies</span>
-                <p className="text-xs text-indigo-700 dark:text-indigo-300">Allow AI to reply automatically when new chats are received.</p>
+                <span className="font-semibold text-sm text-slate-900 dark:text-white">Enable Personal AI Auto-Replies</span>
+                <p className="text-xs text-indigo-700 dark:text-indigo-300">Allow your personal AI assistant to reply automatically to incoming WhatsApp messages.</p>
               </div>
               <Switch
                 checked={formData.autoReply}

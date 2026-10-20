@@ -32,7 +32,7 @@ export class PollinationsProvider implements AIProvider {
       formattedMessages.unshift({ role: 'system', content: options.systemPrompt });
     }
 
-    const models = ['openai', 'mistral', 'llama', 'qwen'];
+    const models = options?.model ? [options.model, 'openai', 'openai-fast'] : ['openai', 'openai-fast'];
     let lastError: Error | null = null;
 
     // 1. Try POST with JSON messages body (best for multi-turn & formatting)
@@ -50,13 +50,14 @@ export class PollinationsProvider implements AIProvider {
             seed: Date.now(),
             jsonMode: false,
           }),
-          signal: AbortSignal.timeout(15000),
+          signal: AbortSignal.timeout(10000),
         });
 
         if (response.ok) {
           const text = await response.text();
-          if (text && text.trim().length > 0) {
-            const content = text.trim();
+          const content = text ? text.trim() : '';
+          // Discard error responses disguised as 200 OK
+          if (content && !content.includes('Free limit reached') && !(content.startsWith('{') && content.includes('"status":404')) && !(content.startsWith('{') && content.includes('"error"'))) {
             return {
               content,
               provider: 'pollinations',
@@ -93,13 +94,13 @@ export class PollinationsProvider implements AIProvider {
         const response = await fetch(url, {
           method: 'GET',
           headers: { 'Accept': 'text/plain' },
-          signal: AbortSignal.timeout(10000),
+          signal: AbortSignal.timeout(8000),
         });
 
         if (response.ok) {
           const text = await response.text();
-          if (text && text.trim().length > 0) {
-            const content = text.trim();
+          const content = text ? text.trim() : '';
+          if (content && !content.includes('Free limit reached') && !(content.startsWith('{') && content.includes('"status":404')) && !(content.startsWith('{') && content.includes('"error"'))) {
             return {
               content,
               provider: 'pollinations',
