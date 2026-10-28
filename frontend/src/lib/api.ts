@@ -3,7 +3,7 @@ import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 export const getBaseURL = () => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
   if (envUrl && (envUrl.startsWith("http://") || envUrl.startsWith("https://"))) {
-    return envUrl;
+    return envUrl.endsWith("/api") ? envUrl : `${envUrl.replace(/\/+$/, "")}/api`;
   }
 
   if (typeof window !== "undefined") {

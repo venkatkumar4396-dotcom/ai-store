@@ -1,3 +1,9 @@
+databases:
+  - name: nexusforge-db
+    databaseName: nexusforge
+    user: nexusforge
+    plan: free
+
 services:
   # Express Backend API
   - type: web
@@ -11,12 +17,19 @@ services:
         value: 5000
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nexusforge-db
+          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: ENCRYPTION_KEY
         generateValue: true
       - key: CORS_ORIGIN
-        sync: false
+        fromService:
+          type: web
+          name: nexusforge-frontend
+          property: url
 
   # Next.js Frontend
   - type: web
@@ -27,6 +40,11 @@ services:
     startCommand: npm start
     envVars:
       - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: nexusforge-backend
+          property: url
+      - key: NEXT_PUBLIC_SOCKET_URL
         fromService:
           type: web
           name: nexusforge-backend

@@ -8,6 +8,10 @@ const getSocketURL = () => {
   if (process.env.NEXT_PUBLIC_SOCKET_URL) {
     return process.env.NEXT_PUBLIC_SOCKET_URL;
   }
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (apiUrl && (apiUrl.startsWith("http://") || apiUrl.startsWith("https://"))) {
+    return apiUrl.replace(/\/api\/?$/, "");
+  }
   if (typeof window !== "undefined") {
     const { hostname, protocol } = window.location;
 

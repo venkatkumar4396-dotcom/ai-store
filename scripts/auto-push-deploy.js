@@ -94,19 +94,31 @@ console.log('══════════════════════�
 
 async function run() {
   try {
-    console.log('📦 [1/3] Staging modified files (git add .)...');
-    execSync('git add .', { stdio: 'inherit' });
-
-    console.log(`\n💬 [2/3] Committing changes ("${commitMsg}")...`);
+    const statusOutput = execSync('git status --porcelain', { encoding: 'utf8' }).trim();
+    let unpushedCommits = '';
     try {
-      execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, { stdio: 'inherit' });
-    } catch (err) {
-      console.log('ℹ️  No new file changes to commit (working tree clean).');
-    }
+      unpushedCommits = execSync('git log origin/main..HEAD --oneline', { encoding: 'utf8' }).trim();
+    } catch (_) {}
 
-    console.log('\n🌐 [3/3] Pushing to GitHub (git push origin main)...');
-    execSync('git push origin main', { stdio: 'inherit' });
-    console.log('\n✅ Git push completed successfully!');
+    const hasLocalChanges = statusOutput.length > 0;
+    const hasUnpushedCommits = unpushedCommits.length > 0;
+
+    if (!hasLocalChanges && !hasUnpushedCommits) {
+      console.log('ℹ️  Working tree is clean and local branch is up to date with origin/main.');
+      console.log('    No changes to push.');
+    } else {
+      if (hasLocalChanges) {
+        console.log('📦 [1/3] Staging modified files (git add .)...');
+        execSync('git add .', { stdio: 'inherit' });
+
+        console.log(`\n💬 [2/3] Committing changes ("${commitMsg}")...`);
+        execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, { stdio: 'inherit' });
+      }
+
+      console.log('\n🌐 [3/3] Pushing to GitHub (git push origin main)...');
+      execSync('git push origin main', { stdio: 'inherit' });
+      console.log('\n✅ Git push completed successfully!');
+    }
 
     // Trigger deploy hooks
     const hooks = getDeployHooks();
