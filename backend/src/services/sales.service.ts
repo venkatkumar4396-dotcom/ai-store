@@ -119,7 +119,10 @@ Company Size: ${lead.companySize || 'Unknown'}`;
 
       enrichment = safeParseAIJson(response.content, 'lead enrichment');
     } catch (e: any) {
-      logger.warn(`Failed to enrich lead, using defaults: ${e.message}`);
+      logger.warn(`Failed to enrich lead: ${e.message}`);
+    }
+
+    if (!enrichment || !enrichment.companyRevenue) {
       enrichment = {
         companyRevenue: '$5M-$20M estimated',
         techStack: ['React', 'Node.js', 'AWS'],
@@ -188,7 +191,10 @@ Rules:
 
       emailData = safeParseAIJson(response.content, 'sales email generation');
     } catch (e: any) {
-      logger.warn(`Failed to generate email, using default: ${e.message}`);
+      logger.warn(`Failed to generate email: ${e.message}`);
+    }
+
+    if (!emailData || !emailData.subject) {
       emailData = {
         subject: 'Quick question about your sales process',
         body: `Hi there,\n\nI noticed your company is growing rapidly — congrats! I wanted to reach out because we help teams like yours automate outbound sales and book more meetings with qualified prospects.\n\nWould you be open to a quick 15-minute call this week to see if there\'s a fit?\n\nBest regards,\nYour Sales Team`

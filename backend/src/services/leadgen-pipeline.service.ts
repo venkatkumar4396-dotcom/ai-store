@@ -324,6 +324,9 @@ Company Size: ${lead.companySize || 'Unknown'}`;
         enrichment = safeParseAIJson(response.content, 'pipeline enrichment');
       } catch (e: any) {
         logger.warn(`Pipeline enrichment fallback for ${lead.name}: ${e.message}`);
+      }
+
+      if (!enrichment || !enrichment.companyRevenue) {
         enrichment = {
           companyRevenue: '$5M-$20M estimated',
           techStack: ['React', 'Node.js', 'AWS'],
@@ -434,6 +437,10 @@ Best Approach: ${enrichment.bestApproach || 'AI automation demo'}`;
 
         emailData = safeParseAIJson(response.content, 'pipeline email writing');
       } catch (e: any) {
+        // Fallback handled below
+      }
+
+      if (!emailData || !emailData.subject) {
         emailData = {
           subject: `Quick question about ${lead.company}`,
           body: `Hey ${lead.name.split(' ')[0]},\n\nNoticed ${lead.company} is scaling fast in ${lead.industry} — curious if outbound is still taking up too much manual time for your team.\n\nWe help growth teams automate prospecting and email follow-ups without the usual generic spam.\n\nWould you be open to a quick 10-min intro call this week?\n\nCheers`

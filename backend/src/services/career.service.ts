@@ -68,7 +68,10 @@ ${data.resumeText}`;
 
       aiResult = safeParseAIJson(response.content, 'career analysis');
     } catch (e: any) {
-      logger.warn(`Failed to parse JobPilot analysis response, using structured fallback: ${e.message}`);
+      logger.warn(`Failed to parse JobPilot analysis response: ${e.message}`);
+    }
+
+    if (!aiResult || !aiResult.recommendations) {
       aiResult = {
         summary: `Your resume demonstrates solid background for ${data.targetRole || 'the position'}, but requires stronger action verbs and quantified impact metrics to pass top ATS screeners.`,
         recommendations: [
@@ -173,7 +176,10 @@ ${data.resumeText}`;
 
       aiResult = safeParseAIJson(response.content, 'career analysis');
     } catch (e: any) {
-      logger.warn(`Failed to generate application package, using fallback: ${e.message}`);
+      logger.warn(`Failed to generate application package: ${e.message}`);
+    }
+
+    if (!aiResult || !aiResult.coverLetter) {
       aiResult = {
         atsScore: 85,
         resumeVersion: `### Tailored Resume for ${data.jobTitle} at ${data.companyName}\n\n**Professional Summary**\nResults-driven professional with expertise in scalable systems, clean architecture, and product execution.\n\n**Core Skills**\n- Technical Expertise, Problem Solving, Agile Collaboration, System Optimization`,
@@ -276,6 +282,9 @@ Format your output strictly as JSON:
       aiResult = safeParseAIJson(response.content, 'career analysis');
     } catch (e: any) {
       logger.warn(`Failed to parse JobPilot interview chat response: ${e.message}`);
+    }
+
+    if (!aiResult || !aiResult.interviewerMessage) {
       aiResult = {
         interviewerMessage: `Welcome! I'm excited to interview you today for the ${data.jobRole} role.\n\nLet's start with a classic behavioral question:\n\n*Can you describe a challenging technical problem you faced in your recent project, and how you navigated through it using the STAR (Situation, Task, Action, Result) format?*`,
         scores: { communication: 82, technical: 85, confidence: 80, problemSolving: 88 },
@@ -344,6 +353,9 @@ Experience Level: ${data.experienceLevel || 'Mid-Level'}`;
       aiResult = safeParseAIJson(response.content, 'career analysis');
     } catch (e: any) {
       logger.warn(`Failed to parse career coaching response: ${e.message}`);
+    }
+
+    if (!aiResult || !aiResult.salaryEstimate) {
       aiResult = {
         targetRole: data.targetRole,
         salaryEstimate: { entry: '$75,000 - $95,000', mid: '$115,000 - $145,000', senior: '$155,000 - $210,000+' },

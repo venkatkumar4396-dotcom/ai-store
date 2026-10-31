@@ -108,6 +108,9 @@ Pitch Goal / Context: ${data.pitchGoal}`;
       aiResult = safeParseAIJson(response.content, 'automator email draft');
     } catch (e: any) {
       logger.warn(`Failed to generate email draft: ${e.message}`);
+    }
+
+    if (!aiResult || !aiResult.subject) {
       aiResult = {
         subject: `Follow-up on your project - NexusForge`,
         body: `Hi ${lead.name},\n\nHope you are doing well. I wanted to follow up on your project details and see if we can schedule a quick 10-minute call this week to align on automated solutions.\n\nLet me know your availability.\n\nBest regards,\nSales Team`

@@ -449,6 +449,9 @@ Format your output as a JSON object:
       result = safeParseAIJson(response.content, 'trip planning');
     } catch (e: any) {
       logger.warn(`Trip planning AI failed: ${e.message}`);
+    }
+
+    if (!result || !result.tripName) {
       result = {
         tripName: 'Custom Trip',
         duration: '3 days',
