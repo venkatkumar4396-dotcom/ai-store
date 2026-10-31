@@ -112,6 +112,14 @@ console.log('══════════════════════�
 
 async function run() {
   try {
+    // Auto-clean stale git index lock if left behind by interrupted operations
+    const lockFile = path.join(__dirname, '..', '.git', 'index.lock');
+    if (fs.existsSync(lockFile)) {
+      try {
+        fs.unlinkSync(lockFile);
+      } catch (_) {}
+    }
+
     // 1. Check existing staged files
     const stagedFiles = execSync('git diff --cached --name-only', { encoding: 'utf8' }).trim();
     const unstagedChanges = execSync('git status --porcelain', { encoding: 'utf8' }).trim();
