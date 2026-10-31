@@ -28,9 +28,9 @@ export const getBaseURL = () => {
     }
 
     // ── All cloud deployments (onrender.com, vercel.app, netlify.app, custom domains) ──
-    return "https://nexusforge-backend.onrender.com/api";
+    return "https://ai-store-87n2.onrender.com/api";
   }
-  return "https://nexusforge-backend.onrender.com/api";
+  return "https://ai-store-87n2.onrender.com/api";
 };
 
 const api = axios.create({
