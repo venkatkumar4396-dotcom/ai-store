@@ -56,11 +56,7 @@ const prisma = new PrismaClient();
 // Initialize WebSocket layer
 initWebSocket(httpServer);
 
-// Restore active WhatsApp sessions on boot
-import { whatsappService } from './services/whatsapp.service';
-whatsappService.restoreActiveSessions();
-
-// Initialize database schema and seed defaults
+// Initialize database schema, seed defaults, and restore sessions
 async function initDatabase() {
   try {
     // 1. Verify if tables exist
@@ -71,9 +67,9 @@ async function initDatabase() {
     try {
       const { execSync } = require('child_process');
       const path = require('path');
-      const backendDir = path.resolve(__dirname, '..');
-      execSync('npx prisma db push --accept-data-loss', {
-        cwd: backendDir,
+      const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+      const schemaPath = path.resolve(__dirname, '../prisma/schema.prisma');
+      execSync(`${npxCmd} --package=prisma@6.9.0 prisma db push --schema="${schemaPath}" --accept-data-loss`, {
         stdio: 'inherit',
         env: { ...process.env },
       });
@@ -89,6 +85,14 @@ async function initDatabase() {
     await ensureAdminSeeded();
   } catch (seedErr: any) {
     logger.warn(`Admin auto-seeding skipped: ${seedErr.message}`);
+  }
+
+  // 3. Restore active WhatsApp sessions after DB is confirmed ready
+  try {
+    const { whatsappService } = await import('./services/whatsapp.service');
+    await whatsappService.restoreActiveSessions();
+  } catch (waErr: any) {
+    logger.warn(`WhatsApp sessions restore skipped: ${waErr.message}`);
   }
 }
 initDatabase();
@@ -122,10 +126,23 @@ try {
 
 // ─── Middleware ─────────────────────────────────────────────
 
+const allowedOrigins = env.CORS_ORIGIN.split(',').map(o => o.trim().replace(/\/+$/, '')).filter(Boolean);
+
 app.use(cors({
-  origin: env.NODE_ENV === 'production'
-    ? env.CORS_ORIGIN.split(',').map(o => o.trim())
-    : true, // Allow all origins in development only
+  origin: (requestOrigin, callback) => {
+    if (!requestOrigin) return callback(null, true);
+    const cleanOrigin = requestOrigin.replace(/\/+$/, '');
+    if (
+      env.NODE_ENV !== 'production' ||
+      allowedOrigins.includes(cleanOrigin) ||
+      cleanOrigin.endsWith('.onrender.com') ||
+      cleanOrigin.includes('localhost') ||
+      cleanOrigin.includes('127.0.0.1')
+    ) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS error: Origin ${requestOrigin} not allowed`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'x-auth-token'],

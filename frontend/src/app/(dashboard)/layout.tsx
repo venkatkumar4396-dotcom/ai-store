@@ -19,7 +19,9 @@ export default function DashboardLayout({
   const [isBackendConnected, setIsBackendConnected] = React.useState<boolean>(true);
   const [isChecking, setIsChecking] = React.useState<boolean>(false);
 
-  const [backendTargetUrl, setBackendTargetUrl] = React.useState<string>("https://ai-store-87n2.onrender.com");
+  const [backendTargetUrl, setBackendTargetUrl] = React.useState<string>(() => {
+    return getBaseURL().replace(/\/api\/?$/, "");
+  });
 
   const checkConnection = React.useCallback(async () => {
     setIsChecking(true);
