@@ -224,6 +224,29 @@ async function main() {
     console.log(`Seeded/Upserted bot: ${upserted.name} (${upserted.id})`);
   }
 
+  // Ensure primary admin account is seeded and updated
+  const bcrypt = require('bcrypt');
+  const seedEmail = (process.env.ADMIN_SEED_EMAIL || 'kumar@nexora.ai').toLowerCase().trim();
+  const seedPassword = process.env.ADMIN_SEED_PASSWORD || 'kumar@4396';
+  const passwordHash = await bcrypt.hash(seedPassword, 12);
+
+  await prisma.user.upsert({
+    where: { email: seedEmail },
+    update: {
+      role: 'admin',
+      passwordHash,
+    },
+    create: {
+      email: seedEmail,
+      name: 'Kumar Admin',
+      passwordHash,
+      role: 'admin',
+      provider: 'credentials',
+      preferences: JSON.stringify({ theme: 'light' }),
+    },
+  });
+  console.log(`Seeded admin user: ${seedEmail}`);
+
   console.log('Seeding completed successfully.');
 }
 
