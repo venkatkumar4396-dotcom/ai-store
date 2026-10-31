@@ -86,38 +86,79 @@ function triggerHook(hook) {
   });
 }
 
-const commitMsg = process.argv.slice(2).join(' ') || `update: platform enhancements [${new Date().toISOString().slice(0, 19).replace('T', ' ')}]`;
+// Parse command line arguments
+// Supports:
+//   npm run push "commit message"
+//   npm run push -- --file=path/to/file "commit message"
+const rawArgs = process.argv.slice(2);
+let targetFile = null;
+const messageParts = [];
+
+rawArgs.forEach(arg => {
+  if (arg.startsWith('--file=') || arg.startsWith('--only=')) {
+    targetFile = arg.split('=')[1].trim();
+  } else if (arg === '--file' || arg === '--only') {
+    // handled next iteration if split
+  } else {
+    messageParts.push(arg);
+  }
+});
+
+const commitMsg = messageParts.join(' ') || `update: platform enhancements [${new Date().toISOString().slice(0, 19).replace('T', ' ')}]`;
 
 console.log('\n🚀 ═══════════════════════════════════════════════════════════════════');
-console.log('   NEXORA AUTO-PUSH & DUAL DEPLOY PIPELINE (BACKEND + FRONTEND)');
+console.log('   NEXORA TEAM-SAFE AUTO-PUSH & DUAL DEPLOY PIPELINE');
 console.log('═══════════════════════════════════════════════════════════════════════\n');
 
 async function run() {
   try {
-    const statusOutput = execSync('git status --porcelain', { encoding: 'utf8' }).trim();
+    // 1. Check existing staged files
+    const stagedFiles = execSync('git diff --cached --name-only', { encoding: 'utf8' }).trim();
+    const unstagedChanges = execSync('git status --porcelain', { encoding: 'utf8' }).trim();
+
     let unpushedCommits = '';
     try {
       unpushedCommits = execSync('git log origin/main..HEAD --oneline', { encoding: 'utf8' }).trim();
     } catch (_) {}
 
-    const hasLocalChanges = statusOutput.length > 0;
-    const hasUnpushedCommits = unpushedCommits.length > 0;
+    const hasStaged = stagedFiles.length > 0;
+    const hasUnstaged = unstagedChanges.length > 0;
+    const hasUnpushed = unpushedCommits.length > 0;
 
-    if (!hasLocalChanges && !hasUnpushedCommits) {
+    if (!hasStaged && !hasUnstaged && !hasUnpushed) {
       console.log('ℹ️  Working tree is clean and local branch is up to date with origin/main.');
-      console.log('    No changes to push.');
+      console.log('    No new changes to push.');
     } else {
-      if (hasLocalChanges) {
-        console.log('📦 [1/3] Staging modified files (git add .)...');
+      // Step 1: Stage specific file(s) or all
+      if (hasStaged) {
+        console.log(`📦 [1/4] Using pre-staged file(s):\n${stagedFiles.split('\n').map(f => '      - ' + f).join('\n')}`);
+        console.log(`\n💬 [2/4] Committing staged file(s) ("${commitMsg}")...`);
+        execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, { stdio: 'inherit' });
+      } else if (targetFile) {
+        console.log(`📦 [1/4] Staging individual file (${targetFile})...`);
+        execSync(`git add "${targetFile}"`, { stdio: 'inherit' });
+        console.log(`\n💬 [2/4] Committing (${targetFile}) ("${commitMsg}")...`);
+        execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, { stdio: 'inherit' });
+      } else if (hasUnstaged) {
+        console.log('📦 [1/4] Staging modified files (git add .)...');
         execSync('git add .', { stdio: 'inherit' });
-
-        console.log(`\n💬 [2/3] Committing changes ("${commitMsg}")...`);
+        console.log(`\n💬 [2/4] Committing changes ("${commitMsg}")...`);
         execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, { stdio: 'inherit' });
       }
 
-      console.log('\n🌐 [3/3] Pushing to GitHub (git push origin main)...');
+      // Step 2: Pull latest commits from teammate to avoid overwriting their work
+      console.log('\n🔄 [3/4] Pulling teammate updates safely (git pull --rebase origin main)...');
+      try {
+        execSync('git pull --rebase origin main', { stdio: 'inherit' });
+      } catch (pullErr) {
+        console.warn('⚠️  Rebase notice: If there are merge conflicts in the same file, resolve them and run "git rebase --continue"');
+        throw pullErr;
+      }
+
+      // Step 3: Push safely
+      console.log('\n🌐 [4/4] Pushing to GitHub (git push origin main)...');
       execSync('git push origin main', { stdio: 'inherit' });
-      console.log('\n✅ Git push completed successfully!');
+      console.log('\n✅ Push completed successfully without overwriting teammate changes!');
     }
 
     // Trigger deploy hooks
