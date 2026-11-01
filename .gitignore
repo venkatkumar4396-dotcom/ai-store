@@ -62,3 +62,4 @@ backend/data/whatsapp-sessions/*
 # Excluded Projects
 no name project/
 no name project
+.neon
