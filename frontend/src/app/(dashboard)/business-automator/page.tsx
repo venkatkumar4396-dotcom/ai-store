@@ -25,6 +25,8 @@ import {
   Copy,
   Check,
   RefreshCw,
+  Download,
+  ExternalLink,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -111,6 +113,7 @@ export default function BusinessAutomatorPage() {
 
   // Email generation
   const [emailContext, setEmailContext] = React.useState("");
+  const [selectedLeadId, setSelectedLeadId] = React.useState<string>("");
 
   React.useEffect(() => {
     loadLeads();
@@ -218,6 +221,50 @@ export default function BusinessAutomatorPage() {
     } finally {
       setIsGeneratingEmail(false);
     }
+  };
+
+  const [isSendingOutreach, setIsSendingOutreach] = React.useState(false);
+  const [dispatchStatus, setDispatchStatus] = React.useState<string | null>(null);
+
+  const handleSendOutreach = async () => {
+    if (!emailDraft) return;
+    const targetLead = selectedLeadId ? leads.find(l => l.id === selectedLeadId) : leads[0];
+    if (!targetLead) {
+      setError("Please select or add a lead first.");
+      return;
+    }
+
+    setIsSendingOutreach(true);
+    setDispatchStatus(null);
+    try {
+      const res = await api.post(`/agents/automator/leads/${targetLead.id}/send-email`, {
+        subject: emailDraft.subject,
+        body: emailDraft.body,
+      });
+
+      setDispatchStatus(res.data.message || "Outreach recorded successfully!");
+      loadLeads();
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to dispatch email.");
+    } finally {
+      setIsSendingOutreach(false);
+    }
+  };
+
+  const handleDownloadEML = () => {
+    if (!emailDraft) return;
+    const targetLead = selectedLeadId ? leads.find(l => l.id === selectedLeadId) : leads[0];
+    const emailTo = targetLead?.email || "lead@example.com";
+    const eml = `To: ${emailTo}\nSubject: ${emailDraft.subject}\nX-Unsent: 1\nContent-Type: text/plain; charset=utf-8\n\n${emailDraft.body}`;
+    const blob = new Blob([eml], { type: "message/rfc822" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `Nexora-Outreach-${(emailDraft.subject || "Email").slice(0, 20).replace(/[^a-zA-Z0-9]/g, "_")}.eml`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
   };
 
   const toggleWorkflow = async (wfId: string, isActive: boolean) => {
@@ -437,6 +484,23 @@ export default function BusinessAutomatorPage() {
               <CardDescription className="text-zinc-400">Describe the context and the AI will draft a professional email.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {leads.length > 0 && (
+                <div>
+                  <label className="text-xs text-zinc-400 mb-1.5 block">Target CRM Lead (Optional)</label>
+                  <select
+                    value={selectedLeadId}
+                    onChange={(e) => setSelectedLeadId(e.target.value)}
+                    className="w-full bg-zinc-900 border border-white/10 text-white rounded-md h-10 px-3 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                  >
+                    <option value="" className="bg-zinc-900">Select a lead...</option>
+                    {leads.map((l) => (
+                      <option key={l.id} value={l.id} className="bg-zinc-900">
+                        {l.name} ({l.email}) {l.company ? `- ${l.company}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <Textarea
                 placeholder="e.g., Follow-up email for a potential client who showed interest in our enterprise plan..."
                 value={emailContext}
@@ -456,18 +520,59 @@ export default function BusinessAutomatorPage() {
               </Button>
 
               {emailDraft && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-white">Draft Result</h4>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => { navigator.clipboard.writeText(`Subject: ${emailDraft.subject}\n\n${emailDraft.body}`); setCopiedEmail(true); setTimeout(() => setCopiedEmail(false), 2000); }}
-                      className="border-white/10 text-zinc-300"
-                    >
-                      {copiedEmail ? <><Check className="h-4 w-4 mr-1 text-emerald-400" /> Copied</> : <><Copy className="h-4 w-4 mr-1" /> Copy</>}
-                    </Button>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h4 className="text-sm font-semibold text-white">Drafted Outreach Message</h4>
+                    <div className="flex items-center flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleSendOutreach}
+                        disabled={isSendingOutreach}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-8 shadow-sm"
+                      >
+                        {isSendingOutreach ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Send className="h-3 w-3 mr-1" />}
+                        Dispatch & Record Outreach
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const targetLead = selectedLeadId ? leads.find(l => l.id === selectedLeadId) : leads[0];
+                          const emailTo = targetLead?.email || "";
+                          window.open(`mailto:${emailTo}?subject=${encodeURIComponent(emailDraft.subject)}&body=${encodeURIComponent(emailDraft.body)}`, '_blank');
+                        }}
+                        className="border-white/10 text-zinc-300 hover:text-white text-xs h-8"
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Open in Email
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleDownloadEML}
+                        className="border-white/10 text-zinc-300 hover:text-white text-xs h-8"
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        .eml
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => { navigator.clipboard.writeText(`Subject: ${emailDraft.subject}\n\n${emailDraft.body}`); setCopiedEmail(true); setTimeout(() => setCopiedEmail(false), 2000); }}
+                        className="border-white/10 text-zinc-300 text-xs h-8"
+                      >
+                        {copiedEmail ? <><Check className="h-3 w-3 mr-1 text-emerald-400" /> Copied</> : <><Copy className="h-3 w-3 mr-1" /> Copy</>}
+                      </Button>
+                    </div>
                   </div>
+
+                  {dispatchStatus && (
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs text-emerald-300 flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                      <span>{dispatchStatus}</span>
+                    </div>
+                  )}
+
                   <div className="p-4 bg-white/5 rounded-lg border border-white/5 space-y-2">
                     <div className="text-xs text-zinc-500">Subject:</div>
                     <div className="text-sm font-semibold text-white">{emailDraft.subject}</div>

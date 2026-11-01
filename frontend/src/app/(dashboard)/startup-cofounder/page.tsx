@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   XCircle,
   Trash2,
+  Download,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -142,6 +143,41 @@ export default function StartupCofounderPage() {
     }
   };
 
+  const [isExportingPDF, setIsExportingPDF] = React.useState(false);
+
+  const handleDownloadPDF = async () => {
+    if (!analysis) return;
+    setIsExportingPDF(true);
+    try {
+      const res = await api.post("/agents/startup/export-pdf", {
+        name: analysis.name || ideaTitle,
+        industry: analysis.industry || industry,
+        description: analysis.description || ideaDescription,
+        scores: analysis.scores,
+        swot: analysis.swotAnalysis,
+        roadmap: analysis.roadmap,
+        revenueModel: analysis.revenueModel,
+      }, {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Nexora-${(analysis.name || "Startup").replace(/[^a-zA-Z0-9]/g, "_")}-Brief.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error("PDF export error:", err);
+      setError("Failed to generate Executive PDF.");
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
+
   const deleteIdea = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDeleting(id);
@@ -259,6 +295,20 @@ export default function StartupCofounderPage() {
           <AnimatePresence>
             {!isAnalyzing && analysis && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-indigo-500/10 border border-orange-500/20">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">Investment Brief & Pitch Deck Outline Ready</h3>
+                    <p className="text-xs text-zinc-400">Download the executive summary PDF with SWOT, market scores & execution roadmap.</p>
+                  </div>
+                  <Button
+                    onClick={handleDownloadPDF}
+                    disabled={isExportingPDF}
+                    className="bg-orange-600 hover:bg-orange-500 text-white text-xs h-9 shadow-lg shadow-orange-600/20 shrink-0"
+                  >
+                    {isExportingPDF ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Download className="h-3.5 w-3.5 mr-1.5" />}
+                    Export Executive Brief PDF
+                  </Button>
+                </div>
                 {/* Title */}
                 <Card className="border border-white/10 bg-zinc-950/60 backdrop-blur-xl">
                   <CardContent className="p-6">

@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { careerService } from '../services/career.service';
+import { pdfService } from '../services/pdf.service';
 import { authenticate } from '../middleware/auth';
 import { aiLimiter } from '../middleware/rateLimit';
 
@@ -158,6 +159,37 @@ router.delete('/matches/:id', authenticate, async (req: Request, res: Response, 
     const id = req.params.id as string;
     await careerService.deleteMatch(userId, id);
     res.status(200).json({ message: 'Cover letter match deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route   POST /api/agents/career/export-pdf
+ * @desc    Export tailored resume and application package as professional PDF
+ */
+router.post('/export-pdf', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { candidateName, jobTitle, companyName, atsScore, summary, skills, experience, coverLetter, recruiterEmail } = req.body;
+    
+    const doc = pdfService.generateCareerPDF({
+      candidateName,
+      jobTitle: jobTitle || 'Target Role',
+      companyName,
+      atsScore: Number(atsScore) || undefined,
+      summary,
+      skills,
+      experience,
+      coverLetter,
+      recruiterEmail,
+    });
+
+    const safeTitle = (jobTitle || 'Career').replace(/[^a-zA-Z0-9]/g, '_');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="Nexora-Resume-${safeTitle}.pdf"`);
+
+    doc.pipe(res);
+    doc.end();
   } catch (error) {
     next(error);
   }

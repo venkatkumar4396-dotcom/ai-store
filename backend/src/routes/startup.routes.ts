@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { startupService } from '../services/startup.service';
+import { pdfService } from '../services/pdf.service';
 import { authenticate } from '../middleware/auth';
 import { aiLimiter } from '../middleware/rateLimit';
 
@@ -48,6 +49,39 @@ router.delete('/ideas/:id', authenticate, async (req: Request, res: Response, ne
     const id = req.params.id as string;
     await startupService.deleteIdea(userId, id);
     res.status(200).json({ message: 'Idea deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route   POST /api/agents/startup/export-pdf
+ * @desc    Export executive startup pitch brief as PDF
+ */
+router.post('/export-pdf', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { name, industry, description, scores, swot, roadmap, revenueModel } = req.body;
+    if (!name) {
+      res.status(400).json({ error: 'Startup name is required' });
+      return;
+    }
+
+    const doc = pdfService.generateStartupPDF({
+      name,
+      industry: industry || 'Technology',
+      description: description || 'No description provided',
+      scores,
+      swot,
+      roadmap,
+      revenueModel,
+    });
+
+    const safeName = (name || 'Startup').replace(/[^a-zA-Z0-9]/g, '_');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="Nexora-${safeName}-Brief.pdf"`);
+
+    doc.pipe(res);
+    doc.end();
   } catch (error) {
     next(error);
   }

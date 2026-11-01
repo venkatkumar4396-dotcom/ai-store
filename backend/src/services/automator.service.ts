@@ -152,6 +152,86 @@ Pitch Goal / Context: ${data.pitchGoal}`;
   }
 
   /**
+   * Send or dispatch an email to a lead
+   */
+  async sendLeadEmail(userId: string, leadId: string, data: { subject: string; body: string }): Promise<any> {
+    const lead = await prisma.automationLead.findFirst({ where: { id: leadId, userId } });
+    if (!lead) throw new Error('Lead not found');
+
+    let sentLive = false;
+    let sendError: string | null = null;
+
+    if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+      try {
+        const nodemailer = await import('nodemailer');
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+        });
+
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          to: lead.email,
+          subject: data.subject,
+          text: data.body,
+        });
+        sentLive = true;
+      } catch (err: any) {
+        logger.warn(`SMTP send failed: ${err.message}`);
+        sendError = err.message;
+      }
+    }
+
+    let history: any[] = [];
+    try {
+      history = JSON.parse(lead.interactionHistory || '[]');
+    } catch {
+      history = [];
+    }
+    history.push({
+      date: new Date().toISOString(),
+      type: 'email_dispatched',
+      text: `Dispatched email to ${lead.email}: "${data.subject}" (Status: ${sentLive ? 'Sent via SMTP' : 'Ready in Outbox/Mailto'})`
+    });
+
+    await prisma.automationLead.update({
+      where: { id: leadId },
+      data: {
+        status: 'contacted',
+        interactionHistory: JSON.stringify(history)
+      }
+    });
+
+    await prisma.agentActivityLog.create({
+      data: {
+        userId,
+        agentId: 'automator',
+        action: 'email_dispatched',
+        description: `Dispatched sales outreach to ${lead.name} (${lead.email})`,
+        reasoning: `Subject: "${data.subject}"`,
+      }
+    });
+
+    const mailtoUrl = `mailto:${encodeURIComponent(lead.email)}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(data.body)}`;
+
+    return {
+      success: true,
+      sentLive,
+      sendError,
+      leadEmail: lead.email,
+      mailtoUrl,
+      message: sentLive
+        ? `Email successfully delivered to ${lead.email} via SMTP!`
+        : `Outreach recorded for ${lead.name}! You can send it directly via your mail client or copy the message.`,
+    };
+  }
+
+  /**
    * Invoice actions
    */
   async getInvoices(userId: string): Promise<any[]> {

@@ -81,6 +81,26 @@ router.post('/leads/:id/email', authenticate, aiLimiter, async (req: Request, re
 });
 
 /**
+ * @route   POST /api/agents/automator/leads/:id/send-email
+ * @desc    Dispatch or record email outreach for a lead
+ */
+router.post('/leads/:id/send-email', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const id = req.params.id as string;
+    const { subject, body } = req.body;
+    if (!subject || !body) {
+      res.status(400).json({ error: 'subject and body are required' });
+      return;
+    }
+    const result = await automatorService.sendLeadEmail(userId, id, { subject, body });
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * @route   GET /api/agents/automator/invoices
  * @desc    Get client invoices
  */
